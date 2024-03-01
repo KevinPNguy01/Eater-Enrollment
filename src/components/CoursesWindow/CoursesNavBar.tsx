@@ -1,7 +1,12 @@
-import { CoursesNavButton } from "."
-import { navLinks } from "../constants"
+import { CoursesNavButton } from ".."
+import { navLinks } from "../../constants/links"
 
-const CoursesNavBar = (props: {state:string, onClick:Function}) => {
+interface Props {
+    activeTab: string;
+    setActiveTab: (a: string) => void;
+}
+
+export const CoursesNavBar = (props: Props) => {
     return(
         <nav className="bg-tertiary h-12 grid grid-cols-3 mb-2">
             {navLinks.slice(1).map((nav, index) => (
@@ -9,12 +14,10 @@ const CoursesNavBar = (props: {state:string, onClick:Function}) => {
                     key={index} 
                     id={nav.id} 
                     title={nav.title}
-                    state={props.state}
-                    onClick={props.onClick}
+                    activeTab={props.activeTab}
+                    setActiveTab={props.setActiveTab}
                 />
             ))}
         </nav>
     )
 }
-
-export default CoursesNavBar

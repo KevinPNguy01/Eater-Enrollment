@@ -1,5 +1,6 @@
-import { Course, CourseOffering } from "../constants";
-const CourseResult = (props: {course: Course}) => {
+import { Course } from "../../../constants/types";
+
+export function CourseResult(props: {course: Course}) {
     const course = props.course;
     return (
         <div>
@@ -40,5 +41,3 @@ const CourseResult = (props: {course: Course}) => {
         </div>
     )
 }
-
-export default CourseResult
