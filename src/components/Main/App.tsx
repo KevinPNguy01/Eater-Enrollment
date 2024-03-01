@@ -1,12 +1,11 @@
-import styles from './style';
+import { NavBar, Calendar, Courses } from '..';
 
-import { NavBar, Hero, Courses } from './components';
-
+// Navigation bar with calendar on the left, and everything else on the right.
 const App = () => (
     <div className="h-screen overflow-hidden flex text-white flex-col">
       <NavBar/>
       <div id="main" className={`h-1 grow bg-secondary grid grid-cols-2`}>
-        <Hero/>
+        <Calendar/>
         <Courses/>
       </div>
     </div>
