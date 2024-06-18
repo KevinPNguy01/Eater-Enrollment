@@ -1,10 +1,13 @@
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
+import { useContext } from 'react';
+import { CalendarContext } from './App';
 
 export function Calendar() {
 	return (
 		<div id="calendar" className={`flex flex-col`}>
 			<FullCalendar 
+				ref={useContext(CalendarContext)}
 				plugins={[ timeGridPlugin ]}
 				initialView="timeGridWeek"
 				headerToolbar={false}
