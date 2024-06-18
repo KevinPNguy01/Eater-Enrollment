@@ -33,7 +33,7 @@ export function SearchForms() {
                         "Fall", "Winter", "Spring", 
                         "Summer Session 1", "Summer Session 2", "10-wk Summer"
                     ]}
-                    default="Spring"
+                    default="Fall"
                 />
                 <DropDown
                     label = "Year"
