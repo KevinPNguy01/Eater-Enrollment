@@ -21,6 +21,7 @@ export function Calendar() {
 				hour: "numeric"
 				}}
 				dayHeaderFormat={{ weekday: 'short' }}
+				eventBorderColor="#00000080"
 			/>
 		</div>
 	)
