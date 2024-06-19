@@ -36,7 +36,14 @@ export function CourseResult(props: {course: Course}) {
                                 <td className="py-2">{offering.section.code}</td>
                                 <td>{offering.section.type}</td>
                                 <td>
-                                    {offering.instructors.map((instructor) => (<p>{instructor.shortened_name}</p>))}
+                                    {offering.instructors.map(
+                                        (instructor) => {
+                                            const name = instructor.shortened_name;
+                                            const rmp_link = `https://www.ratemyprofessors.com/search/professors/1074?q=${name.split(",")[0]}`
+                                            if (name === "STAFF") return (<p>{name+"\n"}</p>)
+                                            return (<a href={rmp_link} target="_blank" rel="noopener noreferrer" className="text-sky-500 underline">{name+"\n"}</a>)
+                                        }
+                                    )}
                                 </td>
                                 <td>{`${offering.meetings[0].days} ${offering.meetings[0].time}`}</td>
                                 <td>{offering.meetings[0].building}</td>
