@@ -35,7 +35,9 @@ export function CourseResult(props: {course: Course}) {
                                 <td><CourseCheckBox course={course} offering={offering}/></td>
                                 <td className="py-2">{offering.section.code}</td>
                                 <td>{offering.section.type}</td>
-                                <td>{offering.instructors[0].shortened_name}</td>
+                                <td>
+                                    {offering.instructors.map((instructor) => (<p>{instructor.shortened_name}</p>))}
+                                </td>
                                 <td>{`${offering.meetings[0].days} ${offering.meetings[0].time}`}</td>
                                 <td>{offering.meetings[0].building}</td>
                                 <td>{`${offering.num_total_enrolled}/${offering.max_capacity}`}</td>
