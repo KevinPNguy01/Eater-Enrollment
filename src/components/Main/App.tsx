@@ -1,9 +1,9 @@
 import { MutableRefObject, createContext, useRef } from 'react';
 import { NavBar, Calendar, Courses } from '..';
-import { CourseOffering } from '../../constants/types';
+import { Course } from '../../constants/types';
 
-// Context provider for saving the course offerings added.
-export const AddedCourseOfferingsContext = createContext([] as CourseOffering[])
+// Context provider for saving the courses and course offerings added.
+export const AddedCoursesContext = createContext([] as Course[])
 
 // Context provider for accessing the calendar element.
 export const CalendarContext = createContext(null as unknown as MutableRefObject<null>);

@@ -1,6 +1,6 @@
 import { Course, CourseOffering } from "../../../constants/types";
 import { useContext } from "react";
-import { AddedCourseOfferingsContext, CalendarContext } from "../../Main/App";
+import { AddedCoursesContext, CalendarContext } from "../../Main/App";
 import { CalendarApi } from '@fullcalendar/core';
 import FullCalendar from "@fullcalendar/react";
 
@@ -28,28 +28,32 @@ export function CourseResult(props: {course: Course}) {
                     </tr>
                 </thead>
                 <tbody className="text-xs">
-                    {course.offerings.map((offering) => (
-                    <tr className="odd:bg-quaternary even:bg-tertiary" key={offering.section.code}>
-                        <td><CourseCheckBox course={course} offering={offering}/></td>
-                        <td className="py-2">{offering.section.code}</td>
-                        <td>{offering.section.type}</td>
-                        <td>{offering.instructors[0].shortened_name}</td>
-                        <td>{`${offering.meetings[0].days} ${offering.meetings[0].time}`}</td>
-                        <td>{offering.meetings[0].building}</td>
-                        <td>{`${offering.num_total_enrolled}/${offering.max_capacity}`}</td>
-                        <td>{offering.status}</td>
-                        <td>{offering.restrictions}</td>
-                    </tr>)
+                    {course.offerings.map((offering) => {
+                        offering.course = course;
+                        return (
+                            <tr className="odd:bg-quaternary even:bg-tertiary" key={offering.section.code}>
+                                <td><CourseCheckBox course={course} offering={offering}/></td>
+                                <td className="py-2">{offering.section.code}</td>
+                                <td>{offering.section.type}</td>
+                                <td>{offering.instructors[0].shortened_name}</td>
+                                <td>{`${offering.meetings[0].days} ${offering.meetings[0].time}`}</td>
+                                <td>{offering.meetings[0].building}</td>
+                                <td>{`${offering.num_total_enrolled}/${offering.max_capacity}`}</td>
+                                <td>{offering.status}</td>
+                                <td>{offering.restrictions}</td>
+                            </tr>)
+                        }
                     )}
                 </tbody>
 
             </table>
+            <br/>
         </div>
     )
 }
 
 function CourseCheckBox(props: {course: Course, offering: CourseOffering}) {
-    const addedCourseOfferings = useContext(AddedCourseOfferingsContext);
+    const addedCourses = useContext(AddedCoursesContext);
     const calendar = (useContext(CalendarContext)!.current! as InstanceType<typeof FullCalendar>).getApi() as CalendarApi;
     const course = props.course;
     const offering = props.offering;
@@ -67,8 +71,18 @@ function CourseCheckBox(props: {course: Course, offering: CourseOffering}) {
      * @param offering The course offering to add.
      */
     const addCourseOffering = (offering: CourseOffering) => {
-        // Add course offering to the list.
-        addedCourseOfferings.push(offering);
+        // If the course was never added before, create a new course with empty offerings.
+        if (!addedCourses.map((course) => course.id).includes(offering.course.id)) {
+            const newCourse = structuredClone(offering.course);
+            newCourse.offerings = [];
+            addedCourses.push(newCourse);
+        }
+        addedCourses.find((course) => course.id === offering.course.id)?.offerings.push(offering);
+
+        // Check all the boxes.
+        for (const checkbox of document.getElementsByClassName(`checkbox-${offering.course.id}-${offering.section.code}`)) {
+            (checkbox as HTMLInputElement).checked = true;
+        }
 
         // Get the days of the week for this course offering.
         const days = offering.meetings[0].days;
@@ -101,12 +115,22 @@ function CourseCheckBox(props: {course: Course, offering: CourseOffering}) {
      * @param offering The course offering to remove.
      */
     const removeCourseOffering = (offering: CourseOffering) => {
-        // Remove course offerings with matching section codes from the list.
-        for (let i = 0; i < addedCourseOfferings.length; ++i) {
-            if (offering.section.code === addedCourseOfferings[i].section.code) {
-                addedCourseOfferings.splice(i, 1);
-                break;
-            }
+        // Remove course offering from appropriate course.
+        const addedCourse = addedCourses.find((course) => course.id === offering.course.id);
+        const offerings = addedCourse?.offerings;
+        const index = offerings?.findIndex((other_offering) => other_offering.section.code === offering.section.code);
+        if (offerings && index! > -1) {
+            offerings.splice(index!, 1);
+        }
+
+        // If the course has no offerings now, remove it.
+        if (offerings && offerings.length == 0) {
+            addedCourses.splice(addedCourses.findIndex((course) => course == addedCourse));
+        }
+
+        // Uncheck all the boxes.
+        for (const checkbox of document.getElementsByClassName(`checkbox-${offering.course.id}-${offering.section.code}`)) {
+            (checkbox as HTMLInputElement).checked = false;
         }
 
         // Remove events with matching section codes from the calendar.
@@ -120,7 +144,14 @@ function CourseCheckBox(props: {course: Course, offering: CourseOffering}) {
         <input 
             type="checkbox"
             onChange={handleCheckBoxChange}
-            defaultChecked={addedCourseOfferings.map((x) => x.section.code).includes(offering.section.code)}
+            className={`checkbox-${offering.course.id}-${offering.section.code}`}
+            defaultChecked={
+                // Combine all the section codes from every course offering into one array.
+                addedCourses.map(
+                    (course) => course.offerings.map(
+                        (offering) => offering.section.code)
+                ).flat().includes(offering.section.code)
+            }
         />
     )
 }
