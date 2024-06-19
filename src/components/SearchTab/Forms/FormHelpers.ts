@@ -21,7 +21,7 @@ function buildQuery(year: string, term: string, department: string, number: stri
     const offeringsSelection = `{restrictions status ${meetingsSelection} ${instructorSelection} num_total_enrolled max_capacity ${sectionSelection}}`;
     const offeringsQuery = `${offeringsConstructor} ${offeringsSelection}`;
     const courseConstructor = `course(id:"${(department+number+"").replace(" ", "")}")`;
-    const courseSelection = `{department number title ${offeringsQuery}}`;
+    const courseSelection = `{id department number title ${offeringsQuery}}`;
     const query: string = `query { ${courseConstructor} ${courseSelection} }`;
     return query;
 }
