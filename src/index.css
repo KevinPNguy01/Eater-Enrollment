@@ -27,8 +27,17 @@
   background: var(--color-quaternary)
 }
 
-.fc-timegrid-body {
-  width: 100% !important;
+/* Reduce margin between columns */
+.fc-timegrid-col-events {
+  margin: 0px 2px 0px 2px !important;
+}
+
+/* Remove white border around events */
+.fc-event {
+  box-shadow: none !important;
+  border-width: 2px;
+  border-radius: 8px;
+  font-weight: 500;
 }
 
 /* width */
