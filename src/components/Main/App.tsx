@@ -27,21 +27,27 @@ function App() {
 	const addedCourses = useContext(AddedCoursesContext);
 
 	useEffect(() => {
-		// Add all the courses from the previous session.
+		// Add all the courses from the previous session, grouping them by the same year and quarters.
+		const quarterYearGroups = new Map<string, string[]>();
 		localStorage.getItem("schedule")?.split(";").forEach(
-			async (offeringString) => {
+			(offeringString) => {
 				const values = offeringString.split(",");
-				const term = values[0];
-				const year = values[1];
+				const quarterYear = values[0] + " " + values[1];
 				const code = values[2];
-
-				const offering = (await getCourseByCode(year, term, code)).data.schedule[0] as CourseOffering;
-
-				if (!containsOffering(offering)) {
-					addOffering(offering);
-				}
+				if (!quarterYearGroups.has(quarterYear)) quarterYearGroups.set(quarterYear, []);
+				quarterYearGroups.get(quarterYear)!.push(code)
 			}
 		);
+
+		quarterYearGroups.forEach(
+			async (codes, quarterYear) => {
+				const [quarter, year] = quarterYear.split(" ");
+
+				const offerings = (await getCourseByCode(quarter, year, codes.join(","))).data.schedule as CourseOffering[];
+
+				offerings.forEach((offering) => {if (!containsOffering(offering)) addOffering(offering)});
+			}
+		)
 
 		// Store all the course codes before the user leaves the page.
 		window.addEventListener("beforeunload", () => 
