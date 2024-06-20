@@ -12,6 +12,21 @@ export function CourseResult(props: {course: Course}) {
         ["Waitl", "text-blue-500"],
         ["FULL", "text-red-500"]
     ]);
+    const typeColors = new Map([
+        ["Lec", "text-red-500"],
+        ["Dis", "text-orange-500"],
+        ["Lab", "text-cyan-500"],
+        ["Sem", "text-blue-500"],
+        ["Stu", "text-green-500"],
+        ["Fld", "text-green-500"],
+        ["Tut", "text-yellow-500"],
+        ["Tap", "text-yellow-500"],
+        ["Res", "text-rose-500"],
+        ["Col", "text-rose-500"],
+        ["Act", "text-indigo-500"],
+        ["Qiz", "text-indigo-500"]
+    ]);
+
     return (
         <div>
             <p 
@@ -40,7 +55,9 @@ export function CourseResult(props: {course: Course}) {
                             <tr className="odd:bg-quaternary even:bg-tertiary" key={offering.section.code}>
                                 <td><CourseCheckBox course={course} offering={offering}/></td>
                                 <td className="py-2">{offering.section.code}</td>
-                                <td>{offering.section.type}</td>
+                                <td>
+                                    <p className={`${typeColors.get(offering.section.type)}`}>{offering.section.type}</p>
+                                </td>
                                 <td>
                                     {offering.instructors.map(
                                         (instructor) => {
