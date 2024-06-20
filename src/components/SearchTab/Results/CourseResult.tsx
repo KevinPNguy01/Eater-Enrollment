@@ -30,11 +30,12 @@ export function CourseResult(props: {course: Course}) {
     return (
         <div>
             <p 
+                className="bg-tertiary p-2 border border-quaternary rounded mb-2 font-bold"
                 key={`${course.department}${course.number}`}
             >
                 {`${course.department} ${course.number}: ${course.title}`}
             </p>
-            <table className="h-full table-fixed text-center overflow-x-scroll min-w-full">
+            <table className="course-result h-full table-fixed text-center overflow-x-scroll min-w-full border-spacing-0 border-separate rounded border border-quaternary">
                 <thead className="text-sm">
                     <tr className="first:bg-tertiary">
                         <th></th>
