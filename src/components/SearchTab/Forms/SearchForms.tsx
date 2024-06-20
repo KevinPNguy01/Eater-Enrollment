@@ -20,7 +20,7 @@ export function SearchForms() {
         setCourseInput("");
         setCourseSuggestions([]);
         setSearchResultsVisibility(true);
-        setSearchResults([(await getCourse(fields.year.value, fields.term.value, department, number)).data.course]);
+        setSearchResults([(await getCourse(fields.term.value, fields.year.value, department, number)).data.course]);
     }
 
     return (

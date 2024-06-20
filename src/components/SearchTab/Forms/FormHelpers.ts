@@ -1,8 +1,8 @@
 import { Course } from "../../../constants/types";
 import courses from "../../../assets/allCourses.json";
 
-export async function getCourse(year: string, term: string, department: string, number: string) {
-    const query: string = buildQuery(year, term, department, number);
+export async function getCourse(term: string, year: string, department: string, number: string) {
+    const query: string = buildQuery(term, year, department, number);
     const response = await fetch("https://api.peterportal.org/graphql",
         {
             method: 'POST',
@@ -13,12 +13,12 @@ export async function getCourse(year: string, term: string, department: string, 
     return response.json();
 }
 
-function buildQuery(year: string, term: string, department: string, number: string) {
+function buildQuery(term: string, year: string, department: string, number: string) {
     const sectionSelection = `section{code type number}`;
     const instructorSelection = `instructors{shortened_name}`
     const meetingsSelection = `meetings{time days building}`
-    const offeringsConstructor = `offerings(year:${year}, quarter:"${term}")`;
-    const offeringsSelection = `{year quarter restrictions status ${meetingsSelection} ${instructorSelection} num_total_enrolled max_capacity ${sectionSelection}}`;
+    const offeringsConstructor = `offerings(quarter:"${term}" year:${year})`;
+    const offeringsSelection = `{quarter year restrictions status ${meetingsSelection} ${instructorSelection} num_total_enrolled max_capacity ${sectionSelection}}`;
     const offeringsQuery = `${offeringsConstructor} ${offeringsSelection}`;
     const courseConstructor = `course(id:"${(department+number+"").replace(" ", "")}")`;
     const courseSelection = `{id department number title ${offeringsQuery}}`;
@@ -26,8 +26,8 @@ function buildQuery(year: string, term: string, department: string, number: stri
     return query;
 }
 
-export async function getCourseByCode(year: string, term: string, code: string) {
-    const query: string = buildQueryByCode(year, term, code);
+export async function getCourseByCode(term: string, year: string, code: string) {
+    const query: string = buildQueryByCode(term, year, code);
     const response = await fetch("https://api.peterportal.org/graphql",
         {
             method: 'POST',
@@ -38,15 +38,14 @@ export async function getCourseByCode(year: string, term: string, code: string) 
     return response.json();
 }
 
-function buildQueryByCode(year: string, term: string, code: string) {
+function buildQueryByCode(term: string, year: string, code: string) {
     const sectionSelection = `section{code type number}`;
     const instructorSelection = `instructors{shortened_name}`
     const meetingsSelection = `meetings{time days building}`
     const courseSelection = `course{id department number title}`;
-    const offeringSelection = `{year quarter restrictions status ${meetingsSelection} ${instructorSelection} num_total_enrolled max_capacity ${sectionSelection} ${courseSelection} }`;
-    const scheduleConstructor = `schedule(year:${year} quarter:"${term}" section_codes:"${code}")`;
+    const offeringSelection = `{quarter year restrictions status ${meetingsSelection} ${instructorSelection} num_total_enrolled max_capacity ${sectionSelection} ${courseSelection} }`;
+    const scheduleConstructor = `schedule(quarter:"${term}" year:${year} section_codes:"${code}")`;
     const query: string = `query { ${scheduleConstructor} ${offeringSelection} }`;
-    console.log(query);
     return query;
 }
 
