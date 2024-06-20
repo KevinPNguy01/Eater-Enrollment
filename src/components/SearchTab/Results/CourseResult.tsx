@@ -134,7 +134,7 @@ function CourseCheckBox(props: {course: Course, offering: CourseOffering}) {
 
         // Calculate color and luminance for event.
         const hue = hashString(`${course.id}${offering.section.type}`) % 360;
-        const saturation = 100;
+        const saturation = 75;
         const lightness = 50;
         const rgb = hslToRgb(hue/360, saturation/100, lightness/100);
         const luminance = (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2])/255;
@@ -169,7 +169,7 @@ function CourseCheckBox(props: {course: Course, offering: CourseOffering}) {
 
         // If the course has no offerings now, remove it.
         if (offerings && offerings.length == 0) {
-            addedCourses.splice(addedCourses.findIndex((course) => course == addedCourse));
+            addedCourses.splice(addedCourses.findIndex((course) => course.id == addedCourse.id), 1);
         }
 
         // Uncheck all the boxes.
