@@ -6,6 +6,12 @@ import FullCalendar from "@fullcalendar/react";
 
 export function CourseResult(props: {course: Course}) {
     const course = props.course;
+    const statusColors = new Map([
+        ["OPEN", "text-green-500"],
+        ["NewOnly", "text-cyan-500"],
+        ["Waitl", "text-blue-500"],
+        ["FULL", "text-red-500"]
+    ]);
     return (
         <div>
             <p 
@@ -48,7 +54,9 @@ export function CourseResult(props: {course: Course}) {
                                 <td>{`${offering.meetings[0].days} ${offering.meetings[0].time}`}</td>
                                 <td>{offering.meetings[0].building}</td>
                                 <td>{`${offering.num_total_enrolled}/${offering.max_capacity}`}</td>
-                                <td>{offering.status}</td>
+                                <td>
+                                    <p className={`${statusColors.get(offering.status)}`}>{offering.status}</p>
+                                </td>
                                 <td>{offering.restrictions}</td>
                             </tr>)
                         }
