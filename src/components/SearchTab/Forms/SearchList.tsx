@@ -12,7 +12,7 @@ export function SearchList() {
                     type="submit"
                     onClick={() => setCourseInput(`${course.department}-${course.number}`)}
                 >
-                    {`${course.department} ${course.number}: ${course.title}`}
+                    {`${course.department}${course.number === "" ? "" : " "}${course.number}: ${course.title}`}
                 </button>
             ))}
         </div>
