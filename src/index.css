@@ -40,6 +40,10 @@
   font-weight: 500;
 }
 
+.fc-event:hover {
+  cursor: pointer;
+}
+
 /* width */
 ::-webkit-scrollbar {
   display: none;
@@ -156,4 +160,12 @@ h1 {
   
 .course-result thead tr:first-child th:last-child {
   border-top-right-radius: 4px;
+}
+
+.event-info td {
+  border-bottom: 1px solid var(--color-quaternary);
+}
+
+.event-info td:last-child {
+  text-align: right;
 }
