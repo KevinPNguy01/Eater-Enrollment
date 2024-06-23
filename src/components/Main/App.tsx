@@ -113,6 +113,7 @@ function App() {
 				backgroundColor: `hsl(${hue}, ${saturation}%, ${lightness}%)`,
 				textColor: luminance > 0.5 ? "black" : "white"
 			});
+			console.log(monday);
 		} 
 	}
 
@@ -199,7 +200,7 @@ function hashString(str: string) {
 function getMonday() {
     const d = new Date();
     const day = d.getDay()
-    const diff = d.getDate() - day + (day == 0 ? -6 : 1); // Adjust when day is sunday.
+    const diff = d.getDate() - day + 1; // Adjust when day is sunday.
     d.setHours(0);
     d.setMinutes(0);
     d.setSeconds(0);
