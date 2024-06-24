@@ -1,19 +1,21 @@
-import { MutableRefObject, createContext, useContext, useEffect, useRef } from 'react';
+import { MutableRefObject, createContext, useEffect, useRef, useState } from 'react';
 import { NavBar, Calendar, Courses } from '..';
 import { Course, CourseOffering } from '../../constants/types';
 import { getCourseByCode } from '../SearchTab/Forms/FormHelpers';
 import { CalendarApi } from 'fullcalendar/index.js';
 import FullCalendar from '@fullcalendar/react';
 
-// Context provider for saving the courses and course offerings added.
-export const AddedCoursesContext = createContext([] as Course[])
-
 // Define the context type of schedule related functions and data.
 type ScheduleContextType = {
 	calendarReference: MutableRefObject<null>,
+	currentSchedule: string,
+	addedCourses: Map<string, Course[]>,
 	addOffering: (offering: CourseOffering) => void, 
 	removeOffering: (offering: CourseOffering) => void,
-	containsOffering: (offering: CourseOffering) => boolean
+	containsOffering: (offering: CourseOffering) => boolean,
+	createSchedule: (scheduleName: string) => void,
+	loadSchedule: (scheduleName: string) => void,
+	saveSchedule: () => void
 }
 
 // Context provider for accessing schedule functions and data.
@@ -24,97 +26,171 @@ export const ScheduleContext = createContext(
 // Navigation bar with calendar on the left, and everything else on the right.
 function App() {
 	const calendarRef = useRef(null);
-	const addedCourses = useContext(AddedCoursesContext);
+	const [addedCourses, setAddedCourses] = useState(new Map<string, Course[]>())
+	const updateMap = () => setAddedCourses(new Map(addedCourses));
+	const [currentSchedule, setCurrentSchedule] = useState("Schedule 1");
+	const loadSchedule = (scheduleName: string) => {
+		const calendar = (calendarRef.current! as InstanceType<typeof FullCalendar>)?.getApi() as CalendarApi;
+		setCurrentSchedule(scheduleName);
+		calendar.removeAllEvents();
+
+		const offerings = addedCourses.get(scheduleName)!.map((course) => course.offerings).flat();
+		offerings.forEach((offering) => {
+			if (offering.meetings[0].time !== "TBA") {
+				const course = offering.course;
+
+				// Get the days of the week for this course offering.
+				const days = offering.meetings[0].days;
+				const dayOffsets = [];
+				if (days.includes("M")) dayOffsets.push(0);
+				if (days.includes("Tu")) dayOffsets.push(1);
+				if (days.includes("W")) dayOffsets.push(2);
+				if (days.includes("Th")) dayOffsets.push(3);
+				if (days.includes("F")) dayOffsets.push(4);
+	
+				// Get the start and end times for this course offering.
+				const [startTime, endTime] = parseTime(offering.meetings[0].time);
+				const monday = getMonday();
+	
+				// Calculate color and luminance for event.
+				const hue = hashString(`${course.id}${offering.section.type}`) % 360;
+				const saturation = 75;
+				const lightness = 50;
+				const rgb = hslToRgb(hue/360, saturation/100, lightness/100);
+				const luminance = (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2])/255;
+	
+				// Add an event to the calendar for each meeting day.
+				for (const days of dayOffsets) {
+					startTime.setDate(monday.getDate() + days);
+					endTime.setDate(monday.getDate() + days);
+					calendar?.addEvent({
+						title: `${course.department} ${course.number} ${offering.section.type}`,
+						start: startTime.toISOString(),
+						end: endTime.toISOString(),
+						id: `${offering.section.code}-${days}`,
+						backgroundColor: `hsl(${hue}, ${saturation}%, ${lightness}%)`,
+						textColor: luminance > 0.5 ? "black" : "white"
+					});
+				} 
+			}
+		});
+	}
 
 	useEffect(() => {
-		// Add all the courses from the previous session, grouping them by the same year and quarters.
-		const quarterYearGroups = new Map<string, string[]>();
-		localStorage.getItem("schedule")?.split(";").forEach(
-			(offeringString) => {
-				const values = offeringString.split(",");
-				const quarterYear = values[0] + " " + values[1];
-				const code = values[2];
-				if (!quarterYearGroups.has(quarterYear)) quarterYearGroups.set(quarterYear, []);
-				quarterYearGroups.get(quarterYear)!.push(code)
+		if (addedCourses.size || !localStorage.getItem("schedule")) {
+			return;
+		}
+
+		localStorage.getItem("schedule")!.split("\n").forEach(
+			(scheduleString) => {
+				const [scheduleName] = scheduleString.split(":");
+				addedCourses.set(scheduleName, []);
 			}
 		);
 
-		quarterYearGroups.forEach(
-			async (codes, quarterYear) => {
-				const [quarter, year] = quarterYear.split(" ");
+		const loadSchedules = () => {
+			localStorage.getItem("schedule")!.split("\n").forEach(async (scheduleString) => {
+				const quarterYearGroups = new Map<string, string[]>();
+				const [scheduleName, offeringsString] = scheduleString.split(":");
+				offeringsString.split(";").forEach((offeringString) => {
+					const values = offeringString.split(",");
+					const quarterYear = values[0] + " " + values[1];
+					const code = values[2];
+					if (!quarterYearGroups.has(quarterYear)) quarterYearGroups.set(quarterYear, []);
+					quarterYearGroups.get(quarterYear)!.push(code)
+				})
 
-				const offerings = (await getCourseByCode(quarter, year, codes.join(","))).data.schedule as CourseOffering[];
+				for (const [quarterYear, codes] of quarterYearGroups) {
+					const [quarter, year] = quarterYear.split(" ");
+					// API only allows 10 codes at a time.
+					for (let i = 0; i < codes.length; i += 10) {
+						const offerings = (await getCourseByCode(quarter, year, codes.slice(i, i+10).join(","))).data.schedule as CourseOffering[];
+						offerings.forEach((offering) => {if (!containsOffering(offering, scheduleName)) addOffering(offering, scheduleName)});
+					}
+				}
 
-				offerings.forEach((offering) => {if (!containsOffering(offering)) addOffering(offering)});
-			}
-		)
-
-		// Store all the course codes before the user leaves the page.
-		window.addEventListener("beforeunload", () => 
-			localStorage.setItem("schedule", 
-				addedCourses.map(
-					(course) => course.offerings.map(
-						(offering) => `${offering.quarter},${offering.year},${offering.section.code}`)
-				).flat().join(";")
-			)
-		);
+				loadSchedule(currentSchedule);
+			});
+		}
+		loadSchedules();
+		
 	});
+
+	const saveSchedule = () => {
+		localStorage.setItem("schedule", 
+			Array.from(addedCourses.entries()).map(
+				([scheduleName, courses]) => (
+					scheduleName + ":" + courses.map(
+						(course) => course.offerings.map(
+							(offering) => `${offering.quarter},${offering.year},${offering.section.code}`
+						)
+					).flat().join(";")
+				)
+			).join("\n")
+		);
+	}
 
 	/**
      * Adds the given course offering to the calendar and data.
      * @param offering The course offering to add.
      */
-	const addOffering = (offering: CourseOffering) => {
+	const addOffering = (offering: CourseOffering, scheduleName=currentSchedule) => {
 		const calendar = (calendarRef.current! as InstanceType<typeof FullCalendar>)?.getApi() as CalendarApi;
 		const course = offering.course;
+		if (!addedCourses.get(scheduleName)) {
+			addedCourses.set(scheduleName, [] as Course[]);
+		}
 
 		// If the course was never added before, create a new course with empty offerings.
-		if (!addedCourses.map((course) => course.id).includes(offering.course.id)) {
+		if (!addedCourses.get(scheduleName)!.map((course) => course.id).includes(offering.course.id)) {
 			const newCourse = structuredClone(offering.course);
 			newCourse.offerings = [];
-			addedCourses.push(newCourse);
+			addedCourses.get(scheduleName)!.push(newCourse);
 		}
-		addedCourses.find((course) => course.id === offering.course.id)?.offerings.push(offering);
+		addedCourses.get(scheduleName)!.find((course) => course.id === offering.course.id)?.offerings.push(offering);
 
 		// Check all the boxes.
 		for (const checkbox of document.getElementsByClassName(`checkbox-${offering.course.id}-${offering.section.code}`)) {
 			(checkbox as HTMLInputElement).checked = true;
 		}
 
-		// Get the days of the week for this course offering.
-		const days = offering.meetings[0].days;
-		const dayOffsets = [];
-		if (days.includes("M")) dayOffsets.push(0);
-		if (days.includes("Tu")) dayOffsets.push(1);
-		if (days.includes("W")) dayOffsets.push(2);
-		if (days.includes("Th")) dayOffsets.push(3);
-		if (days.includes("F")) dayOffsets.push(4);
+		if (offering.meetings[0].time !== "TBA") {
+			// Get the days of the week for this course offering.
+			const days = offering.meetings[0].days;
+			const dayOffsets = [];
+			if (days.includes("M")) dayOffsets.push(0);
+			if (days.includes("Tu")) dayOffsets.push(1);
+			if (days.includes("W")) dayOffsets.push(2);
+			if (days.includes("Th")) dayOffsets.push(3);
+			if (days.includes("F")) dayOffsets.push(4);
 
-		// Get the start and end times for this course offering.
-		const [startTime, endTime] = parseTime(offering.meetings[0].time);
-		const monday = getMonday();
+			// Get the start and end times for this course offering.
+			const [startTime, endTime] = parseTime(offering.meetings[0].time);
+			const monday = getMonday();
 
-		// Calculate color and luminance for event.
-		const hue = hashString(`${course.id}${offering.section.type}`) % 360;
-		const saturation = 75;
-		const lightness = 50;
-		const rgb = hslToRgb(hue/360, saturation/100, lightness/100);
-		const luminance = (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2])/255;
+			// Calculate color and luminance for event.
+			const hue = hashString(`${course.id}${offering.section.type}`) % 360;
+			const saturation = 75;
+			const lightness = 50;
+			const rgb = hslToRgb(hue/360, saturation/100, lightness/100);
+			const luminance = (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2])/255;
 
-		// Add an event to the calendar for each meeting day.
-		for (const days of dayOffsets) {
-			startTime.setDate(monday.getDate() + days);
-			endTime.setDate(monday.getDate() + days);
-			calendar?.addEvent({
-				title: `${course.department} ${course.number} ${offering.section.type}`,
-				start: startTime.toISOString(),
-				end: endTime.toISOString(),
-				id: `${offering.section.code}-${days}`,
-				backgroundColor: `hsl(${hue}, ${saturation}%, ${lightness}%)`,
-				textColor: luminance > 0.5 ? "black" : "white"
-			});
-			console.log(monday);
-		} 
+			// Add an event to the calendar for each meeting day.
+			for (const days of dayOffsets) {
+				startTime.setDate(monday.getDate() + days);
+				endTime.setDate(monday.getDate() + days);
+				calendar?.addEvent({
+					title: `${course.department} ${course.number} ${offering.section.type}`,
+					start: startTime.toISOString(),
+					end: endTime.toISOString(),
+					id: `${offering.section.code}-${days}`,
+					backgroundColor: `hsl(${hue}, ${saturation}%, ${lightness}%)`,
+					textColor: luminance > 0.5 ? "black" : "white"
+				});
+			} 
+		}
+		
+		updateMap();
 	}
 
 	/**
@@ -123,9 +199,12 @@ function App() {
 	 */
 	const removeOffering = (offering: CourseOffering) => {
 		const calendar = (calendarRef.current! as InstanceType<typeof FullCalendar>)?.getApi() as CalendarApi;
+		if (!addedCourses.get(currentSchedule)) {
+			addedCourses.set(currentSchedule, [] as Course[]);
+		}
 
 		// Remove course offering from appropriate course.
-		const addedCourse = addedCourses.find((course) => course.id === offering.course.id);
+		const addedCourse = addedCourses.get(currentSchedule)!.find((course) => course.id === offering.course.id);
 		const offerings = addedCourse?.offerings;
 		const index = offerings?.findIndex((other_offering) => other_offering.section.code === offering.section.code);
 		if (offerings && index! > -1) {
@@ -134,7 +213,7 @@ function App() {
 
 		// If the course has no offerings now, remove it.
 		if (offerings && offerings.length == 0) {
-			addedCourses.splice(addedCourses.findIndex((course) => course.id == addedCourse.id), 1);
+			addedCourses.get(currentSchedule)!.splice(addedCourses.get(currentSchedule)!.findIndex((course) => course.id == addedCourse.id), 1);
 		}
 
 		// Uncheck all the boxes.
@@ -147,6 +226,8 @@ function App() {
 			const event = calendar?.getEventById(`${offering.section.code}-${i}`);
 			if (event) event.remove()
 		}
+
+		updateMap();
 	}
 
 	/**
@@ -154,8 +235,12 @@ function App() {
 	 * @param offering The offering to check for.
 	 * @returns Whether the offering is already in the current schedule.
 	 */
-	const containsOffering = (offering: CourseOffering) => {
-		return addedCourses.filter(
+	const containsOffering = (offering: CourseOffering, scheduleName=currentSchedule) => {
+		if (!addedCourses.get(scheduleName)) {
+			addedCourses.set(scheduleName, [] as Course[]);
+		}
+
+		return addedCourses.get(scheduleName)!.filter(
 			(course) => course.id === offering.course.id
 		).map(
 			(course) => course.offerings.map(
@@ -164,12 +249,22 @@ function App() {
 		).flat().includes(offering.section.code);
 	}
 
+	const createSchedule = (scheduleName: string) => {
+		addedCourses.set(scheduleName, []);
+		loadSchedule(scheduleName);
+	}
+
 	return (
 		<ScheduleContext.Provider value={
 			{ 
 				calendarReference: calendarRef, 
+				currentSchedule: currentSchedule,
+				addedCourses: addedCourses,
 				addOffering: addOffering, 
 				removeOffering: removeOffering,
+				createSchedule: createSchedule,
+				loadSchedule: loadSchedule,
+				saveSchedule: saveSchedule,
 				containsOffering: containsOffering
 			}
 		}>

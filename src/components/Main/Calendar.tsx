@@ -1,16 +1,17 @@
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import { useContext, useState } from 'react';
-import { AddedCoursesContext, ScheduleContext } from './App';
+import { ScheduleContext } from './App';
 import { CourseOffering } from '../../constants/types';
+import { CalendarNavBar } from './CalendarNavBar';
 
 export function Calendar() {
 	const [offering, setOffering] = useState(null as unknown as CourseOffering);
 	const [pos, setPos] = useState({x: 0, y: 0});
-	const { calendarReference, removeOffering } = useContext(ScheduleContext);
-	const addedCourses = useContext(AddedCoursesContext);
+	const { calendarReference, currentSchedule, addedCourses, removeOffering } = useContext(ScheduleContext);
 	return (
 		<div id="calendar" className={`flex flex-col`}>
+			<CalendarNavBar/>
 			<FullCalendar 
 				ref={calendarReference}
 				plugins={[ timeGridPlugin ]}
@@ -29,7 +30,7 @@ export function Calendar() {
 				eventBorderColor="#00000080"
 				eventClick={(info) => {
 					setPos(({x: info.el.getBoundingClientRect().left + info.el.getBoundingClientRect().width + 5, y: info.el.getBoundingClientRect().top}));
-					const clickedOffering = addedCourses.map((course) => course.offerings).flat().find((offering) => offering.section.code === info.event.id.split("-")[0])!
+					const clickedOffering = addedCourses.get(currentSchedule)!.map((course) => course.offerings).flat().find((offering) => offering.section.code === info.event.id.split("-")[0])!
 					if (clickedOffering == offering) {
 						setOffering(null as unknown as CourseOffering);
 					} else {
