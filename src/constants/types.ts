@@ -20,6 +20,9 @@ export type CourseOffering = {
     status: string
     units: string
     course: Course
+
+    // Additional fields
+    gpa: number
 }
   
 export type Course = {
