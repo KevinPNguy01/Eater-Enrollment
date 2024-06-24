@@ -21,9 +21,9 @@ export function SearchForms() {
         setCourseSuggestions([]);
         setSearchResultsVisibility(true);
         if (number != "") {
-            setSearchResults([(await getCourse(fields.term.value, fields.year.value, department, number)).data.course]);
+            setSearchResults([await getCourse(fields.term.value, fields.year.value, department, number)]);
         } else {
-            const offerings = ((await getSchedule(fields.term.value, fields.year.value, department)).data.schedule as CourseOffering[]).filter(offering => !!offering.course);
+            const offerings = (await getSchedule(fields.term.value, fields.year.value, department)).filter(offering => !!offering.course);
             const courses = new Map<string, CourseOffering[]>();
             offerings.forEach((offering) => {
                 const key = `${offering.course.id}\n${offering.course.department}\n${offering.course.number}\n${offering.course.title}`

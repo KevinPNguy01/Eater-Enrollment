@@ -1,4 +1,4 @@
-import { Course } from "../../../constants/types";
+import { Course, CourseOffering, GradeDistributionCollection } from "../../../constants/types";
 import courses from "../../../assets/allCourses.json";
 
 const departments = Array.from(
@@ -25,7 +25,24 @@ export async function getCourse(term: string, year: string, department: string, 
             body: JSON.stringify({'query': query})
         }
     );
-    return response.json();
+    const grades = await getDepartmentGrades(department);
+    const course = (await response.json()).data.course as Course;
+    course.offerings.forEach((offering) => {
+        if (!course) return;
+        for (const instructor of offering.instructors) {
+            const key = `${course.department} ${course.number} ${instructor.shortened_name}`.toUpperCase();
+            const gpa = grades.get(key);
+            if (gpa && instructor.shortened_name !== "STAFF") {
+                offering.gpa = gpa;
+                break;
+            }
+        }
+        const staffGPA = grades.get(`${course.department} ${course.number} STAFF`.toUpperCase())
+        if (!offering.gpa && staffGPA) {
+            offering.gpa = staffGPA;
+        }
+    });
+    return course;
 }
 
 function buildQuery(term: string, year: string, department: string, number: string) {
@@ -42,6 +59,7 @@ function buildQuery(term: string, year: string, department: string, number: stri
 }
 
 export async function getSchedule(term: string, year: string, department: string) {
+
     const query: string = buildScheduleQuery(term, year, department);
     const response = await fetch("https://api.peterportal.org/graphql",
         {
@@ -49,8 +67,28 @@ export async function getSchedule(term: string, year: string, department: string
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({'query': query})
         }
-    );
-    return response.json();
+    );    
+    const grades = await getDepartmentGrades(department);
+    const offerings = (await response.json()).data.schedule as CourseOffering[];
+
+    offerings.forEach((offering) => {
+        const course = offering.course;
+        if (!course) return;
+        for (const instructor of offering.instructors) {
+            const key = `${course.department} ${course.number} ${instructor.shortened_name}`.toUpperCase();
+            const gpa = grades.get(key);
+            if (gpa && instructor.shortened_name !== "STAFF") {
+                offering.gpa = gpa;
+                break;
+            }
+        }
+        const staffGPA = grades.get(`${course.department} ${course.number} STAFF`.toUpperCase())
+        if (!offering.gpa && staffGPA) {
+            offering.gpa = staffGPA;
+        }
+    });
+
+    return offerings;
 }
 
 function buildScheduleQuery(term: string, year: string, department: string) {
@@ -73,7 +111,25 @@ export async function getCourseByCode(term: string, year: string, code: string) 
             body: JSON.stringify({'query': query})
         }
     );
-    return response.json();
+    const offerings = (await response.json()).data.schedule as CourseOffering[];
+    offerings.forEach(async (offering) => {
+        const course = offering.course;
+        const grades = await getDepartmentGrades(course.department)
+        if (!course) return;
+        for (const instructor of offering.instructors) {
+            const key = `${course.department} ${course.number} ${instructor.shortened_name}`.toUpperCase();
+            const gpa = grades.get(key);
+            if (gpa && instructor.shortened_name !== "STAFF") {
+                offering.gpa = gpa;
+                break;
+            }
+        }
+        const staffGPA = grades.get(`${course.department} ${course.number} STAFF`.toUpperCase())
+        if (!offering.gpa && staffGPA) {
+            offering.gpa = staffGPA;
+        }
+    });
+    return offerings;
 }
 
 function buildQueryByCode(term: string, year: string, code: string) {
@@ -105,4 +161,82 @@ function buildRegExp(searchStr: string) {
         }
     }
     return new RegExp(regExpStr);
+}
+
+export async function getDepartmentGrades(department: string) {
+    const query = `
+        query {
+            grades(department: "${department}") {
+                grade_distributions{
+                    average_gpa
+                    course_offering {
+                        course { department number }
+                        section { type }
+                        instructors {shortened_name }
+                    }
+                }
+            }
+        }
+    `;
+    const response = await fetch("https://api.peterportal.org/graphql",
+        {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({'query': query})
+        }
+    );
+    const grades = (await response.json()).data.grades as GradeDistributionCollection;
+    return aggregatedGrades(grades);
+}
+
+export async function getCourseGrades(department: string, number: string) {
+    const query = `
+        query {
+            grades(department: "${department}" number: "${number}") {
+                grade_distributions{
+                    average_gpa
+                    course_offering {
+                        course { department number }
+                        section { type }
+                        instructors {shortened_name }
+                    }
+                }
+            }
+        }
+    `;
+    const response = await fetch("https://api.peterportal.org/graphql",
+        {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({'query': query})
+        }
+    );
+    const grades = (await response.json()).data.grades as GradeDistributionCollection;
+    return aggregatedGrades(grades);
+}
+
+function aggregatedGrades(grades: GradeDistributionCollection) {
+    const grouped = new Map<string, number[]>();
+    grades.grade_distributions.forEach((distribution) => {
+        const offering = distribution.course_offering;
+        const course = offering.course;
+        const key = `${course.department} ${course.number} ${offering.instructors[0].shortened_name}`
+        if (!grouped.has(key)) {
+            grouped.set(key, []);
+        }
+        grouped.get(key)!.push(distribution.average_gpa);
+
+        const staffKey = `${course.department} ${course.number} STAFF`;
+        if (!grouped.has(staffKey)) {
+            grouped.set(staffKey, []);
+        }
+        grouped.get(staffKey)!.push(distribution.average_gpa);
+    });
+
+    const aggregated = new Map<string, number>();
+    grouped.forEach((gpas, key) => {
+        aggregated.set(key, gpas.reduce((a, b) => a + b) / gpas.length);
+    });
+
+    return aggregated;
 }

@@ -40,6 +40,7 @@ export function CourseResult(props: {course: Course}) {
                         <th className="p-2">Code</th>
                         <th>Type</th>
                         <th>Instructors</th>
+                        <td>GPA</td>
                         <th>Time</th>
                         <th>Location</th>
                         <th>Capacity</th>
@@ -62,11 +63,12 @@ export function CourseResult(props: {course: Course}) {
                                         (instructor) => {
                                             const name = instructor.shortened_name;
                                             const rmp_link = `https://www.ratemyprofessors.com/search/professors/1074?q=${name.split(",")[0]}`
-                                            if (name === "STAFF") return (<p>{name+"\n"}</p>)
-                                            return (<a href={rmp_link} target="_blank" rel="noopener noreferrer" className="text-sky-500 underline">{name+"\n"}</a>)
+                                            if (name === "STAFF") return (<p>{name}</p>)
+                                            return (<a href={rmp_link} target="_blank" rel="noopener noreferrer" className="text-sky-500 underline">{name}<br/></a>)
                                         }
                                     )}
                                 </td>
+                                <td>{offering.gpa ? (Math.round((offering.gpa + Number.EPSILON) * 100) / 100).toFixed(2) : ""}</td>
                                 <td>{`${offering.meetings[0].days} ${offering.meetings[0].time}`}</td>
                                 <td>{offering.meetings[0].building}</td>
                                 <td>{`${offering.num_total_enrolled}/${offering.max_capacity}`}</td>

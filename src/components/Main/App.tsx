@@ -104,7 +104,7 @@ function App() {
 					const [quarter, year] = quarterYear.split(" ");
 					// API only allows 10 codes at a time.
 					for (let i = 0; i < codes.length; i += 10) {
-						const offerings = (await getCourseByCode(quarter, year, codes.slice(i, i+10).join(","))).data.schedule as CourseOffering[];
+						const offerings = await getCourseByCode(quarter, year, codes.slice(i, i+10).join(","));
 						offerings.forEach((offering) => {if (!containsOffering(offering, scheduleName)) addOffering(offering, scheduleName)});
 					}
 				}
