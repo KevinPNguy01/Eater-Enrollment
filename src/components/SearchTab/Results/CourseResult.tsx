@@ -40,7 +40,8 @@ export function CourseResult(props: {course: Course}) {
                         <th className="p-2">Code</th>
                         <th>Type</th>
                         <th>Instructors</th>
-                        <td>GPA</td>
+                        <th>GPA</th>
+                        <th>RMP</th>
                         <th>Time</th>
                         <th>Location</th>
                         <th>Capacity</th>
@@ -69,6 +70,7 @@ export function CourseResult(props: {course: Course}) {
                                     )}
                                 </td>
                                 <td>{offering.gpa ? (Math.round((offering.gpa + Number.EPSILON) * 100) / 100).toFixed(2) : ""}</td>
+                                <td>{offering.rmp ? (Math.round((offering.rmp + Number.EPSILON) * 100) / 100).toFixed(1) : ""}</td>
                                 <td>{`${offering.meetings[0].days} ${offering.meetings[0].time}`}</td>
                                 <td>{offering.meetings[0].building}</td>
                                 <td>{`${offering.num_total_enrolled}/${offering.max_capacity}`}</td>
