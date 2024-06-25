@@ -23,6 +23,7 @@ export type CourseOffering = {
 
     // Additional fields
     gpa: number
+    rmp: number
 }
   
 export type Course = {
