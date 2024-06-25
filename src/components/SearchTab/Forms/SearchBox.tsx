@@ -1,6 +1,6 @@
 import { useContext } from "react"
-import { autoSuggest } from "./FormHelpers"
 import { SearchContext } from "../.."
+import { autoSuggest } from "./FormHelpers";
 
 export function SearchBox() {
     const { courseInput, setCourseInput, setCourseSuggestions } = useContext(SearchContext);

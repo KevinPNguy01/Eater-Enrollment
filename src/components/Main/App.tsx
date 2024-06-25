@@ -1,9 +1,9 @@
 import { MutableRefObject, createContext, useEffect, useRef, useState } from 'react';
 import { NavBar, Calendar, Courses } from '..';
 import { Course, CourseOffering } from '../../constants/types';
-import { getCourseByCode } from '../SearchTab/Forms/FormHelpers';
 import { CalendarApi } from 'fullcalendar/index.js';
 import FullCalendar from '@fullcalendar/react';
+import { requestSchedule } from '../../helpers/PeterPortalCalls';
 
 // Define the context type of schedule related functions and data.
 type ScheduleContextType = {
@@ -104,8 +104,12 @@ function App() {
 					const [quarter, year] = quarterYear.split(" ");
 					// API only allows 10 codes at a time.
 					for (let i = 0; i < codes.length; i += 10) {
-						const offerings = await getCourseByCode(quarter, year, codes.slice(i, i+10).join(","));
-						offerings.forEach((offering) => {if (!containsOffering(offering, scheduleName)) addOffering(offering, scheduleName)});
+						const courses = await requestSchedule({
+							quarter: quarter, 
+							year: year, 
+							section_codes: codes.slice(i, i+10).join(",")
+						});
+						courses.forEach(({offerings}) => offerings.forEach((offering) => {if (!containsOffering(offering, scheduleName)) addOffering(offering, scheduleName)}));
 					}
 				}
 

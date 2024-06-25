@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { DropDown, SearchContext, SearchList, SearchBox } from "../..";
-import { getCourse, getSchedule } from "./FormHelpers";
-import { Course, CourseOffering, SearchFields } from "../../../constants/types";
+import { requestSchedule } from "../../../helpers/PeterPortalCalls";
+import { SearchFields } from "../../../constants/types";
 
 export function SearchForms() {
     const {
@@ -20,23 +20,12 @@ export function SearchForms() {
         setCourseInput("");
         setCourseSuggestions([]);
         setSearchResultsVisibility(true);
-        if (number != "") {
-            setSearchResults([await getCourse(fields.term.value, fields.year.value, department, number)]);
-        } else {
-            const offerings = (await getSchedule(fields.term.value, fields.year.value, department)).filter(offering => !!offering.course);
-            const courses = new Map<string, CourseOffering[]>();
-            offerings.forEach((offering) => {
-                const key = `${offering.course.id}\n${offering.course.department}\n${offering.course.number}\n${offering.course.title}`
-                if (!courses.has(key)) {
-                    courses.set(key, []);
-                }
-                courses.get(key)!.push(offering);
-            });
-            setSearchResults(Array.from(courses.entries()).map(([courseString, offerings]) => {
-                const [id, department, number, title] = courseString.split("\n");
-                return {id: id, department: department, number: number, title: title, offerings: offerings} as Course;
-            }));
-        }
+        setSearchResults(await requestSchedule({
+            quarter: fields.term.value,
+            year: fields.year.value,
+            department: department,
+            number: number
+        }));
     }
 
     return (
