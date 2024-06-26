@@ -1,6 +1,6 @@
 import { SearchResultsNavBar, SearchContext } from "../.."
 import { useContext } from "react";
-import ScheduleResults from "./ScheduleResults";
+import { ScheduleResults } from "./ScheduleResult";
 
 export function SearchResults() {
     const { searchResultsVisibility, searchResults } = useContext(SearchContext);

@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 import { ScheduleContext } from '../Main/App';
-import ScheduleResults from '../SearchTab/Results/ScheduleResults';
+import { ScheduleResults } from '../SearchTab/Results/ScheduleResult';
 
 export function AddedTab(props: {activeTab: string}) {
     const { currentSchedule, addedCourses } = useContext(ScheduleContext);
