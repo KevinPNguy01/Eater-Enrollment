@@ -36,7 +36,7 @@ export function OfferingResult(props: {offering: CourseOffering}) {
             <td><CourseCheckBox course={course} offering={offering}/></td>
             <td>{offering.section.code}</td>
             <td className={`${typeColors.get(offering.section.type)}`}>{offering.section.type}</td>
-            <td>{offering.instructors.map(instructor => <RateMyProfessorsLink instructor={instructor}/>)}</td>
+            <td>{offering.instructors.map(instructor => <RateMyProfessorsLink key={instructor.shortened_name} instructor={instructor}/>)}</td>
             <td>{offering.gpa ? (Math.round((offering.gpa + Number.EPSILON) * 100) / 100).toFixed(2) : ""}</td>
             <td>{offering.rmp ? (Math.round((offering.rmp + Number.EPSILON) * 100) / 100).toFixed(1) : ""}</td>
             <td>{`${offering.meetings[0].days} ${offering.meetings[0].time}`}</td>

@@ -44,7 +44,7 @@ export function CourseResult(props: {course: Course}) {
                 <th>Restrictions</th>
             </tr>
             {/* Create an OfferingResult for each offering of this course. */}
-            {course.offerings.map(offering => <OfferingResult offering={offering}/>)}
+            {course.offerings.map(offering => <OfferingResult key={`${course.id}-${offering.section.code}`} offering={offering}/>)}
             {spacerRow}
         </tbody>
     )

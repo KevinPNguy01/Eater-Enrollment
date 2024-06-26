@@ -92,6 +92,7 @@ function App() {
 			localStorage.getItem("schedule")!.split("\n").forEach(async (scheduleString) => {
 				const quarterYearGroups = new Map<string, string[]>();
 				const [scheduleName, offeringsString] = scheduleString.split(":");
+				if (offeringsString === "") return;
 				offeringsString.split(";").forEach((offeringString) => {
 					const values = offeringString.split(",");
 					const quarterYear = values[0] + " " + values[1];
