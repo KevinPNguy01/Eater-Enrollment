@@ -1,6 +1,6 @@
 import { Course } from "../../../constants/types";
 import { useState } from "react";
-import { populateGrades } from "../../../helpers/PeterPortalCalls";
+import { populateGrades } from "../../../helpers/PeterPortal";
 import { OfferingResult } from "./OfferingResult";
 
 // Spacer table row to separate other CourseResults.

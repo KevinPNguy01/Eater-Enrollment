@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { DropDown, SearchContext, SearchList, SearchBox } from "../..";
-import { requestSchedule } from "../../../helpers/PeterPortalCalls";
+import { requestSchedule } from "../../../helpers/PeterPortal";
 import { SearchFields } from "../../../constants/types";
 
 export function SearchForms() {
