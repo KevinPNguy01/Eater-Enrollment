@@ -1,5 +1,4 @@
 import { Course, CourseOffering, GradeDistribution, GradeDistributionCollection } from "../constants/types";
-import { searchProfessor } from "./RateMyProfessors";
 
 /**
  * Makes a request to the PeterPortal API.
@@ -48,7 +47,6 @@ export async function requestSchedule({quarter, year, department="", section_cod
     const offerings = (await makeRequest(query)).data.schedule as CourseOffering[];
     const grades = await requestGrades(department ? `${department},${number}` : offerings.map(({course}) => `${course.department},${course.number}`).join(";"));
     const courses = new Map<string, CourseOffering[]>();
-    const instructors = new Map<string, CourseOffering[]>();
     offerings.forEach((offering) => {
         const course = offering.course;
         if (!course) return;
@@ -57,12 +55,7 @@ export async function requestSchedule({quarter, year, department="", section_cod
         for (const instructor of offering.instructors) {
             if (instructor.shortened_name === "STAFF") continue;
             const gpa = grades.get(`${course.department} ${course.number} ${instructor.shortened_name}`.toUpperCase());
-            if (gpa) offering.gpa = gpa
-
-            if (!instructors.has(instructor.shortened_name)) {
-                instructors.set(instructor.shortened_name, []);
-            }
-            instructors.get(instructor.shortened_name)!.push(offering);
+            if (gpa) offering.gpa = gpa;
         }
 
         const key = `${offering.course.id}\n${offering.course.department}\n${offering.course.number}\n${offering.course.title}`;
@@ -72,19 +65,10 @@ export async function requestSchedule({quarter, year, department="", section_cod
         courses.get(key)!.push(offering);
     });
 
-    instructors.forEach(async (offerings, instructor) => {
-        const rating = await searchProfessor(instructor);
-        if (rating) {
-            offerings.forEach((offering) => {
-                offering.rmp = rating;
-            });
-        }
-    });
-
     return Array.from(courses.entries()).map(([courseString, offerings]) => {
         const [id, department, number, title] = courseString.split("\n");
         return {id: id, department: department, number: number, title: title, offerings: offerings} as Course;
-    })
+    });
 }
 
 async function requestGrades(courses: string) {
