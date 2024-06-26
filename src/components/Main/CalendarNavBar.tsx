@@ -14,10 +14,10 @@ export function CalendarNavBar() {
 
     return(
         <nav className="bg-tertiary h-12 grid grid-cols-3 my-1">
-            <select className="drop-down m-2 bg-secondary border border-quaternary" onChange={onChangeFunc}>
+            <select className="drop-down m-2 bg-secondary border border-quaternary" onChange={onChangeFunc} value={currentSchedule}>
                 {
                     Array.from(addedCourses.keys()).map((scheduleName) => (
-                        <option value={scheduleName} selected={scheduleName === currentSchedule}>{scheduleName}</option>
+                        <option key={scheduleName} value={scheduleName}>{scheduleName}</option>
                     ))
                 }
                 <option value="add">
