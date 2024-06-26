@@ -2,9 +2,11 @@ import { Course, CourseOffering } from "../../../constants/types";
 import { useContext, useState } from "react";
 import { ScheduleContext } from "../../Main/App";
 import { populateReviews } from "../../../helpers/RateMyProfessors";
+import { populateGrades } from "../../../helpers/PeterPortalCalls";
 
 export function CourseResult(props: {course: Course}) {
     const [gotReviews, setGotReviews] = useState(false);
+    const [gotGrades, setGotGrades] = useState(false);
 
     const course = props.course;
     const statusColors = new Map([
@@ -34,6 +36,14 @@ export function CourseResult(props: {course: Course}) {
     }
     if (!gotReviews) {
         updateReviews();
+    }
+
+    const updateGrades = async () => {
+        await populateGrades([course]);
+        setGotGrades(true);
+    }
+    if (!gotGrades) {
+        updateGrades();
     }
 
     return (
