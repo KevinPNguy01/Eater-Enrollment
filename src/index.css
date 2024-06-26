@@ -146,11 +146,11 @@ h1 {
   border-top: 1px solid var(--color-secondary);
 }
 
-.course-result:last-child td:first-child {
+.course-result:nth-last-child(2) td:first-child {
   border-bottom-left-radius: 4px;
 }
   
-.course-result:last-child td:last-child {
+.course-result:nth-last-child(2) td:last-child {
   border-bottom-right-radius: 4px;
 }
 
@@ -176,7 +176,7 @@ h1 {
   border-top: 1px solid var(--color-quaternary);
 }
 
-.course-result:last-child td {
+.course-result:nth-last-child(2) td {
   border-bottom: 1px solid var(--color-quaternary);
 }
 
