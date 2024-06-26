@@ -26,7 +26,11 @@ interface ScheduleOptions {
     // Optional:
     number?: string,
 }
-export async function requestSchedule({quarter, year, department="", section_codes="", number=""}: ScheduleOptions) {
+/**
+ * Requests a schedule from the Peter Portal API with the given arguments.
+ * @returns A list of courses representing the schedule.
+ */
+export async function requestSchedule({quarter, year, department="", section_codes="", number=""}: ScheduleOptions): Promise<Course[]> {
     const query =  `
         query {
             schedule(
@@ -44,19 +48,12 @@ export async function requestSchedule({quarter, year, department="", section_cod
             }
         }
     `;
+    // The schedule query returns a list of course offerings.
     const offerings = (await makeRequest(query)).data.schedule as CourseOffering[];
-    const grades = await requestGrades(department ? `${department},${number}` : offerings.map(({course}) => `${course.department},${course.number}`).join(";"));
     const courses = new Map<string, CourseOffering[]>();
     offerings.forEach((offering) => {
         const course = offering.course;
         if (!course) return;
-        const staffGPA = grades.get(`${course.department} ${course.number} STAFF`.toUpperCase())
-        if (staffGPA) offering.gpa = staffGPA;
-        for (const instructor of offering.instructors) {
-            if (instructor.shortened_name === "STAFF") continue;
-            const gpa = grades.get(`${course.department} ${course.number} ${instructor.shortened_name}`.toUpperCase());
-            if (gpa) offering.gpa = gpa;
-        }
 
         const key = `${offering.course.id}\n${offering.course.department}\n${offering.course.number}\n${offering.course.title}`;
         if (!courses.has(key)) {
@@ -71,14 +68,13 @@ export async function requestSchedule({quarter, year, department="", section_cod
     });
 }
 
-async function requestGrades(courses: string) {
-    const ids = Array.from(new Set(courses.split(";")));
+async function requestGrades(courses: Course[]) {
+    let index = 0;
     const query =  `
         query {
-            ${ids.map((id, index) => {
-                const [department, number] = id.split(",");
+            ${courses.map(({department, number}) => {
                 return `
-                    grades${index}: grades (
+                    grades${index++}: grades (
                         ${department ? `department: "${department}"` : ""}
                         ${number ? `number: "${number}"` : ""}
                     ) {
@@ -97,7 +93,7 @@ async function requestGrades(courses: string) {
     `;
     const response = await makeRequest(query);
     const grades = {grade_distributions: [] as GradeDistribution[]} as GradeDistributionCollection;
-    for (let i = 0; i < ids.length; ++i) {
+    for (let i = 0; i < courses.length; ++i) {
         const courseGrades = response.data[`grades${i}`] as GradeDistributionCollection;
         courseGrades.grade_distributions.forEach(grade => grades.grade_distributions.push(grade));
     }
@@ -128,4 +124,20 @@ function aggregatedGrades(grades: GradeDistributionCollection) {
     });
 
     return aggregated;
+}
+
+export async function populateGrades(courses: Course[]) {
+    const offerings = courses.map(course => course.offerings).flat();
+    const grades = await requestGrades(courses);
+    offerings.forEach((offering) => {
+        const course = offering.course;
+        if (!course) return;
+        const staffGPA = grades.get(`${course.department} ${course.number} STAFF`.toUpperCase())
+        if (staffGPA) offering.gpa = staffGPA;
+        for (const instructor of offering.instructors) {
+            if (instructor.shortened_name === "STAFF") continue;
+            const gpa = grades.get(`${course.department} ${course.number} ${instructor.shortened_name}`.toUpperCase());
+            if (gpa) offering.gpa = gpa;
+        }
+    });
 }
