@@ -1,5 +1,6 @@
-import { SearchResultsNavBar, SearchContext, CourseResult } from "../.."
+import { SearchResultsNavBar, SearchContext } from "../.."
 import { useContext } from "react";
+import ScheduleResults from "./ScheduleResults";
 
 export function SearchResults() {
     const { searchResultsVisibility, searchResults } = useContext(SearchContext);
@@ -7,9 +8,7 @@ export function SearchResults() {
         <div className={`h-full flex flex-col ${searchResultsVisibility ? "block" : "hidden"}`}>
             <SearchResultsNavBar/>
             <div className="h-1 overflow-y-scroll flex-grow">
-                {searchResults.map((course) => (
-                    <CourseResult key={`${course.department} ${course.number}`} course={course}/>
-                ))}
+                <ScheduleResults courses={searchResults}/>
             </div>
         </div>
     )
