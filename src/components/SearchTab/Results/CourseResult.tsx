@@ -1,8 +1,11 @@
 import { Course, CourseOffering } from "../../../constants/types";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { ScheduleContext } from "../../Main/App";
+import { populateReviews } from "../../../helpers/RateMyProfessors";
 
 export function CourseResult(props: {course: Course}) {
+    const [gotReviews, setGotReviews] = useState(false);
+
     const course = props.course;
     const statusColors = new Map([
         ["OPEN", "text-green-500"],
@@ -24,6 +27,14 @@ export function CourseResult(props: {course: Course}) {
         ["Act", "text-indigo-500"],
         ["Qiz", "text-indigo-500"]
     ]);
+
+    const updateReviews = async () => {
+        await populateReviews([course]);
+        setGotReviews(true);
+    }
+    if (!gotReviews) {
+        updateReviews();
+    }
 
     return (
         <div>
@@ -63,7 +74,7 @@ export function CourseResult(props: {course: Course}) {
                                     {offering.instructors.map(
                                         (instructor) => {
                                             const name = instructor.shortened_name;
-                                            const rmp_link = `https://www.ratemyprofessors.com/search/professors/1074?q=${name.split(",")[0]}`
+                                            const rmp_link = `https://www.ratemyprofessors.com/search/professors/1074?q=${name.replace(/,/g, '').replace(/\./g, '')}`
                                             if (name === "STAFF") return (<p>{name}</p>)
                                             return (<a href={rmp_link} target="_blank" rel="noopener noreferrer" className="text-sky-500 underline">{name}<br/></a>)
                                         }
