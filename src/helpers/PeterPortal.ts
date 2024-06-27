@@ -25,12 +25,13 @@ interface ScheduleOptions {
     section_codes?: string
     // Optional:
     number?: string,
+    callBack?: () => void
 }
 /**
  * Requests a schedule from the Peter Portal API with the given arguments.
  * @returns A list of courses representing the schedule.
  */
-export async function requestSchedule({quarter, year, department="", section_codes="", number=""}: ScheduleOptions): Promise<Course[]> {
+export async function requestSchedule({quarter, year, department="", section_codes="", number="", callBack=()=>{}}: ScheduleOptions): Promise<Course[]> {
     const codes = section_codes.split(",");
     // If no codes were provided, initialize with empty code chunk so at least one iteration happens.
     const codeChunks: string[][] = codes.length ? [] : [[]];
@@ -57,7 +58,6 @@ export async function requestSchedule({quarter, year, department="", section_cod
             }`)}
         }
     `;
-    console.log(query)
 
     // The schedule query returns a list of course offerings.
     const offerings = [] as CourseOffering[];
@@ -65,22 +65,29 @@ export async function requestSchedule({quarter, year, department="", section_cod
     for (let i = 0; i < codeChunks.length; ++i) {
         (response.data[`schedule${i}`] as CourseOffering[]).forEach(offering => offerings.push(offering));
     }
-    const courses = new Map<string, CourseOffering[]>();
+    const courseOfferings = new Map<string, CourseOffering[]>();
     offerings.forEach((offering) => {
         const course = offering.course;
         if (!course) return;
 
         const key = `${offering.course.id}\n${offering.course.department}\n${offering.course.number}\n${offering.course.title}`;
-        if (!courses.has(key)) {
-            courses.set(key, []);
+        if (!courseOfferings.has(key)) {
+            courseOfferings.set(key, []);
         }
-        courses.get(key)!.push(offering);
+        courseOfferings.get(key)!.push(offering);
     });
 
-    return Array.from(courses.entries()).map(([courseString, offerings]) => {
+    const courses = Array.from(courseOfferings.entries()).map(([courseString, offerings]) => {
         const [id, department, number, title] = courseString.split("\n");
         return {id: id, department: department, number: number, title: title, offerings: offerings} as Course;
     });
+
+    (async () => {
+        await populateGrades(courses);
+        callBack();
+    })();
+
+    return courses;
 }
 
 async function requestGrades(courses: Course[]) {

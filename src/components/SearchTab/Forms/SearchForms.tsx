@@ -20,12 +20,14 @@ export function SearchForms() {
         setCourseInput("");
         setCourseSuggestions([]);
         setSearchResultsVisibility(true);
-        setSearchResults(await requestSchedule({
+        const courses = await requestSchedule({
             quarter: fields.term.value,
             year: fields.year.value,
             department: department,
-            number: number
-        }));
+            number: number,
+            callBack: () => setSearchResults(courses.slice())
+        });
+        setSearchResults(courses);
     }
 
     return (
