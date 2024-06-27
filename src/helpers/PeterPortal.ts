@@ -86,8 +86,7 @@ export async function requestSchedule({quarter, year, department="", section_cod
     (async () => {
         await populateGrades(courses);
         callBack();
-        await populateReviews(courses);
-        callBack();
+        populateReviews(courses, callBack);
     })();
 
     return courses;

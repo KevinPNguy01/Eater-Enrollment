@@ -1,6 +1,6 @@
 import { Course, CourseOffering } from "../constants/types";
 
-export async function populateReviews(courses: Course[]) {
+export async function populateReviews(courses: Course[], callBack=()=>{}) {
     // Map of instructor names to offerings they teach.
     const instructorOfferings = new Map<string, CourseOffering[]>();
     for (const course of courses) {
@@ -16,17 +16,15 @@ export async function populateReviews(courses: Course[]) {
         }
     }
 
-    const promises = [] as Promise<null>[];
-    const instructors = Array.from(instructorOfferings.keys());
-
-    instructors.forEach(instructor => promises.push(searchProfessor(instructor)));
-    await Promise.all(promises);
-
-    for (let i = 0; i < instructors.length; ++i) {
-        const instructor = instructors[i];
-        const offerings = instructorOfferings.get(instructor)!;
-        const rating = await promises[i];
-        if (rating) offerings.forEach(offering => offering.rmp = rating);
+    for (const [instructor, offerings] of instructorOfferings) {
+        (async () => {
+            const rating = await searchProfessor(instructor);
+            if (rating) {
+                offerings.forEach(offering => offering.rmp = rating);
+                callBack();
+            }
+        })();
+        await new Promise(r => setTimeout(r, 500));
     }
 }
 
