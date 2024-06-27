@@ -1,4 +1,5 @@
 import { Course, CourseOffering, GradeDistribution, GradeDistributionCollection } from "../constants/types";
+import { populateReviews } from "./RateMyProfessors";
 
 /**
  * Makes a request to the PeterPortal API.
@@ -84,6 +85,8 @@ export async function requestSchedule({quarter, year, department="", section_cod
 
     (async () => {
         await populateGrades(courses);
+        callBack();
+        await populateReviews(courses);
         callBack();
     })();
 
