@@ -66,15 +66,13 @@ function App() {
 
 				for (const [quarterYear, codes] of quarterYearGroups) {
 					const [quarter, year] = quarterYear.split(" ");
-					// API only allows 10 codes at a time.
-					for (let i = 0; i < codes.length; i += 10) {
-						const courses = await requestSchedule({
-							quarter: quarter, 
-							year: year, 
-							section_codes: codes.slice(i, i+10).join(",")
-						});
-						courses.forEach(({offerings}) => offerings.forEach((offering) => {if (!containsOffering(offering, scheduleName)) addOffering(offering, scheduleName)}));
-					}
+					const courses = await requestSchedule({
+						quarter: quarter, 
+						year: year, 
+						section_codes: codes.join(",")
+					});
+					courses.forEach(({offerings}) => offerings.forEach((offering) => {if (!containsOffering(offering, scheduleName)) addOffering(offering, scheduleName)}));
+				
 				}
 
 				loadSchedule(currentSchedule);

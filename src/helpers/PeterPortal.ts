@@ -31,9 +31,18 @@ interface ScheduleOptions {
  * @returns A list of courses representing the schedule.
  */
 export async function requestSchedule({quarter, year, department="", section_codes="", number=""}: ScheduleOptions): Promise<Course[]> {
+    const codes = section_codes.split(",");
+    // If no codes were provided, initialize with empty code chunk so at least one iteration happens.
+    const codeChunks: string[][] = codes.length ? [] : [[]];
+    // API has a limit of 10 codes per query.
+    for (let i = 0; i < codes.length; i+=10) {
+        codeChunks.push(codes.slice(i, i + 10));
+    }
+
     const query =  `
         query {
-            schedule(
+            ${codeChunks.map((section_codes, index) => `
+                schedule${index}: schedule(
                 quarter: "${quarter}" 
                 year: ${year}
                 ${department ? `department: "${department}"` : ""}
@@ -45,11 +54,17 @@ export async function requestSchedule({quarter, year, department="", section_cod
                 section { code type number }
                 instructors { shortened_name }
                 course { id department number title }
-            }
+            }`)}
         }
     `;
+    console.log(query)
+
     // The schedule query returns a list of course offerings.
-    const offerings = (await makeRequest(query)).data.schedule as CourseOffering[];
+    const offerings = [] as CourseOffering[];
+    const response = await makeRequest(query);
+    for (let i = 0; i < codeChunks.length; ++i) {
+        (response.data[`schedule${i}`] as CourseOffering[]).forEach(offering => offerings.push(offering));
+    }
     const courses = new Map<string, CourseOffering[]>();
     offerings.forEach((offering) => {
         const course = offering.course;
