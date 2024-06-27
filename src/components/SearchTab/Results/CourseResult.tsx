@@ -1,6 +1,4 @@
 import { Course } from "../../../constants/types";
-import { useState } from "react";
-import { populateGrades } from "../../../helpers/PeterPortal";
 import { OfferingResult } from "./OfferingResult";
 
 // Spacer table row to separate other CourseResults.
@@ -10,16 +8,7 @@ const spacerRow = (<tr><td colSpan={99}><br/></td></tr>);
  * Component for displaying a Course result as a tbody, to be used in ScheduleResult.
  */
 export function CourseResult(props: {course: Course}) {
-    const [gotGrades, setGotGrades] = useState(false);
     const course = props.course;
-
-    if (!gotGrades) {
-        (async () => {
-            await populateGrades([course]);
-            setGotGrades(true);
-        })();
-    }
-
     return (
         <tbody className="text-xs">
             {/* Table row for displaying course information. */}
