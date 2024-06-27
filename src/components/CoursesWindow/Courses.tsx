@@ -7,7 +7,7 @@ export const Courses = () => {
     const [activeTab, setActiveTab] = useState("search");
     
     return (
-        <div className="m-1 flex flex-col h-full">
+        <div className="relative m-1 flex flex-col h-full">
             <CoursesNavBar activeTab={activeTab} setActiveTab={setActiveTab}/>
             <SearchTab activeTab={activeTab}/>
             <AddedTab activeTab={activeTab}/>
