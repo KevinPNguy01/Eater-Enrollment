@@ -30,6 +30,7 @@ function App() {
 	const [addedCourses, setAddedCourses] = useState(new Map<string, Course[]>())
 	const updateMap = () => setAddedCourses(new Map(addedCourses));
 	const [currentSchedule, setCurrentSchedule] = useState("Schedule 1");
+	const [, setUpdateCounter] = useState(0);
 	const loadSchedule = (scheduleName: string) => {
 		const calendar = (calendarRef.current! as InstanceType<typeof FullCalendar>)?.getApi() as CalendarApi;
 		setCurrentSchedule(scheduleName);
@@ -69,7 +70,8 @@ function App() {
 					const courses = await requestSchedule({
 						quarter: quarter, 
 						year: year, 
-						section_codes: codes.join(",")
+						section_codes: codes.join(","),
+						callBack: () => setUpdateCounter(a => a+1)
 					});
 					courses.forEach(({offerings}) => offerings.forEach((offering) => {if (!containsOffering(offering, scheduleName)) addOffering(offering, scheduleName)}));
 				
