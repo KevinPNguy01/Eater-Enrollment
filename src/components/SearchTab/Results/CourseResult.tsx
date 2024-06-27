@@ -25,7 +25,6 @@ export function CourseResult(props: {course: Course}) {
                 <th>Type</th>
                 <th>Instructors</th>
                 <th>GPA</th>
-                <th>RMP</th>
                 <th>Time</th>
                 <th>Location</th>
                 <th>Capacity</th>

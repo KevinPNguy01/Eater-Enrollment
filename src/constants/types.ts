@@ -23,7 +23,6 @@ export type CourseOffering = {
 
     // Additional fields
     gpa: number
-    rmp: number
 }
   
 export type Course = {
@@ -64,6 +63,9 @@ export type Instructor = {
     schools: string[]
     related_departments: string[]
     course_history: Course[]
+
+    // Optional:
+    review: Review
 };
   
 export type Meeting = {
@@ -109,4 +111,15 @@ export type GradeDistribution = {
     grade_w_count: number
     average_gpa: number
     course_offering: CourseOffering
+}
+
+export type Review = {
+    firstName: string,
+    lastName: string,
+    department: string,
+    avgRating: number,
+    numRatings: number,
+    wouldTakeAgainPercent: number,
+    avgDifficulty: number,
+    url: string
 }

@@ -1,4 +1,4 @@
-import { Course, CourseOffering } from "../constants/types";
+import { Course, CourseOffering, Review } from "../constants/types";
 
 export async function populateReviews(courses: Course[], callBack=()=>{}) {
     // Map of instructor names to offerings they teach.
@@ -18,9 +18,9 @@ export async function populateReviews(courses: Course[], callBack=()=>{}) {
 
     for (const [instructor, offerings] of instructorOfferings) {
         (async () => {
-            const rating = await searchProfessor(instructor);
-            if (rating) {
-                offerings.forEach(offering => offering.rmp = rating);
+            const review = await searchProfessor(instructor);
+            if (review) {
+                offerings.forEach(offering => offering.instructors.filter(({shortened_name}) => shortened_name === instructor).forEach(instructor => instructor.review = review));
                 callBack();
             }
         })();
@@ -31,7 +31,7 @@ export async function populateReviews(courses: Course[], callBack=()=>{}) {
 export async function searchProfessor(shortened_name: string) {
     const name = shortened_name;
     const [lastName, firstInitial] = name.toLowerCase().split(", ");
-    let rating = null;
+    let instructorReview = null as unknown as Review;
     await fetch(`/api/professors?q=${name.replace(/,/g, '').replace(/\./g, '')}`)
         .then(response => {
             if (!response.ok) {
@@ -56,15 +56,20 @@ export async function searchProfessor(shortened_name: string) {
                 })
 
                 if (data.get("lastName")?.toLowerCase() === lastName && data.get("firstName")?.toLowerCase().startsWith(firstInitial[0])) {
-                    const rmp = data.get("avgRating");
-                    const url = `https://www.ratemyprofessors.com/professor/${data.get("legacyId")}`;
-                    if (rmp) {
-                        rating = parseFloat(rmp);
-                        break;
-                    }
+                    instructorReview = {
+                        firstName: data.get("firstName"),
+                        lastName: data.get("lastName"),
+                        department: data.get("department"),
+                        avgRating: parseFloat(data.get("avgRating") || ""),
+                        numRatings: parseInt(data.get("numRatings") || ""),
+                        wouldTakeAgainPercent: parseFloat(data.get("wouldTakeAgainPercent") || ""),
+                        avgDifficulty: parseFloat(data.get("avgDifficulty") || ""),
+                        url: `https://www.ratemyprofessors.com/professor/${data.get("legacyId") || ""}`
+                    } as Review;
+                    break;
                 }
             }
         })
         .catch(error => console.error('Error:', error));
-    return rating;
+    return instructorReview;
 }
