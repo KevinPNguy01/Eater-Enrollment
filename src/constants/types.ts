@@ -22,7 +22,7 @@ export type CourseOffering = {
     course: Course
 
     // Additional fields
-    gpa: number
+    grades: GradeDistributionCollection
 }
   
 export type Course = {

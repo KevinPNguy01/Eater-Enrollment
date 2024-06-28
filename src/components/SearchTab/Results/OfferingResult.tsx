@@ -2,6 +2,7 @@ import { useContext } from 'react';
 import { Course, CourseOffering } from '../../../constants/types'
 import { ScheduleContext } from '../../Main/App';
 import { RateMyProfessorsLink } from './RateMyProfessorsLink';
+import { ZotisticsLink } from './ZotisticsLink';
 
 // Define colors for various keywords.
 const statusColors = new Map([
@@ -37,8 +38,8 @@ export function OfferingResult(props: {offering: CourseOffering}) {
             <td><CourseCheckBox course={course} offering={offering}/></td>
             <td>{offering.section.code}</td>
             <td className={`${typeColors.get(offering.section.type)}`}>{offering.section.type}</td>
-            <td>{offering.instructors.map(instructor => <RateMyProfessorsLink key={instructor.shortened_name} instructor={instructor}/>)}</td>
-            <td>{offering.gpa ? (Math.round((offering.gpa + Number.EPSILON) * 100) / 100).toFixed(2) : ""}</td>
+            <td>{offering.instructors.map((instructor, i) => <RateMyProfessorsLink key={`${instructor.shortened_name}-${i}`} instructor={instructor}/>)}</td>
+            <td>{<ZotisticsLink grades={offering.grades} offering={offering}/>}</td>
             <td>{`${offering.meetings[0].days} ${offering.meetings[0].time}`}</td>
             <td>{offering.meetings[0].building}</td>
             <td>{`${offering.num_total_enrolled}/${offering.max_capacity}`}</td>

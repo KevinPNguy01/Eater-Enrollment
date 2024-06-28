@@ -64,7 +64,9 @@ export async function requestSchedule({quarter, year, department="", section_cod
     const offerings = [] as CourseOffering[];
     const response = await makeRequest(query);
     for (let i = 0; i < codeChunks.length; ++i) {
-        (response.data[`schedule${i}`] as CourseOffering[]).forEach(offering => offerings.push(offering));
+        (response.data[`schedule${i}`] as CourseOffering[]).forEach(offering => {
+            offerings.push(offering);
+        });
     }
     const courseOfferings = new Map<string, CourseOffering[]>();
     offerings.forEach((offering) => {
@@ -104,6 +106,14 @@ async function requestGrades(courses: Course[]) {
                     ) {
                         grade_distributions{
                             average_gpa
+                            grade_a_count
+                            grade_b_count
+                            grade_c_count
+                            grade_d_count
+                            grade_f_count
+                            grade_p_count
+                            grade_np_count
+                            grade_w_count
                             course_offering {
                                 course { department number }
                                 section { type }
@@ -124,30 +134,75 @@ async function requestGrades(courses: Course[]) {
     return aggregatedGrades(grades);
 }
 
+const defaultGrades = () => {
+    return {
+        aggregate: {
+            sum_grade_a_count: 0,
+            sum_grade_b_count: 0,
+            sum_grade_c_count: 0,
+            sum_grade_d_count: 0,
+            sum_grade_f_count: 0,
+            sum_grade_np_count: 0,
+            sum_grade_p_count: 0,
+            sum_grade_w_count: 0,
+            average_gpa: 0,
+            count: 0
+        },
+        instructors: [] as string[]
+    } as GradeDistributionCollection;
+}
+
+const updateGrades = (avgGrades: GradeDistributionCollection, grades: GradeDistribution) => {
+    avgGrades.aggregate.sum_grade_a_count += grades.grade_a_count;
+    avgGrades.aggregate.sum_grade_b_count += grades.grade_b_count;
+    avgGrades.aggregate.sum_grade_c_count += grades.grade_c_count;
+    avgGrades.aggregate.sum_grade_d_count += grades.grade_d_count;
+    avgGrades.aggregate.sum_grade_f_count += grades.grade_f_count;
+    avgGrades.aggregate.sum_grade_p_count += grades.grade_p_count;
+    avgGrades.aggregate.sum_grade_np_count += grades.grade_np_count;
+    avgGrades.aggregate.sum_grade_w_count += grades.grade_w_count;
+    avgGrades.aggregate.average_gpa = (avgGrades.aggregate.average_gpa * avgGrades.aggregate.count + grades.average_gpa) / (avgGrades.aggregate.count + 1);
+    avgGrades.aggregate.count += 1;
+}
+
+const updateGradesCollection = (grades1: GradeDistributionCollection, grades2: GradeDistributionCollection) => {
+    const g1 = grades1.aggregate;
+    const g2 = grades2.aggregate
+    g1.sum_grade_a_count += g2.sum_grade_a_count;
+    g1.sum_grade_b_count += g2.sum_grade_b_count;
+    g1.sum_grade_c_count += g2.sum_grade_c_count;
+    g1.sum_grade_d_count += g2.sum_grade_d_count;
+    g1.sum_grade_f_count += g2.sum_grade_f_count;
+    g1.sum_grade_p_count += g2.sum_grade_p_count;
+    g1.sum_grade_np_count += g2.sum_grade_np_count;
+    g1.sum_grade_w_count += g2.sum_grade_w_count;
+    g1.average_gpa = (g1.average_gpa * g1.count + g2.average_gpa * g2.count) / (g1.count + g2.count);
+    g1.count += 1;
+}
+
 function aggregatedGrades(grades: GradeDistributionCollection) {
-    const grouped = new Map<string, number[]>();
+    // A map of "<department> <number> <instructor>" to GradeDistributions.
+    const grouped = new Map<string, GradeDistributionCollection>();
+
     grades.grade_distributions.forEach((distribution) => {
         const offering = distribution.course_offering;
         const course = offering.course;
-        const key = `${course.department} ${course.number} ${offering.instructors[0].shortened_name}`
+        const instructor = offering.instructors[0].shortened_name;
+        const key = `${course.department} ${course.number} ${instructor}`
+
         if (!grouped.has(key)) {
-            grouped.set(key, []);
+            grouped.set(key, defaultGrades());
         }
-        grouped.get(key)!.push(distribution.average_gpa);
+        updateGrades(grouped.get(key)!, distribution);
 
         const staffKey = `${course.department} ${course.number} STAFF`;
         if (!grouped.has(staffKey)) {
-            grouped.set(staffKey, []);
+            grouped.set(staffKey, defaultGrades());
         }
-        grouped.get(staffKey)!.push(distribution.average_gpa);
+        updateGrades(grouped.get(staffKey)!, distribution);
     });
 
-    const aggregated = new Map<string, number>();
-    grouped.forEach((gpas, key) => {
-        aggregated.set(key, gpas.reduce((a, b) => a + b) / gpas.length);
-    });
-
-    return aggregated;
+    return grouped;
 }
 
 export async function populateGrades(courses: Course[]) {
@@ -156,12 +211,18 @@ export async function populateGrades(courses: Course[]) {
     offerings.forEach((offering) => {
         const course = offering.course;
         if (!course) return;
-        const staffGPA = grades.get(`${course.department} ${course.number} STAFF`.toUpperCase())
-        if (staffGPA) offering.gpa = staffGPA;
+
+        const combinedGrades = defaultGrades();
+
         for (const instructor of offering.instructors) {
-            if (instructor.shortened_name === "STAFF") continue;
-            const gpa = grades.get(`${course.department} ${course.number} ${instructor.shortened_name}`.toUpperCase());
-            if (gpa) offering.gpa = gpa;
+            const instructorGrades = grades.get(`${course.department} ${course.number} ${instructor.shortened_name}`.toUpperCase());
+            if (instructorGrades && instructor.shortened_name !== "STAFF") {
+                updateGradesCollection(combinedGrades, instructorGrades);
+                combinedGrades.instructors.push(instructor.shortened_name)
+            }
         }
+        const staffGrades = grades.get(`${course.department} ${course.number} STAFF`.toUpperCase())
+        if (staffGrades && !combinedGrades.instructors.length) updateGradesCollection(combinedGrades, staffGrades);
+        offering.grades = combinedGrades;
     });
 }
