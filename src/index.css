@@ -187,3 +187,7 @@ h1 {
 .event-info td:last-child {
   text-align: right;
 }
+
+line {
+  shape-rendering: crispEdges;
+}
