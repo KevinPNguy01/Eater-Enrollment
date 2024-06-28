@@ -5,11 +5,11 @@ import { Review } from "../../../constants/types";
  * @param review The review to render.
  * @param visible Whether to render this component.
  */
-export function RateMyProfessorsReview(props: {review: Review, visible: boolean}) {
+export function RateMyProfessorsReview(props: {review: Review}) {
     const review = props.review;
     if (!review) return;
     return (
-        <div className={`absolute left-full -translate-y-1/2 ${props.visible ? "block" : "hidden"} text-nowrap text-white text-left border border-quaternary bg-tertiary mx-4 p-4 z-20 w-fit`}>
+        <div className={`absolute left-full -translate-y-1/2 text-nowrap text-white text-left border border-quaternary bg-tertiary mx-4 p-4 z-20 w-fit`}>
             <div className="flex">
                 <p className="text-4xl font-extrabold">{`${review.avgRating}`}</p>
                 <p className="whitespace-pre text-gray-300 text-base font-bold">{` / 5`}</p>
