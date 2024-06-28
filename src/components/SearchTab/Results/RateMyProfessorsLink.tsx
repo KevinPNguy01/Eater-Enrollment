@@ -26,7 +26,7 @@ export function RateMyProfessorsLink(props: {instructor: Instructor}) {
             >{name}
                 <br/>
             </a>
-            <RateMyProfessorsReview review={review} visible={reviewVisible}/>
+            {reviewVisible ? <RateMyProfessorsReview review={review}/> : null}
         </div>
     );
 }
