@@ -36,7 +36,7 @@ export function OfferingResult(props: {offering: CourseOffering}) {
             <td><CourseCheckBox course={course} offering={offering}/></td>
             <td>{offering.section.code}</td>
             <td className={`${typeColors.get(offering.section.type)}`}>{offering.section.type}</td>
-            <td>{offering.instructors.map(instructor => <RateMyProfessorsLink key={instructor.shortened_name} instructor={instructor} review={instructor.review}/>)}</td>
+            <td>{offering.instructors.map(instructor => <RateMyProfessorsLink key={instructor.shortened_name} instructor={instructor}/>)}</td>
             <td>{offering.gpa ? (Math.round((offering.gpa + Number.EPSILON) * 100) / 100).toFixed(2) : ""}</td>
             <td>{`${offering.meetings[0].days} ${offering.meetings[0].time}`}</td>
             <td>{offering.meetings[0].building}</td>
@@ -71,11 +71,11 @@ function CourseCheckBox(props: {course: Course, offering: CourseOffering}) {
 /**
  * RateMyProfessors link tag for the given instructor, or a regular text tag if the instructor is STAFF.
  */
-function RateMyProfessorsLink(props: {instructor: Instructor, review: Review}) {
+export function RateMyProfessorsLink(props: {instructor: Instructor}) {
     const [reviewVisible, setReviewVisible] = useState(false);
 
     const name = props.instructor.shortened_name;
-    const review = props.review;
+    const review = props.instructor.review;
     if (name === "STAFF") return <p>{name}</p>;
     const rmp_link = review ? review.url : `https://www.ratemyprofessors.com/search/professors/1074?q=${name.replace(/,/g, '').replace(/\./g, '')}`;
     return (
@@ -101,7 +101,7 @@ function RateMyProfessorsReview(props: {review: Review, visible: boolean}) {
         return;
     }
     return (
-        <div className={`absolute left-full -translate-y-1/2 ${props.visible ? "block" : "hidden"} text-nowrap text-white text-left border border-quaternary bg-tertiary m-2 p-4 z-20 w-fit`}>
+        <div className={`absolute left-full -translate-y-1/2 ${props.visible ? "block" : "hidden"} text-nowrap text-white text-left border border-quaternary bg-tertiary mx-4 p-4 z-20 w-fit`}>
             <div className="flex">
                 <p className="text-4xl font-extrabold">{`${review.avgRating}`}</p>
                 <p className="whitespace-pre text-gray-300 text-base font-bold">{` / 5`}</p>
