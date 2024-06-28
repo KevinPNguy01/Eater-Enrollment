@@ -4,6 +4,7 @@ import { useContext, useState } from 'react';
 import { ScheduleContext } from './App';
 import { CourseOffering } from '../../constants/types';
 import { CalendarNavBar } from './CalendarNavBar';
+import { RateMyProfessorsLink } from '../SearchTab/Results/OfferingResult';
 
 export function Calendar() {
 	const [offering, setOffering] = useState(null as unknown as CourseOffering);
@@ -59,10 +60,7 @@ export function Calendar() {
 							<td>
 								{offering.instructors.map(
 									(instructor) => {
-										const name = instructor.shortened_name;
-										const rmp_link = `https://www.ratemyprofessors.com/search/professors/1074?q=${name.split(",")[0]}`
-										if (name === "STAFF") return (<p>{name+"\n"}</p>)
-										return (<a href={rmp_link} target="_blank" rel="noopener noreferrer" className="text-sky-500 underline">{name+"\n"}</a>)
+										return <RateMyProfessorsLink instructor={instructor}/>
 									}
 								)}
 							</td>
