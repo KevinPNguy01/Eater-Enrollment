@@ -3,7 +3,7 @@ import { DropDown, SearchContext, SearchList, SearchBox } from "../..";
 import { requestSchedule } from "../../../helpers/PeterPortal";
 import { SearchFields } from "../../../constants/types";
 
-export function SearchForms() {
+export function SearchForms(props: {callBack: () => void}) {
     const {
         searchResultsVisibility, setSearchResultsVisibility,
         setSearchResults,
@@ -25,7 +25,7 @@ export function SearchForms() {
             year: fields.year.value,
             department: department,
             number: number,
-            callBack: () => setSearchResults(courses.slice())
+            callBack: props.callBack
         });
         setSearchResults(courses);
     }

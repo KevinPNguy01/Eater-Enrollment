@@ -15,6 +15,9 @@ export function SearchTab(props: { activeTab: string }) {
     // React State Hook used as the text label in the search box.
     const [courseInput, setCourseInput] = useState("");
 
+    // React State hook for rerendering this component. 
+    const [, setUpdateCounter] = useState(0);
+
     return (
         <SearchContext.Provider value = {{
             searchResultsVisibility, setSearchResultsVisibility,
@@ -23,7 +26,7 @@ export function SearchTab(props: { activeTab: string }) {
             courseInput, setCourseInput
         }}>
             <div className={`h-1 flex flex-col flex-grow ${props.activeTab === "search" ? "block" : "hidden"}`}>
-                <SearchForms/>        
+                <SearchForms callBack={() => setUpdateCounter(a => a+1)}/>        
                 <SearchResults/>
             </div>
         </SearchContext.Provider>
