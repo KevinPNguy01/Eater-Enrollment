@@ -4,6 +4,8 @@
 @tailwind components;
 @tailwind utilities;
 
+
+
 :root {
   --color-primary: rgb(0,128,0);
   --color-secondary: rgb(48,48,48);

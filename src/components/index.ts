@@ -1,6 +1,6 @@
 import App from "./Main/App";
 import { NavBar } from "./Main/NavBar";
-import { Calendar} from "./Main/Calendar";
+import { Calendar} from "./CalendarPane/Calendar";
 
 import { Courses } from "./CoursesWindow/Courses";
 import { CoursesNavBar } from "./CoursesWindow/CoursesNavBar";
