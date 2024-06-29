@@ -174,7 +174,7 @@ function App() {
 
 	const createSchedule = (scheduleName: string) => {
 		addedCourses.push({name: scheduleName, courses: []})
-		loadSchedule(scheduleIndex + 1);
+		loadSchedule(addedCourses.length - 1);
 	}
 
 	return (
