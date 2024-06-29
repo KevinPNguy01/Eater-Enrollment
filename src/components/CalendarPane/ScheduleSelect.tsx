@@ -4,18 +4,18 @@ import { ScheduleContext } from "../Main/App"
 
 export function ScheduleSelect() {
     const [visible, setVisible] = useState(false);
-    const {addedCourses, currentSchedule, createSchedule} = useContext(ScheduleContext);
+    const {addedCourses, scheduleIndex, createSchedule} = useContext(ScheduleContext);
     return (
         <div className="relative border border-quaternary bg-secondary m-2 p-1 select-none">
             <div className="flex hover:cursor-pointer justify-between" onClick={() => setVisible(!visible)}>
-                <p>{currentSchedule}</p>
+                <p>{addedCourses[scheduleIndex].name}</p>
                 <p>{visible ? "⮝" : "⮟"}</p>
             </div>
             
             {visible ? (
                 <div className="absolute w-full z-20 bg-secondary border border-quaternary left-0 top-full">
-                    {Array.from(addedCourses.keys()).map((name) => (<ScheduleOption name={name}/>))}
-                    <button className="p-2 text-left hover:bg-tertiary w-full" onClick={() => createSchedule("Schedule " + (1 + addedCourses.size))}>
+                    {addedCourses.map(({name}, index) => (<ScheduleOption name={name} index={index}/>))}
+                    <button className="p-2 text-left hover:bg-tertiary w-full" onClick={() => createSchedule("Schedule " + (1 + addedCourses.length))}>
                         + New Schedule
                     </button>
                 </div>
