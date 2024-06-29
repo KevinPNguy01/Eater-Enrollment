@@ -17,9 +17,14 @@ export function ScheduleOption(props: {name: string, index: number}) {
                         onBlur={() => {
                             setTimeout(()=>setRenaming(false), 100);
                         }}
-                        onChange={e => {
-                            addedCourses[props.index].name=e.currentTarget.value;
+                        onChange={event => {
+                            addedCourses[props.index].name=event.currentTarget.value;
                             renamed();
+                        }}
+                        onKeyDown={event => {
+                            if (event.key === "Enter") {
+                                setRenaming(false);
+                            }
                         }}
                     />
                 ) : (
