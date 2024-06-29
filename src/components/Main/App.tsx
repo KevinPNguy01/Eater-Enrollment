@@ -16,7 +16,10 @@ type ScheduleContextType = {
 	containsOffering: (offering: CourseOffering) => boolean,
 	createSchedule: (scheduleName: string) => void,
 	loadSchedule: (scheduleIndex: number) => void,
-	saveSchedule: () => void
+	saveSchedule: () => void,
+
+	renames: number,
+	renamed: () => void
 }
 
 // Context provider for accessing schedule functions and data.
@@ -29,6 +32,7 @@ function App() {
 	const calendarRef = useRef(null);
 	const [addedCourses, setAddedCourses] = useState([{name: "Schedule 1", courses: [] as Course[]}])
 	const [scheduleIndex, setScheduleIndex] = useState(0);
+	const [renames, renamed] = useState(0);
 	const updateMap = () => setAddedCourses(addedCourses.slice());
 	const [updateCounter, setUpdateCounter] = useState(0);
 	const loadSchedule = (scheduleIndex: number) => {
@@ -184,7 +188,10 @@ function App() {
 				createSchedule: createSchedule,
 				loadSchedule: loadSchedule,
 				saveSchedule: saveSchedule,
-				containsOffering: containsOffering
+				containsOffering: containsOffering,
+
+				renames: renames,
+				renamed: () => renamed(a => a+1)
 			}
 		}>
 			<div className="h-screen overflow-hidden flex text-white flex-col">
