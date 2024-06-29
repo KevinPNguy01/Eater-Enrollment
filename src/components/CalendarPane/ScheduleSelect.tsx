@@ -14,7 +14,7 @@ export function ScheduleSelect() {
             
             {visible ? (
                 <div className="absolute w-full z-20 bg-secondary border border-quaternary left-0 top-full">
-                    {addedCourses.map(({name}, index) => (<ScheduleOption name={name} index={index}/>))}
+                    {addedCourses.map(({name}, index) => (<ScheduleOption key={index} name={name} index={index}/>))}
                     <button className="p-2 text-left hover:bg-tertiary w-full" onClick={() => createSchedule("Schedule " + (1 + addedCourses.length))}>
                         + New Schedule
                     </button>

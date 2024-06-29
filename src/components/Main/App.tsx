@@ -34,6 +34,7 @@ function App() {
 	const loadSchedule = (scheduleIndex: number) => {
 		const calendar = (calendarRef.current! as InstanceType<typeof FullCalendar>)?.getApi() as CalendarApi;
 		setScheduleIndex(scheduleIndex);
+		setAddedCourses(addedCourses.slice())
 		calendar.removeAllEvents();
 
 		const offerings = addedCourses[scheduleIndex].courses.map((course) => course.offerings).flat();
