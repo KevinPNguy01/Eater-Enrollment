@@ -33,8 +33,15 @@ export function addOfferingsToCalendar(offerings: CourseOffering[], calendar: Ca
 
         // Add an event to the calendar for each meeting day.
         for (const days of dayOffsets) {
-            startTime.setDate(monday.getDate() + days);
-            endTime.setDate(monday.getDate() + days);
+            startTime.setDate(monday.getDate());
+            endTime.setDate(monday.getDate());
+            startTime.setMonth(monday.getMonth());
+            endTime.setMonth(monday.getMonth());
+            startTime.setFullYear(monday.getFullYear());
+            endTime.setFullYear(monday.getFullYear());
+            
+            startTime.setDate(startTime.getDate() + days);
+            endTime.setDate(endTime.getDate() + days);
             calendar?.addEvent({
                 title: `${course.department} ${course.number} ${offering.section.type}`,
                 start: startTime.toISOString(),
@@ -80,7 +87,8 @@ function getMonday() {
     d.setHours(0);
     d.setMinutes(0);
     d.setSeconds(0);
-    return new Date(d.setDate(diff));
+    const newDate = new Date(d.setDate(diff));
+    return newDate;
 }
 
 /**
