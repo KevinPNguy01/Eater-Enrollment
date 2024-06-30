@@ -4,12 +4,12 @@ import { useContext, useState } from 'react';
 import { ScheduleContext } from '../Main/App';
 import { CourseOffering } from '../../constants/types';
 import { CalendarNavBar } from './CalendarNavBar';
-import { RateMyProfessorsLink } from '../SearchTab/Results/RateMyProfessorsLink';
+import { EventInfo } from './EventInfo';
 
 export function Calendar() {
 	const [offering, setOffering] = useState(null as unknown as CourseOffering);
 	const [pos, setPos] = useState({x: 0, y: 0});
-	const { calendarReference, scheduleIndex, addedCourses, removeOffering } = useContext(ScheduleContext);
+	const { calendarReference, scheduleIndex, addedCourses} = useContext(ScheduleContext);
 	return (
 		<div id="calendar" className={`flex flex-col`}>
 			<CalendarNavBar/>
@@ -39,49 +39,7 @@ export function Calendar() {
 					}
 				}}
 			/>
-			{offering ? (<div className="absolute bg-tertiary p-2 border border-quaternary z-10 event-info" style={{top: `${pos.y}px`, left: `${pos.x}px`}}>
-				<table>
-					<tbody>
-						<tr>
-							<td>
-								{`${offering.course.department} ${offering.course.number} ${offering.section.type}`}
-							</td>
-							<td>
-								<button onClick={() => {
-									removeOffering(offering);
-									setOffering(null as unknown as CourseOffering);
-								}}>
-									🗑
-								</button>
-							</td>
-						</tr>
-						<tr>
-							<td className="whitespace-pre">{"Instructors\t\t"}</td>
-							<td>
-								{offering.instructors.map(
-									(instructor) => {
-										return <RateMyProfessorsLink instructor={instructor}/>
-									}
-								)}
-							</td>
-						</tr>
-						<tr>
-							<td>Capacity</td>
-							<td>{`${offering.num_total_enrolled}/${offering.max_capacity}`}</td>
-						</tr>
-						<tr>
-							<td>Status</td>
-							<td>{offering.status}</td>
-						</tr>
-						<tr>
-							<td>Code</td>
-							<td>
-								{offering.section.code}
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>) : null}
+			{offering ? <EventInfo offering={offering} setOffering={setOffering} pos={pos}/> : null}
 		</div>
 	)
 

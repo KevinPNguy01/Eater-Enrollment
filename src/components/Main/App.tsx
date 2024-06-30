@@ -5,6 +5,7 @@ import { CalendarApi } from 'fullcalendar/index.js';
 import FullCalendar from '@fullcalendar/react';
 import { requestSchedule } from '../../helpers/PeterPortal';
 import { addOfferingsToCalendar, removeOfferingsFromCalendar } from '../../helpers/FullCalendar';
+import { RGBColor } from 'react-color';
 
 // Define the context type of schedule related functions and data.
 type ScheduleContextType = {
@@ -19,7 +20,10 @@ type ScheduleContextType = {
 	saveSchedule: () => void,
 
 	renames: number,
-	renamed: () => void
+	renamed: () => void,
+
+	colorRules: Map<string, RGBColor>,
+	setColorRules: (rules: Map<string, RGBColor>) => void
 }
 
 // Context provider for accessing schedule functions and data.
@@ -31,6 +35,7 @@ export const ScheduleContext = createContext(
 function App() {
 	const calendarRef = useRef(null);
 	const [addedCourses, setAddedCourses] = useState([{name: "Schedule 1", courses: [] as Course[]}])
+	const [colorRules, setColorRules] = useState(new Map<string, RGBColor>());
 	const [scheduleIndex, setScheduleIndex] = useState(0);
 	const [renames, renamed] = useState(0);
 	const updateMap = () => setAddedCourses(addedCourses.slice());
@@ -42,7 +47,7 @@ function App() {
 		calendar.removeAllEvents();
 
 		const offerings = addedCourses[scheduleIndex].courses.map((course) => course.offerings).flat();
-		addOfferingsToCalendar(offerings, calendar);
+		addOfferingsToCalendar(offerings, calendar, colorRules);
 	}
 
 	useEffect(() => {
@@ -58,6 +63,12 @@ function App() {
 				addedCourses.push({name: scheduleName, courses: []});
 			}
 		);
+
+		localStorage.getItem("colorRules")?.split("\n").forEach(rule => {
+			const [offering, color] = rule.split(":")
+			const [r, g, b] = color.split(" ");
+			colorRules.set(offering, {r: parseInt(r), g: parseInt(g), b: parseInt(b)} as RGBColor);
+		})
 
 		const loadSchedules = () => {
 			localStorage.getItem("schedule")!.split("\n").forEach(async (scheduleString, index) => {
@@ -100,6 +111,10 @@ function App() {
 				)
 			).join("\n")
 		);
+
+		localStorage.setItem("colorRules",
+			Array.from(colorRules.entries()).map(([offering, rgb]) => `${offering}:${rgb.r} ${rgb.g} ${rgb.b}`).join("\n")
+		);
 	}
 
 	/**
@@ -122,7 +137,7 @@ function App() {
 			(checkbox as HTMLInputElement).checked = true;
 		}
 
-		if (index === scheduleIndex) addOfferingsToCalendar([offering], calendar);
+		if (index === scheduleIndex) addOfferingsToCalendar([offering], calendar, colorRules);
 		
 		updateMap();
 	}
@@ -191,7 +206,10 @@ function App() {
 				containsOffering: containsOffering,
 
 				renames: renames,
-				renamed: () => renamed(a => a+1)
+				renamed: () => renamed(a => a+1),
+
+				colorRules: colorRules,
+				setColorRules: setColorRules
 			}
 		}>
 			<div className="h-screen overflow-hidden flex text-white flex-col">
