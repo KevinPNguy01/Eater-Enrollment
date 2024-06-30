@@ -1,10 +1,11 @@
 import { CalendarApi } from "fullcalendar/index.js";
 import { CourseOffering } from "../constants/types";
+import { RGBColor } from "react-color";
 
 /**
  * Add the given CourseOfferings to the Calendar.
  */
-export function addOfferingsToCalendar(offerings: CourseOffering[], calendar: CalendarApi | undefined) {
+export function addOfferingsToCalendar(offerings: CourseOffering[], calendar: CalendarApi | undefined, colorRules: Map<string, RGBColor>) {
     offerings.forEach((offering) => {
         if (offering.meetings[0].time === "TBA") return;
 
@@ -27,8 +28,8 @@ export function addOfferingsToCalendar(offerings: CourseOffering[], calendar: Ca
         const hue = hashString(`${course.id}${offering.section.type}`) % 360;
         const saturation = 75;
         const lightness = 50;
-        const rgb = hslToRgb(hue/360, saturation/100, lightness/100);
-        const luminance = (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2])/255;
+        const rgb = colorRules.get(`${offering.quarter} ${offering.year} ${offering.section.code}`) || hslToRgb(hue/360, saturation/100, lightness/100);
+        const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b)/255;
 
         // Add an event to the calendar for each meeting day.
         for (const days of dayOffsets) {
@@ -39,7 +40,7 @@ export function addOfferingsToCalendar(offerings: CourseOffering[], calendar: Ca
                 start: startTime.toISOString(),
                 end: endTime.toISOString(),
                 id: `${offering.section.code}-${days}`,
-                backgroundColor: `hsl(${hue}, ${saturation}%, ${lightness}%)`,
+                backgroundColor: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`,
                 textColor: luminance > 0.5 ? "black" : "white"
             });
         } 
@@ -153,7 +154,7 @@ function hslToRgb(h: number, s: number, l: number) {
         g = hueToRgb(p, q, h);
         b = hueToRgb(p, q, h - 1/3);
     }
-    return [round(r * 255), round(g * 255), round(b * 255)];
+    return {r: round(r * 255), g: round(g * 255), b: round(b * 255)} as RGBColor;
 }
 
 function hueToRgb(p: number, q: number, t: number) {

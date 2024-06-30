@@ -51,7 +51,7 @@ export async function requestSchedule({quarter, year, department="", section_cod
                 ${section_codes ? `section_codes: "${section_codes}"` : ""}
                 ${number ? `course_number: "${number}"` : ""}
             ) {
-                quarter year num_total_enrolled max_capacity status restrictions
+                quarter year num_total_enrolled max_capacity num_on_waitlist num_new_only_reserved status restrictions
                 meetings { time days building }
                 section { code type number }
                 instructors { shortened_name }

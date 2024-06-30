@@ -42,7 +42,11 @@ export function OfferingResult(props: {offering: CourseOffering}) {
             <td>{<ZotisticsLink grades={offering.grades} offering={offering}/>}</td>
             <td>{`${offering.meetings[0].days} ${offering.meetings[0].time}`}</td>
             <td>{offering.meetings[0].building}</td>
-            <td>{`${offering.num_total_enrolled}/${offering.max_capacity}`}</td>
+            <td>
+                <p>{`${offering.num_total_enrolled}/${offering.max_capacity}`}</p>
+                <p>{`WL: ${offering.num_on_waitlist}`}</p>
+                <p>{`NOR: ${offering.num_new_only_reserved}`}</p>
+            </td>
             <td className={`${statusColors.get(offering.status)}`}>{offering.status}</td>
             <td>{offering.restrictions}</td>
         </tr>)
