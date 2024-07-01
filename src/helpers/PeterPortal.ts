@@ -17,7 +17,7 @@ async function makeRequest(query: string) {
     return (await response.json());
 }
 
-interface ScheduleOptions {
+export interface ScheduleOptions {
     // Required:
     quarter: string,
     year: string,
@@ -25,45 +25,49 @@ interface ScheduleOptions {
     department?: string,
     section_codes?: string
     // Optional:
-    number?: string,
-    callBack?: () => void
+    number?: string
 }
 /**
  * Requests a schedule from the Peter Portal API with the given arguments.
  * @returns A list of courses representing the schedule.
  */
-export async function requestSchedule({quarter, year, department="", section_codes="", number="", callBack=()=>{}}: ScheduleOptions): Promise<Course[]> {
-    const codes = section_codes.split(",");
-    // If no codes were provided, initialize with empty code chunk so at least one iteration happens.
-    const codeChunks: string[][] = codes.length ? [] : [[]];
-    // API has a limit of 10 codes per query.
-    for (let i = 0; i < codes.length; i+=10) {
-        codeChunks.push(codes.slice(i, i + 10));
-    }
+export async function requestSchedule(queries: ScheduleOptions[], callBack=()=>{}): Promise<Course[]> {
+    let numQueries = 0;
 
     const query =  `
         query {
-            ${codeChunks.map((section_codes, index) => `
-                schedule${index}: schedule(
-                quarter: "${quarter}" 
-                year: ${year}
-                ${department ? `department: "${department}"` : ""}
-                ${section_codes ? `section_codes: "${section_codes}"` : ""}
-                ${number ? `course_number: "${number}"` : ""}
-            ) {
-                quarter year num_total_enrolled max_capacity num_on_waitlist num_new_only_reserved status restrictions
-                meetings { time days building }
-                section { code type number }
-                instructors { shortened_name }
-                course { id department number title }
-            }`)}
+            ${queries.map(query => {
+                const {quarter, year, department, section_codes, number} = query;
+                const codes = (section_codes || "").split(",");
+                // If no codes were provided, initialize with empty code chunk so at least one iteration happens.
+                const codeChunks: string[][] = codes.length ? [] : [[]];
+                // API has a limit of 10 codes per query.
+                for (let i = 0; i < codes.length; i+=10) {
+                    codeChunks.push(codes.slice(i, i + 10));
+                }
+
+                return codeChunks.map((section_codes) => `
+                    schedule${numQueries++}: schedule(
+                    quarter: "${quarter}" 
+                    year: ${year}
+                    ${department ? `department: "${department}"` : ""}
+                    ${section_codes ? `section_codes: "${section_codes}"` : ""}
+                    ${number ? `course_number: "${number}"` : ""}
+                ) {
+                    quarter year num_total_enrolled max_capacity num_on_waitlist num_new_only_reserved status restrictions
+                    meetings { time days building }
+                    section { code type number }
+                    instructors { shortened_name }
+                    course { id department number title }
+                }`).join("\n");
+            })}
         }
     `;
 
     // The schedule query returns a list of course offerings.
     const offerings = [] as CourseOffering[];
     const response = await makeRequest(query);
-    for (let i = 0; i < codeChunks.length; ++i) {
+    for (let i = 0; i < numQueries; ++i) {
         (response.data[`schedule${i}`] as CourseOffering[]).forEach(offering => {
             offerings.push(offering);
         });

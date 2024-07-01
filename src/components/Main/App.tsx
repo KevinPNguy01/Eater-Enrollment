@@ -85,12 +85,11 @@ function App() {
 
 				for (const [quarterYear, codes] of quarterYearGroups) {
 					const [quarter, year] = quarterYear.split(" ");
-					const courses = await requestSchedule({
+					const courses = await requestSchedule([{
 						quarter: quarter, 
 						year: year, 
-						section_codes: codes.join(","),
-						callBack: () => setUpdateCounter(a => a+1)
-					});
+						section_codes: codes.join(",")
+					}], () => setUpdateCounter(a => a+1));
 					courses.forEach(({offerings}) => offerings.forEach((offering) => {if (!containsOffering(offering, index)) addOffering(offering, index)}));
 				
 				}
