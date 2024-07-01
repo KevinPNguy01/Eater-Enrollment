@@ -1,14 +1,14 @@
 import { useContext } from "react";
 import { DropDown, SearchContext, SearchList, SearchBox } from "../..";
-import { requestSchedule } from "../../../helpers/PeterPortal";
 import { SearchFields } from "../../../constants/types";
+import { SearchButton } from "./SearchButton";
 
 export function SearchForms(props: {callBack: () => void}) {
     const {
-        searchResultsVisibility, setSearchResultsVisibility,
-        setSearchResults,
+        searchResultsVisibility,
         courseSuggestions, setCourseSuggestions,
-        courseInput, setCourseInput
+        courseInput, setCourseInput,
+        queries, setQueries
     } = useContext(SearchContext);
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -19,15 +19,12 @@ export function SearchForms(props: {callBack: () => void}) {
         const number = courseInput.split("-")[1];
         setCourseInput("");
         setCourseSuggestions([]);
-        setSearchResultsVisibility(true);
-        const courses = await requestSchedule({
+        setQueries(queries.concat([{
             quarter: fields.term.value,
             year: fields.year.value,
             department: department,
-            number: number,
-            callBack: props.callBack
-        });
-        setSearchResults(courses);
+            number: number
+        }]));
     }
 
     return (
@@ -50,8 +47,8 @@ export function SearchForms(props: {callBack: () => void}) {
                 />
             </div>
             <br></br>
-            <SearchBox/>
-            <SearchList/>
+            <SearchBox callBack={props.callBack}/>
+            {courseSuggestions.length ? <SearchList/> : <SearchButton callBack={props.callBack}/>}
         </form>
     )
 }
