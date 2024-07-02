@@ -38,7 +38,7 @@ export function SearchTab(props: { activeTab: string }) {
             year, setYear
         }}>
             <div className={`h-1 flex flex-col flex-grow ${props.activeTab === "search" ? "block" : "hidden"}`}>
-                {!searchResultsVisibility ? <SearchForms callBack={() => setUpdateCounter(a => a+1)}/> : <SearchResults/>}        
+                {!searchResultsVisibility ? <SearchForms callBack={() => setUpdateCounter(a => a+1)}/> : <SearchResults callBack={() => setUpdateCounter(a => a+1)}/>}        
             </div>
         </SearchContext.Provider>
     )

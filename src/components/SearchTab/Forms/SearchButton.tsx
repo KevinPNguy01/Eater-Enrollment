@@ -8,7 +8,7 @@ export function SearchButton(props: {callBack: () => void}) {
         setSearchResults,
         setCourseSuggestions,
         setCourseInput,
-        queries, setQueries
+        queries
     } = useContext(SearchContext);
 
     const handleSubmit = async () => {
@@ -16,7 +16,6 @@ export function SearchButton(props: {callBack: () => void}) {
         setCourseSuggestions([]);
         setSearchResultsVisibility(true);
         const courses = await requestSchedule(queries, props.callBack);
-        setQueries([])
         setSearchResults(courses);
     }
     return (
