@@ -6,24 +6,27 @@ import { CourseOffering } from '../../constants/types';
 import { CalendarNavBar } from './CalendarNavBar';
 import { EventInfo } from './EventInfo';
 
-export function Calendar() {
+export function Calendar(props: {showingFinals: boolean, setShowingFinals: (_: boolean) => void}) {
 	const [offering, setOffering] = useState(null as unknown as CourseOffering);
 	const [pos, setPos] = useState({x: 0, y: 0});
+	const {showingFinals, setShowingFinals} = props;
+	
 	const { calendarReference, scheduleIndex, addedCourses} = useContext(ScheduleContext);
 	return (
 		<div id="calendar" className={`flex flex-col`}>
-			<CalendarNavBar/>
+			<CalendarNavBar showingFinals={showingFinals} setShowingFinals={setShowingFinals}/>
 			<FullCalendar 
 				ref={calendarReference}
 				plugins={[ timeGridPlugin ]}
 				initialView="timeGridWeek"
 				headerToolbar={false}
-				weekends={false}
+				weekends={showingFinals}
 				allDaySlot={false}
 				height="100%"
 				expandRows={true}
 				slotMinTime="07:00:00"
 				slotMaxTime="23:00:00"
+				firstDay={6}
 				slotLabelFormat={{
 				hour: "numeric"
 				}}

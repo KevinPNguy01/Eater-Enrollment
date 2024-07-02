@@ -9,7 +9,7 @@ import { RGBColor } from 'react-color';
 
 // Define the context type of schedule related functions and data.
 type ScheduleContextType = {
-	calendarReference: MutableRefObject<null>,
+	calendarReference: MutableRefObject<FullCalendar>,
 	addedCourses: {name: string, courses: Course[]}[],
 	scheduleIndex: number,
 	addOffering: (offering: CourseOffering) => void, 
@@ -33,13 +33,14 @@ export const ScheduleContext = createContext(
 
 // Navigation bar with calendar on the left, and everything else on the right.
 function App() {
-	const calendarRef = useRef(null);
+	const calendarRef = useRef(null as unknown as FullCalendar);
 	const [addedCourses, setAddedCourses] = useState([{name: "Schedule 1", courses: [] as Course[]}])
 	const [colorRules, setColorRules] = useState(new Map<string, RGBColor>());
 	const [scheduleIndex, setScheduleIndex] = useState(0);
 	const [renames, renamed] = useState(0);
 	const updateMap = () => setAddedCourses(addedCourses.slice());
 	const [updateCounter, setUpdateCounter] = useState(0);
+	const [showingFinals, setShowingFinals] = useState(false);
 	const loadSchedule = (scheduleIndex: number) => {
 		const calendar = (calendarRef.current! as InstanceType<typeof FullCalendar>)?.getApi() as CalendarApi;
 		setScheduleIndex(scheduleIndex);
@@ -47,7 +48,7 @@ function App() {
 		calendar.removeAllEvents();
 
 		const offerings = addedCourses[scheduleIndex].courses.map((course) => course.offerings).flat();
-		addOfferingsToCalendar(offerings, calendar, colorRules);
+		addOfferingsToCalendar(offerings, calendar, colorRules, showingFinals);
 	}
 
 	useEffect(() => {
@@ -136,7 +137,7 @@ function App() {
 			(checkbox as HTMLInputElement).checked = true;
 		}
 
-		if (index === scheduleIndex) addOfferingsToCalendar([offering], calendar, colorRules);
+		if (index === scheduleIndex) addOfferingsToCalendar([offering], calendar, colorRules, showingFinals);
 		
 		updateMap();
 	}
@@ -214,7 +215,7 @@ function App() {
 			<div className="h-screen overflow-hidden flex text-white flex-col">
 				<NavBar/>
 				<div id="main" className={`h-1 grow bg-secondary grid grid-cols-2`}>
-					<Calendar/>
+					<Calendar showingFinals={showingFinals} setShowingFinals={setShowingFinals}/>
 					<Courses/>
 				</div>
 			</div>
