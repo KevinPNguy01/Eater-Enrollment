@@ -5,11 +5,14 @@ import { RGBColor } from "react-color";
 /**
  * Add the given CourseOfferings to the Calendar.
  */
-export function addOfferingsToCalendar(offerings: CourseOffering[], calendar: CalendarApi | undefined, colorRules: Map<string, RGBColor>) {
-    offerings.forEach((offering) => {
-        if (offering.meetings[0].time === "TBA") return;
+export function addOfferingsToCalendar(offerings: CourseOffering[], calendar: CalendarApi | undefined, colorRules: Map<string, RGBColor>, final: boolean) {
+    const events = (final ? createFinalEvents : createEvents)(offerings, colorRules);
+    events.forEach(event => calendar?.addEvent(event));
+}
 
-        const course = offering.course;
+function createEvents(offerings: CourseOffering[], colorRules: Map<string, RGBColor>) {
+    return offerings.map(offering => {
+        if (offering.meetings[0].time === "TBA") return [];
 
         // Get the days of the week for this course offering.
         const days = offering.meetings[0].days;
@@ -22,36 +25,24 @@ export function addOfferingsToCalendar(offerings: CourseOffering[], calendar: Ca
 
         // Get the start and end times for this course offering.
         const [startTime, endTime] = parseTime(offering.meetings[0].time);
-        const monday = getMonday();
-
-        // Calculate color and luminance for event.
-        const hue = hashString(`${course.id}${offering.section.type}`) % 360;
-        const saturation = 75;
-        const lightness = 50;
-        const rgb = colorRules.get(`${offering.quarter} ${offering.year} ${offering.section.code}`) || hslToRgb(hue/360, saturation/100, lightness/100);
-        const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b)/255;
 
         // Add an event to the calendar for each meeting day.
-        for (const days of dayOffsets) {
-            startTime.setDate(monday.getDate());
-            endTime.setDate(monday.getDate());
-            startTime.setMonth(monday.getMonth());
-            endTime.setMonth(monday.getMonth());
-            startTime.setFullYear(monday.getFullYear());
-            endTime.setFullYear(monday.getFullYear());
-            
-            startTime.setDate(startTime.getDate() + days);
-            endTime.setDate(endTime.getDate() + days);
-            calendar?.addEvent({
-                title: `${course.department} ${course.number} ${offering.section.type}`,
-                start: startTime.toISOString(),
-                end: endTime.toISOString(),
-                id: `${offering.section.code}-${days}`,
-                backgroundColor: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`,
-                textColor: luminance > 0.5 ? "black" : "white"
-            });
-        } 
-    });
+        return dayOffsets.map(days => {
+            const day = getDay(days);
+            const startDate = new Date(day);
+            startDate.setHours(startTime.getHours());
+            startDate.setMinutes(startTime.getMinutes());
+            const endDate = new Date(day);
+            endDate.setHours(endTime.getHours());
+            endDate.setMinutes(endTime.getMinutes());
+            return Object.assign({
+                title: `${offering.course.department} ${offering.course.number} ${offering.section.type}`,
+                start: startDate.toISOString(),
+                end: endDate.toISOString(),
+                id: `${offering.section.code}-${days}`
+            }, getColor(offering, colorRules));
+        });
+    }).flat();
 }
 
 /**
@@ -67,6 +58,56 @@ export function removeOfferingsFromCalendar(offerings: CourseOffering[], calenda
     });
 }
 
+function createFinalEvents(offerings: CourseOffering[], colorRules: Map<string, RGBColor>) {
+    const dayOffsets = new Map([
+        ["Mon", 0],
+        ["Tue", 1],
+        ["Wed", 2],
+        ["Thu", 3],
+        ["Fri", 4],
+        ["Sat", -2],
+        ["Sun", -1]
+    ]);
+
+    return offerings.filter(offering => (offering.final_exam && offering.final_exam !== "TBA")).map(offering => {
+
+        // Get the start and end times for this course offering.
+        const [dayString, , , timeString] = offering.final_exam.split(" ");
+        const [startTime, endTime] = parseTime(timeString);
+        const day = getDay(dayOffsets.get(dayString)!);
+
+        const startDate = new Date(day);
+        startDate.setHours(startTime.getHours());
+        startDate.setMinutes(startTime.getMinutes());
+        const endDate = new Date(day);
+        endDate.setHours(endTime.getHours());
+        endDate.setMinutes(endTime.getMinutes());
+        
+        return Object.assign({
+            title: `${offering.course.department} ${offering.course.number} Final`,
+            start: startDate.toISOString(),
+            end: endDate.toISOString(),
+            id: `${offering.section.code}-1`
+        }, getColor(offering, colorRules));
+    });
+}
+
+function getColor(offering: CourseOffering, colorRules: Map<string, RGBColor>) {
+    const {course} = offering;
+
+    // Calculate color and luminance for event.
+    const hue = hashString(`${course.id}${offering.section.type}`) % 360;
+    const saturation = 75;
+    const lightness = 50;
+    const rgb = colorRules.get(`${offering.quarter} ${offering.year} ${offering.section.code}`) || hslToRgb(hue/360, saturation/100, lightness/100);
+    const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b)/255;
+
+    return {
+        backgroundColor: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`,
+        textColor: luminance > 0.5 ? "black" : "white"
+    }
+}
+
 /**
  * Generates a simple hash code for the given input string.
  * @param str The string to hash.
@@ -77,18 +118,14 @@ function hashString(str: string) {
 }
 
 /**
- * 
- * @returns A Date object representing the monday of the current week.
+ * @param
+ * @returns A Date object representing a day on the calendar of the current week.
  */
-function getMonday() {
+function getDay(days: number) {
     const d = new Date();
     const day = d.getDay()
-    const diff = d.getDate() - day + 1; // Adjust when day is sunday.
-    d.setHours(0);
-    d.setMinutes(0);
-    d.setSeconds(0);
-    const newDate = new Date(d.setDate(diff));
-    return newDate;
+    const diff = d.getDate() - day + 1 + days; // Adjust when day is sunday.
+    return new Date(d.setDate(diff));
 }
 
 /**
@@ -97,9 +134,9 @@ function getMonday() {
  * @returns Two Date objects storing the start/end times represented by the given time string.
  */
 function parseTime(time: string) {
-    time = time.replace(/\s+/g, "");                        // Remove whitespace.
-    const pm = time[time.length-1] === "p" ? true : false;  // The time ends past 12 if the string ends in 'p'.
-    const timeArray = time.replace("p", "").split("-");     // Drop the p and split by '-' into two separate times.
+    time = time.replace(/\s+/g, "").replace("am", "").replace("pm", "p")    // Normalize string.
+    const pm = time[time.length-1] === "p" ? true : false;                  // The time ends past 12 if the string ends in 'p'.
+    const timeArray = time.replace("p", "").split("-");                     // Drop the p and split by '-' into two separate times.
 
     // Isolate the start/end hours and minutes.
     const startArray = timeArray[0].split(":");             

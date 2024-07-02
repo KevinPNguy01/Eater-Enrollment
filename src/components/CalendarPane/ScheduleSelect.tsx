@@ -6,7 +6,7 @@ export function ScheduleSelect() {
     const [visible, setVisible] = useState(false);
     const {addedCourses, scheduleIndex, createSchedule} = useContext(ScheduleContext);
     return (
-        <div className="relative border border-quaternary bg-secondary m-2 p-1 select-none">
+        <div className="relative rounded border border-quaternary bg-secondary m-2 p-1 select-none">
             <div className="flex hover:cursor-pointer justify-between" onClick={() => setVisible(!visible)}>
                 <p>{addedCourses[scheduleIndex].name}</p>
                 <p>{visible ? "⮝" : "⮟"}</p>
