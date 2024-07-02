@@ -1,27 +1,41 @@
 import coursesJson from "../../../assets/allCourses.json";
 import { Course } from "../../../constants/types";
+import { ScheduleOptions } from "../../../helpers/PeterPortal";
 
-const courses: {data: {allCourses: Course[]}} = coursesJson as {data: {allCourses: Course[]}};
-const departments = Array.from(
+export type SearchSuggestion = {
+    text: string;
+    value: ScheduleOptions;
+}
+let searchSuggestions = [] as SearchSuggestion[];
+
+const courses = coursesJson as {data: {allCourses: Course[]}};
+const departmentSuggestions = Array.from(
     new Map(courses.data.allCourses.map(
         (course) => [course.department, course.department_name]
     )).entries()
 ).map(
     ([department, department_name]) => {return {
-        department: department,
-        number: "",
-        title: department_name,
-        department_name: department_name
-    }}
+        text: `${department}: ${department_name}`,
+        value: {department: department} as ScheduleOptions
+    } as SearchSuggestion}
 );
+const courseSuggestions = courses.data.allCourses.map(({department, number, title}) => {
+    return {
+        text: `${department} ${number}: ${title}`,
+        value: {
+            department: department,
+            number: number
+        } as ScheduleOptions
+    } as SearchSuggestion
+})
 
-const coursesAndDepartments = departments.concat(courses.data.allCourses);
+searchSuggestions = searchSuggestions.concat(departmentSuggestions).concat(courseSuggestions);
 
-export function autoSuggest(searchStr: string, setCourseSuggestions: (list: {department: string, number: string, title: string}[]) => void) {
+export function autoSuggest(searchStr: string, setCourseSuggestions: (_: SearchSuggestion[]) => void) {
     const regExp = buildRegExp(searchStr);
-    setCourseSuggestions(new Array<Course>());
-    if (searchStr.length > 2) setCourseSuggestions(coursesAndDepartments.filter(
-        course => (regExp.test(` ${course.department} ${course.number}: ${course.title}`.toLowerCase())))
+    setCourseSuggestions([]);
+    if (searchStr.length > 2) setCourseSuggestions(searchSuggestions.filter(
+        ({text}) => (regExp.test(` ${text}`.toLowerCase())))
     );
 }
 
