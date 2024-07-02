@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Course } from "../../../constants/types";
 import { OfferingResult } from "./OfferingResult";
+import { CourseInfo } from "./CourseInfo";
 
 // Spacer table row to separate other CourseResults.
 const spacerRow = (<tr><td colSpan={99}><br/></td></tr>);
@@ -8,14 +10,17 @@ const spacerRow = (<tr><td colSpan={99}><br/></td></tr>);
  * Component for displaying a Course result as a tbody, to be used in ScheduleResult.
  */
 export function CourseResult(props: {course: Course}) {
+    const [infoVisible, setInfoVisible] = useState(false);
     const course = props.course;
     return (
         <tbody className="text-xs">
             {/* Table row for displaying course information. */}
-            <tr>
-                <td colSpan={99} className="bg-tertiary p-2 border border-quaternary rounded font-bold text-left text-base">
+            <tr className="relative">
+                <td colSpan={99} className="bg-tertiary p-2 border border-quaternary rounded font-bold text-left text-base hover:cursor-pointer" onClick={() => setInfoVisible(!infoVisible)}>
                     {`${course.department} ${course.number}: ${course.title}`}
+    
                 </td>
+                {infoVisible ? <CourseInfo course={course}/>: null}
             </tr>
             {spacerRow}
             {/* Header row. */}

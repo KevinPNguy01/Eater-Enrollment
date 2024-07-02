@@ -1,6 +1,7 @@
-import courses from "../../../assets/allCourses.json";
+import coursesJson from "../../../assets/allCourses.json";
 import { Course } from "../../../constants/types";
 
+const courses: {data: {allCourses: Course[]}} = coursesJson as {data: {allCourses: Course[]}};
 const departments = Array.from(
     new Map(courses.data.allCourses.map(
         (course) => [course.department, course.department_name]

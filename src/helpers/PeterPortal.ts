@@ -1,5 +1,8 @@
 import { Course, CourseOffering, GradeDistribution, GradeDistributionCollection } from "../constants/types";
 import { populateReviews } from "./RateMyProfessors";
+import coursesJson from "../../src/assets/allCourses.json";
+
+const courseMap = new Map<string, Course>((coursesJson as {data: {allCourses: Course[]}}).data.allCourses.map(course => [course.id, course]));
 
 /**
  * Makes a request to the PeterPortal API.
@@ -77,16 +80,18 @@ export async function requestSchedule(queries: ScheduleOptions[], callBack=()=>{
         const course = offering.course;
         if (!course) return;
 
-        const key = `${offering.course.id}\n${offering.course.department}\n${offering.course.number}\n${offering.course.title}`;
-        if (!courseOfferings.has(key)) {
-            courseOfferings.set(key, []);
+        const id = course.id;
+        if (!courseOfferings.has(id)) {
+            courseOfferings.set(id, []);
         }
-        courseOfferings.get(key)!.push(offering);
+        courseOfferings.get(id)!.push(offering);
     });
 
-    const courses = Array.from(courseOfferings.entries()).map(([courseString, offerings]) => {
-        const [id, department, number, title] = courseString.split("\n");
-        return {id: id, department: department, number: number, title: title, offerings: offerings} as Course;
+    const courses = Array.from(courseOfferings.entries()).map(([id, offerings]) => {
+        const course = Object.assign({}, courseMap.get(id)) as Course;
+        offerings.forEach(offering => offering.course = course);
+        course.offerings = offerings;
+        return course;
     });
 
     (async () => {
