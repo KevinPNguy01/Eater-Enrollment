@@ -22,17 +22,22 @@ export function SearchTab(props: { activeTab: string }) {
     // React State hook for rerendering this component. 
     const [, setUpdateCounter] = useState(0);
 
+    // React State hooks for keeping track of term and year.
+    const [term, setTerm] = useState("Fall");
+    const [year, setYear] = useState("2024");
+
     return (
         <SearchContext.Provider value = {{
             searchResultsVisibility, setSearchResultsVisibility,
             searchResults, setSearchResults,
             courseSuggestions, setCourseSuggestions,
             courseInput, setCourseInput,
-            queries, setQueries
+            queries, setQueries,
+            term, setTerm,
+            year, setYear
         }}>
             <div className={`h-1 flex flex-col flex-grow ${props.activeTab === "search" ? "block" : "hidden"}`}>
-                <SearchForms callBack={() => setUpdateCounter(a => a+1)}/>        
-                <SearchResults/>
+                {!searchResultsVisibility ? <SearchForms callBack={() => setUpdateCounter(a => a+1)}/> : <SearchResults/>}        
             </div>
         </SearchContext.Provider>
     )
@@ -49,6 +54,10 @@ type SearchContent = {
     setCourseInput: (a: string) => void;
     queries: ScheduleOptions[];
     setQueries: (a: ScheduleOptions[]) => void;
+    term: string;
+    setTerm: (_: string) => void;
+    year: string;
+    setYear: (_: string) => void;
 }
 
 export const SearchContext = createContext<SearchContent>({} as SearchContent);
