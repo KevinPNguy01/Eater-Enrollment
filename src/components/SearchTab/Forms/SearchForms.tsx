@@ -1,6 +1,5 @@
 import { useContext } from "react";
 import { DropDown, SearchContext, SearchList, SearchBox } from "../..";
-import { SearchFields } from "../../../constants/types";
 import { SearchButton } from "./SearchButton";
 
 export function SearchForms(props: {callBack: () => void}) {
@@ -8,20 +7,21 @@ export function SearchForms(props: {callBack: () => void}) {
         searchResultsVisibility,
         courseSuggestions, setCourseSuggestions,
         courseInput, setCourseInput,
-        queries, setQueries
+        queries, setQueries,
+        term, setTerm,
+        year, setYear
     } = useContext(SearchContext);
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (!courseSuggestions.length) return;
-        const fields = event.target as typeof event.target & SearchFields;
         const department = courseInput.split("-")[0];
         const number = courseInput.split("-")[1];
         setCourseInput("");
         setCourseSuggestions([]);
         setQueries(queries.concat([{
-            quarter: fields.term.value,
-            year: fields.year.value,
+            quarter: term,
+            year: year,
             department: department,
             number: number
         }]));
@@ -37,13 +37,15 @@ export function SearchForms(props: {callBack: () => void}) {
                         "Fall", "Winter", "Spring", 
                         "Summer Session 1", "Summer Session 2", "10-wk Summer"
                     ]}
-                    default="Fall"
+                    default={term}
+                    setter={setTerm}
                 />
                 <DropDown
                     label = "Year"
                     name = "year"
                     options={Array.from({ length: new Date().getFullYear() - 2015 + 2}, (_, index) => (new Date().getFullYear()+1 - index).toString())}
-                    default={"2024"}
+                    default={year}
+                    setter={setYear}
                 />
             </div>
             <br></br>
