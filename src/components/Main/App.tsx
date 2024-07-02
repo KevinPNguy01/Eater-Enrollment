@@ -125,7 +125,7 @@ function App() {
 
 		// If the course was never added before, create a new course with empty offerings.
 		if (!addedCourses[index].courses.map((course) => course.id).includes(offering.course.id)) {
-			const newCourse = structuredClone(offering.course);
+			const newCourse = Object.assign({}, offering.course);
 			newCourse.offerings = [];
 			addedCourses[index].courses!.push(newCourse);
 		}
