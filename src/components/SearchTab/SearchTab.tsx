@@ -2,7 +2,7 @@ import { createContext, useState } from "react";
 import { SearchForms, SearchResults } from "..";
 import { Course } from "../../constants/types";
 import { ScheduleOptions } from "../../helpers/PeterPortal";
-import { SearchSuggestion } from "./Forms/FormHelpers";
+import { SearchSuggestion } from "../../helpers/FormHelpers";
 
 export function SearchTab(props: { activeTab: string }) {
     // React State Hook for determining whether to show course search results or not.
