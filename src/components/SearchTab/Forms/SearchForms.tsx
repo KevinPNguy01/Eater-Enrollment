@@ -6,8 +6,7 @@ export function SearchForms(props: {callBack: () => void}) {
     const {
         searchResultsVisibility,
         courseSuggestions, setCourseSuggestions,
-        courseInput, setCourseInput,
-        queries, setQueries,
+        setCourseInput,
         term, setTerm,
         year, setYear
     } = useContext(SearchContext);
@@ -15,16 +14,8 @@ export function SearchForms(props: {callBack: () => void}) {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (!courseSuggestions.length) return;
-        const department = courseInput.split("-")[0];
-        const number = courseInput.split("-")[1];
         setCourseInput("");
         setCourseSuggestions([]);
-        setQueries(queries.concat([{
-            quarter: term,
-            year: year,
-            department: department,
-            number: number
-        }]));
     }
 
     return (
