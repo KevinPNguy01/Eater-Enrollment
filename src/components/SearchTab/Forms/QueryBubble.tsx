@@ -13,7 +13,7 @@ export function QueryBubble(props: {query: ScheduleOptions, index: number}) {
 
     return (
         <div className="whitespace-nowrap border border-quaternary bg-tertiary px-4 m-1 rounded-full hover:bg-red-500 hover:cursor-pointer" onClick={handleClick}>
-            {query.department + (query.number ? ` ${query.number}` : "")}
+            {query.ge ? query.ge : query.department + (query.number ? ` ${query.number}` : "")}
         </div>
     )
 }

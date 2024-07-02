@@ -22,10 +22,11 @@ async function makeRequest(query: string) {
 
 export interface ScheduleOptions {
     // Required:
-    quarter: string,
-    year: string,
+    quarter: string
+    year: string
     // At least one of:
-    department?: string,
+    department?: string
+    ge?: string
     section_codes?: string
     // Optional:
     number?: string
@@ -40,7 +41,7 @@ export async function requestSchedule(queries: ScheduleOptions[], callBack=()=>{
     const query =  `
         query {
             ${queries.map(query => {
-                const {quarter, year, department, section_codes, number} = query;
+                const {quarter, year, department, section_codes, number, ge} = query;
                 const codes = (section_codes || "").split(",");
                 // If no codes were provided, initialize with empty code chunk so at least one iteration happens.
                 const codeChunks: string[][] = codes.length ? [] : [[]];
@@ -56,6 +57,7 @@ export async function requestSchedule(queries: ScheduleOptions[], callBack=()=>{
                     ${department ? `department: "${department}"` : ""}
                     ${section_codes ? `section_codes: "${section_codes}"` : ""}
                     ${number ? `course_number: "${number}"` : ""}
+                    ${ge ? `ge: "${ge}"` : ""}
                 ) {
                     quarter year num_total_enrolled max_capacity num_on_waitlist num_new_only_reserved status restrictions final_exam
                     meetings { time days building }
@@ -72,7 +74,10 @@ export async function requestSchedule(queries: ScheduleOptions[], callBack=()=>{
     const response = await makeRequest(query);
     for (let i = 0; i < numQueries; ++i) {
         (response.data[`schedule${i}`] as CourseOffering[]).forEach(offering => {
-            offerings.push(offering);
+            // Add offering if it is not a duplicate.
+            if (!offerings.find(({quarter, year, section}) => (section.code === offering.section.code && quarter === offering.quarter && year === offering.year))) {
+                offerings.push(offering);
+            }
         });
     }
     const courseOfferings = new Map<string, CourseOffering[]>();
@@ -104,42 +109,57 @@ export async function requestSchedule(queries: ScheduleOptions[], callBack=()=>{
 }
 
 async function requestGrades(courses: Course[]) {
-    let index = 0;
-    const query =  `
-        query {
-            ${courses.map(({department, number}) => {
-                return `
-                    grades${index++}: grades (
-                        ${department ? `department: "${department}"` : ""}
-                        ${number ? `number: "${number}"` : ""}
-                    ) {
-                        grade_distributions{
-                            average_gpa
-                            grade_a_count
-                            grade_b_count
-                            grade_c_count
-                            grade_d_count
-                            grade_f_count
-                            grade_p_count
-                            grade_np_count
-                            grade_w_count
-                            course_offering {
-                                course { department number }
-                                section { type }
-                                instructors {shortened_name }
+    const courseChunks = [] as Course[][];
+    // Split courses into chunks so each query is under the payload limit.
+    for (let i = 0; i < courses.length; i+=10) {
+        courseChunks.push(courses.slice(i, i + 10));
+    }
+
+    const requests = [] as Promise<{data: GradeDistributionCollection}>[];
+    const grades = {grade_distributions: [] as GradeDistribution[]} as GradeDistributionCollection;
+    courseChunks.forEach(async (chunk) => {
+        let index = 0;
+        const query =  `
+            query {
+                ${chunk.map(({department, number}) => {
+                    return `
+                        grades${index++}: grades (
+                            ${department ? `department: "${department}"` : ""}
+                            ${number ? `number: "${number}"` : ""}
+                        ) {
+                            grade_distributions{
+                                average_gpa
+                                grade_a_count
+                                grade_b_count
+                                grade_c_count
+                                grade_d_count
+                                grade_f_count
+                                grade_p_count
+                                grade_np_count
+                                grade_w_count
+                                course_offering {
+                                    course { department number }
+                                    section { type }
+                                    instructors {shortened_name }
+                                }
                             }
                         }
-                    }
-                `;
-            }).join("\n")}
+                    `;
+                }).join("\n")}
+            }
+        `;
+        const request = makeRequest(query)
+        requests.push(request);
+
+        const response = await request;
+        for (let i = 0; i < chunk.length; ++i) {
+            const courseGrades = response.data[`grades${i}`] as GradeDistributionCollection;
+            courseGrades.grade_distributions.forEach(grade => grades.grade_distributions.push(grade));
         }
-    `;
-    const response = await makeRequest(query);
-    const grades = {grade_distributions: [] as GradeDistribution[]} as GradeDistributionCollection;
-    for (let i = 0; i < courses.length; ++i) {
-        const courseGrades = response.data[`grades${i}`] as GradeDistributionCollection;
-        courseGrades.grade_distributions.forEach(grade => grades.grade_distributions.push(grade));
-    }
+    });
+
+    await Promise.all(requests);
+
     return aggregatedGrades(grades);
 }
 

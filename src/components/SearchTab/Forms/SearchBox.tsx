@@ -1,6 +1,6 @@
 import { useContext } from "react"
 import { SearchContext } from "../.."
-import { autoSuggest } from "./FormHelpers";
+import { autoSuggest } from "../../../helpers/FormHelpers";
 import { QueryBubble } from "./QueryBubble";
 import { requestSchedule } from "../../../helpers/PeterPortal";
 
