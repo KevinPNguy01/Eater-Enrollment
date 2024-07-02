@@ -5,7 +5,7 @@ import { QueryBubble } from "./QueryBubble";
 import { requestSchedule } from "../../../helpers/PeterPortal";
 
 export function SearchBox(props: {callBack: () => void}) {
-    const { courseInput, setCourseInput, setCourseSuggestions, setSearchResults, setSearchResultsVisibility, queries, setQueries} = useContext(SearchContext);
+    const { courseInput, setCourseInput, setCourseSuggestions, setSearchResults, setSearchResultsVisibility, queries} = useContext(SearchContext);
     return (
         <div className="flex border-b">
             {queries.map((query, index) => <QueryBubble query={query} index={index}/>)}
@@ -23,7 +23,6 @@ export function SearchBox(props: {callBack: () => void}) {
                         setCourseSuggestions([]);
                         setSearchResultsVisibility(true);
                         const courses = await requestSchedule(queries, props.callBack);
-                        setQueries([])
                         setSearchResults(courses);
                     }
                 }}
