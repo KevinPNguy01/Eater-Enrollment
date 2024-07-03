@@ -1,12 +1,13 @@
-import { Course } from '../../../constants/types'
+import { Course, CourseOffering } from '../../../constants/types'
 import { CourseResult } from './CourseResult'
-import { SortingOptions } from './SearchResults'
+import { FilteringOptions, SortingOptions } from './SearchResults'
 
 /**
  * Component for displaying a list of Course results in a table.
  */
-export function ScheduleResults(props: {sortingOptions: SortingOptions, courses: Course[]}) {
+export function ScheduleResults(props: {sortingOptions: SortingOptions, filteringOptions: FilteringOptions, courses: Course[]}) {
     const {sortBy, direction} = props.sortingOptions;
+    const {sectionTypes} = props.filteringOptions;
 
     const sortByName = (a: Course, b: Course) => {
         if (a.department < b.department) {
@@ -37,7 +38,7 @@ export function ScheduleResults(props: {sortingOptions: SortingOptions, courses:
     const sortByGPA = (a: Course, b: Course) => {
         const minOrMax = direction === "Ascending" ? Math.min : Math.max;
         const defaultGpa = direction === "Ascending" ? 5 : -1;
-        const getGpa = (course: Course) => minOrMax(...course.offerings.map(({grades}) => grades.aggregate.average_gpa || defaultGpa));
+        const getGpa = (course: Course) => minOrMax(...course.offerings.map(({grades}) => grades?.aggregate?.average_gpa || defaultGpa));
         const gpaA = getGpa(a);
         const gpaB = getGpa(b);
         if (gpaA < gpaB) {
@@ -64,7 +65,15 @@ export function ScheduleResults(props: {sortingOptions: SortingOptions, courses:
         }
     }
 
-    const courses = props.courses.sort(sortBy === "Name" ? sortByName : (sortBy === "GPA" ? sortByGPA : sortByRMP));
+    const filterSectionType = (offering: CourseOffering) => {
+        return sectionTypes.has(offering.section.type);
+    };
+
+    const courses = props.courses.map(course => {
+        const newCourse = Object.assign({}, course);
+        newCourse.offerings = newCourse.offerings.filter(filterSectionType);
+        return newCourse;
+    }).sort(sortBy === "Name" ? sortByName : (sortBy === "GPA" ? sortByGPA : sortByRMP));
     if (direction === "Descending") {
         courses.reverse();
     }
