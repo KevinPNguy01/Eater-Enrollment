@@ -12,6 +12,8 @@ export type SortingOptions = {
 export type FilteringOptions = {
     sectionTypes: Set<string>
     setSectionTypes: (_: Set<string>) => void
+    statusTypes: Set<string>
+    setStatusTypes: (_: Set<string>) => void
 }
 
 export function SearchResults(props: {callBack: () => void}) {
@@ -26,9 +28,12 @@ export function SearchResults(props: {callBack: () => void}) {
     }
 
     const [sectionTypes, setSectionTypes] = useState(new Set(["Lec", "Dis", "Lab", "Sem", "Stu", "Tut", "Act", "Res", "Fld", "Col", "Qiz", "Tap"]));
+    const [statusTypes, setStatusTypes] = useState(new Set(["OPEN", "NewOnly", "Waitl", "FULL"]));
     const filteringOptions = {
         sectionTypes: sectionTypes,
-        setSectionTypes: setSectionTypes
+        setSectionTypes: setSectionTypes,
+        statusTypes: statusTypes,
+        setStatusTypes: setStatusTypes
     }
 
     return (

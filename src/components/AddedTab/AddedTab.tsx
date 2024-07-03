@@ -10,7 +10,10 @@ export function AddedTab(props: {activeTab: string}) {
             <div className="h-1 overflow-y-scroll flex-grow">
                 <ScheduleResults 
                     sortingOptions={{sortBy:"Name", direction:"Ascending"} as SortingOptions} 
-                    filteringOptions={{sectionTypes: new Set(["Lec", "Dis", "Lab", "Sem", "Stu", "Tut", "Act", "Res", "Fld", "Col", "Qiz", "Tap"])} as FilteringOptions} 
+                    filteringOptions={{
+                        sectionTypes: new Set(["Lec", "Dis", "Lab", "Sem", "Stu", "Tut", "Act", "Res", "Fld", "Col", "Qiz", "Tap"]),
+                        statusTypes: new Set(["OPEN", "NewOnly", "Waitl", "FULL"])
+                    } as FilteringOptions} 
                     courses={addedCourses[scheduleIndex].courses}
                     />
             </div>
