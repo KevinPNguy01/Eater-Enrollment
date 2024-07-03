@@ -5,6 +5,7 @@ import { RateMyProfessorsLink } from './RateMyProfessorsLink';
 import { ZotisticsLink } from './ZotisticsLink';
 import { ColoredText } from '../../Global/ColoredText';
 import { statusColors, typeColors } from '../../../constants/TextColors';
+import { buildingCodes } from '../../../constants/BuildingCodes';
 
 /**
  * Component for displaying a course result as a tr, to be used in CourseResult.
@@ -21,7 +22,14 @@ export function OfferingResult(props: {offering: CourseOffering}) {
             <td>{offering.instructors.map((instructor, i) => <RateMyProfessorsLink key={`${instructor.shortened_name}-${i}`} instructor={instructor}/>)}</td>
             <td>{<ZotisticsLink grades={offering.grades} offering={offering}/>}</td>
             <td>{`${offering.meetings[0].days} ${offering.meetings[0].time}`}</td>
-            <td>{offering.meetings[0].building}</td>
+            <td>
+                <p className="group relative hover:cursor-pointer">
+                    {offering.meetings[0].building}
+                    <p className="whitespace-nowrap hidden group-hover:absolute group-hover:block bottom-full left-1/2 -translate-x-1/2 bg-tertiary border border-quaternary p-2 mb-2 rounded text-base">
+                        {buildingCodes.get(offering.meetings[0].building.split(" ")[0])}
+                    </p>
+                </p>
+            </td>
             <td>
                 <p>{`${offering.num_total_enrolled}/${offering.max_capacity}`}</p>
                 <p>{`WL: ${offering.num_on_waitlist}`}</p>
