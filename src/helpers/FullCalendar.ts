@@ -1,5 +1,5 @@
 import { CalendarApi } from "fullcalendar/index.js";
-import { CourseOffering } from "../constants/types";
+import { CourseOffering } from "../constants/Types";
 import { RGBColor } from "react-color";
 
 /**

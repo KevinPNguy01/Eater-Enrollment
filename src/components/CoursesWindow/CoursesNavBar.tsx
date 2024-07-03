@@ -1,5 +1,5 @@
 import { CoursesNavButton } from ".."
-import { navLinks } from "../../constants/links"
+import { navLinks } from "../../constants/Links"
 
 interface Props {
     activeTab: string;

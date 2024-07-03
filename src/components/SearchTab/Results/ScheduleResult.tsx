@@ -1,4 +1,4 @@
-import { Course, CourseOffering } from '../../../constants/types'
+import { Course, CourseOffering } from '../../../constants/Types'
 import { CourseResult } from './CourseResult'
 import { FilteringOptions, SortingOptions } from './SearchResults'
 

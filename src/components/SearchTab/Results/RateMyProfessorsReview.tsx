@@ -1,4 +1,4 @@
-import { Review } from "../../../constants/types";
+import { Review } from "../../../constants/Types";
 
 /**
  * Preview of an instructor on RateMyProfessors.

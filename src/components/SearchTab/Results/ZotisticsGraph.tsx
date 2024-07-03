@@ -1,5 +1,5 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from "recharts";
-import { CourseOffering, GradeDistributionCollection } from "../../../constants/types";
+import { CourseOffering, GradeDistributionCollection } from "../../../constants/Types";
 
 export function ZotisticsGraph(props: {grades: GradeDistributionCollection, offering: CourseOffering}) {
     const grades = props.grades;

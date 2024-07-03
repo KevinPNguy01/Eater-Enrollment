@@ -1,4 +1,4 @@
-import { Course, CourseOffering, Review } from "../constants/types";
+import { Course, CourseOffering, Review } from "../constants/Types";
 
 export async function populateReviews(courses: Course[], callBack=()=>{}) {
     // Map of instructor names to offerings they teach.

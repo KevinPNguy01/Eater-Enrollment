@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { CourseOffering } from "../../constants/types";
+import { CourseOffering } from "../../constants/Types";
 import { ScheduleContext } from "../Main/App";
 import { RateMyProfessorsLink } from "../SearchTab/Results/RateMyProfessorsLink";
 import { RGBColor, SketchPicker } from "react-color";
