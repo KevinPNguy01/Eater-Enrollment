@@ -9,6 +9,11 @@ export type SortingOptions = {
     setDirection: (_: string) => void
 }
 
+export type FilteringOptions = {
+    sectionTypes: Set<string>
+    setSectionTypes: (_: Set<string>) => void
+}
+
 export function SearchResults(props: {callBack: () => void}) {
     const { searchResultsVisibility, searchResults } = useContext(SearchContext);
     const [sortBy, setSortBy] = useState("Name");
@@ -19,11 +24,18 @@ export function SearchResults(props: {callBack: () => void}) {
         direction: direction,
         setDirection: setDirection
     }
+
+    const [sectionTypes, setSectionTypes] = useState(new Set(["Lec", "Dis", "Lab", "Sem", "Stu", "Tut", "Act", "Res", "Fld", "Col", "Qiz", "Tap"]));
+    const filteringOptions = {
+        sectionTypes: sectionTypes,
+        setSectionTypes: setSectionTypes
+    }
+
     return (
         <div className={`h-full flex flex-col ${searchResultsVisibility ? "block" : "hidden"}`}>
-            <SearchResultsNavBar sortingOptions={sortingOptions} callBack={props.callBack}/>
+            <SearchResultsNavBar sortingOptions={sortingOptions} filteringOptions={filteringOptions} callBack={props.callBack}/>
             <div className="h-1 overflow-y-scroll flex-grow">
-                <ScheduleResults sortingOptions={sortingOptions} courses={searchResults}/>
+                <ScheduleResults sortingOptions={sortingOptions} filteringOptions={filteringOptions} courses={searchResults}/>
             </div>
         </div>
     )
