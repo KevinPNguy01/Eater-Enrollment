@@ -1,6 +1,6 @@
 import { createContext, useState } from "react";
 import { SearchForms, SearchResults } from "..";
-import { Course } from "../../constants/types";
+import { Course } from "../../constants/Types";
 import { ScheduleOptions } from "../../helpers/PeterPortal";
 import { SearchSuggestion } from "../../helpers/FormHelpers";
 

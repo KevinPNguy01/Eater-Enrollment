@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CourseOffering, GradeDistributionCollection } from "../../../constants/types";
+import { CourseOffering, GradeDistributionCollection } from "../../../constants/Types";
 import { ZotisticsGraph } from "./ZotisticsGraph";
 
 /**

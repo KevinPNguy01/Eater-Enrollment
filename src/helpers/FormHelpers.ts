@@ -1,5 +1,5 @@
 import coursesJson from "../assets/allCourses.json";
-import { Course } from "../constants/types";
+import { Course } from "../constants/Types";
 import { ScheduleOptions } from "./PeterPortal";
 
 export type SearchSuggestion = {

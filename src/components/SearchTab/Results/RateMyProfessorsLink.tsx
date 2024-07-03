@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Instructor } from "../../../constants/types";
+import { Instructor } from "../../../constants/Types";
 import { RateMyProfessorsReview } from "./RateMyProfessorsReview";
 
 /**

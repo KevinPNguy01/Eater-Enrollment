@@ -1,6 +1,6 @@
 import { MutableRefObject, createContext, useEffect, useRef, useState } from 'react';
 import { NavBar, Calendar, Courses } from '..';
-import { Course, CourseOffering } from '../../constants/types';
+import { Course, CourseOffering } from '../../constants/Types';
 import { CalendarApi } from 'fullcalendar/index.js';
 import FullCalendar from '@fullcalendar/react';
 import { requestSchedule } from '../../helpers/PeterPortal';

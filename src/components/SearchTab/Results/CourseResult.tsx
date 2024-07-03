@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Course } from "../../../constants/types";
+import { Course } from "../../../constants/Types";
 import { OfferingResult } from "./OfferingResult";
 import { CourseInfo } from "./CourseInfo";
 

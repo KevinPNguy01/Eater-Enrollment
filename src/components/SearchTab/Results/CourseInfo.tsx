@@ -1,4 +1,4 @@
-import { Course } from "../../../constants/types";
+import { Course } from "../../../constants/Types";
 
 export function CourseInfo(props: {course: Course}) {
     const {course} = props;

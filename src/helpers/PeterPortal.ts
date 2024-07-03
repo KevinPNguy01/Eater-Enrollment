@@ -1,4 +1,4 @@
-import { Course, CourseOffering, GradeDistribution, GradeDistributionCollection } from "../constants/types";
+import { Course, CourseOffering, GradeDistribution, GradeDistributionCollection } from "../constants/Types";
 import { populateReviews } from "./RateMyProfessors";
 import coursesJson from "../../src/assets/allCourses.json";
 

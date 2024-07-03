@@ -2,7 +2,7 @@ import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import { useContext, useState } from 'react';
 import { ScheduleContext } from '../Main/App';
-import { CourseOffering } from '../../constants/types';
+import { CourseOffering } from '../../constants/Types';
 import { CalendarNavBar } from './CalendarNavBar';
 import { EventInfo } from './EventInfo';
 
