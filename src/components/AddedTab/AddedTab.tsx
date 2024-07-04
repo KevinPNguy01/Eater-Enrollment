@@ -12,7 +12,8 @@ export function AddedTab(props: {activeTab: string}) {
                     sortingOptions={{sortBy:"Name", direction:"Ascending"} as SortingOptions} 
                     filteringOptions={{
                         sectionTypes: new Set(["Lec", "Dis", "Lab", "Sem", "Stu", "Tut", "Act", "Res", "Fld", "Col", "Qiz", "Tap"]),
-                        statusTypes: new Set(["OPEN", "NewOnly", "Waitl", "FULL"])
+                        statusTypes: new Set(["OPEN", "NewOnly", "Waitl", "FULL"]),
+                        dayTypes: new Set(["M", "Tu", "W", "Th", "F"])
                     } as FilteringOptions} 
                     courses={addedCourses[scheduleIndex].courses}
                     />

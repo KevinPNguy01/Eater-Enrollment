@@ -1,6 +1,7 @@
 import { SearchResultsNavBar, SearchContext } from "../.."
 import { useContext, useState } from "react";
 import { ScheduleResults } from "./ScheduleResult";
+import { statusColors, typeColors } from "../../../constants/TextColors";
 
 export type SortingOptions = {
     sortBy: string
@@ -14,6 +15,8 @@ export type FilteringOptions = {
     setSectionTypes: (_: Set<string>) => void
     statusTypes: Set<string>
     setStatusTypes: (_: Set<string>) => void
+    dayTypes: Set<string>
+    setDayTypes: (_: Set<string>) => void
 }
 
 export function SearchResults(props: {callBack: () => void}) {
@@ -27,13 +30,16 @@ export function SearchResults(props: {callBack: () => void}) {
         setDirection: setDirection
     }
 
-    const [sectionTypes, setSectionTypes] = useState(new Set(["Lec", "Dis", "Lab", "Sem", "Stu", "Tut", "Act", "Res", "Fld", "Col", "Qiz", "Tap"]));
-    const [statusTypes, setStatusTypes] = useState(new Set(["OPEN", "NewOnly", "Waitl", "FULL"]));
+    const [sectionTypes, setSectionTypes] = useState(new Set(typeColors.keys()));
+    const [statusTypes, setStatusTypes] = useState(new Set(statusColors.keys()));
+    const [dayTypes, setDayTypes] = useState(new Set(["M", "Tu", "W", "Th", "F"]));
     const filteringOptions = {
         sectionTypes: sectionTypes,
         setSectionTypes: setSectionTypes,
         statusTypes: statusTypes,
-        setStatusTypes: setStatusTypes
+        setStatusTypes: setStatusTypes,
+        dayTypes: dayTypes,
+        setDayTypes: setDayTypes
     }
 
     return (

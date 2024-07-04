@@ -3,14 +3,15 @@ import { ColoredText } from "../../Global/ColoredText";
 import { FilteringOptions } from "./SearchResults";
 
 export function FilterMenu(props: {filteringOptions: FilteringOptions}) {
-    const {sectionTypes, setSectionTypes, statusTypes, setStatusTypes} = props.filteringOptions;
+    const {sectionTypes, setSectionTypes, statusTypes, setStatusTypes, dayTypes, setDayTypes} = props.filteringOptions;
     const sectionOptions = Array.from(typeColors.keys());
     const statusOptions = Array.from(statusColors.keys())
+    const dayOptions = ["M", "Tu", "W", "Th", "F"];
     return (
         <div className="bg-secondary border top-full left-0 my-1 p-4 border-quaternary absolute z-10 text-base text-left">
             <p className="text-xl whitespace-pre border-b border-quaternary mb-2">{"Search Filters"}</p>
-            <div className="grid grid-flow-col auto-cols-auto	">
-                <fieldset className="border border-quaternary p-2 mr-4">
+            <div className="grid grid-flow-col auto-cols-auto gap-4">
+                <fieldset className="border border-quaternary p-2">
                     <legend>Section Type</legend>
                         <div className="grid grid-rows-6 grid-flow-col font-bold">
                             {sectionOptions.map(option => {
@@ -58,20 +59,40 @@ export function FilterMenu(props: {filteringOptions: FilteringOptions}) {
                     <legend>Status</legend>
                     <div>
                         {statusOptions.map(option => {
-                                    return (
-                                        <div className="flex font-bold">
-                                            <input type="checkbox" id={option} name={option} defaultChecked={statusTypes.has(option)} className={`text-left my-1 checkbox-${option}`} onChange={e => {
-                                                if (e.target.checked) {
-                                                    statusTypes.add(e.target.name);
-                                                } else {
-                                                    statusTypes.delete(e.target.name);
-                                                }
-                                                setStatusTypes(new Set(statusTypes));
-                                            }}/>
-                                            <ColoredText className="ml-1" text={option} colorRules={statusColors}/>
-                                        </div>
-                                    );
-                                })}
+                            return (
+                                <div className="flex font-bold">
+                                    <input type="checkbox" id={option} name={option} defaultChecked={statusTypes.has(option)} className={`text-left my-1 checkbox-${option}`} onChange={e => {
+                                        if (e.target.checked) {
+                                            statusTypes.add(e.target.name);
+                                        } else {
+                                            statusTypes.delete(e.target.name);
+                                        }
+                                        setStatusTypes(new Set(statusTypes));
+                                    }}/>
+                                    <ColoredText className="ml-1" text={option} colorRules={statusColors}/>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </fieldset>
+                <fieldset className="border border-quaternary p-2">
+                    <legend>Days</legend>
+                    <div>
+                        {dayOptions.map(option => {
+                            return (
+                                <div className="flex font-bold">
+                                    <input type="checkbox" id={option} name={option} defaultChecked={dayTypes.has(option)} className={`text-left my-1 checkbox-${option}`} onChange={e => {
+                                        if (e.target.checked) {
+                                            dayTypes.add(e.target.name);
+                                        } else {
+                                            dayTypes.delete(e.target.name);
+                                        }
+                                        setDayTypes(new Set(dayTypes));
+                                    }}/>
+                                    <p className="ml-1 mr-8">{option}</p>
+                                </div>
+                            );
+                        })}
                     </div>
                 </fieldset>
             </div>
