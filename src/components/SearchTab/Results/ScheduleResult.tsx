@@ -7,7 +7,7 @@ import { FilteringOptions, SortingOptions } from './SearchResults'
  */
 export function ScheduleResults(props: {sortingOptions: SortingOptions, filteringOptions: FilteringOptions, courses: Course[]}) {
     const {sortBy, direction} = props.sortingOptions;
-    const {sectionTypes, statusTypes} = props.filteringOptions;
+    const {sectionTypes, statusTypes, dayTypes} = props.filteringOptions;
 
     const sortByName = (a: Course, b: Course) => {
         if (a.department < b.department) {
@@ -73,9 +73,15 @@ export function ScheduleResults(props: {sortingOptions: SortingOptions, filterin
         return statusTypes.has(offering.status);
     };
 
+    const filterDays = (offering: CourseOffering) => {
+        let days = offering.meetings[0].days;
+        dayTypes.forEach(day => days = days.replace(day, ""));
+        return days === "";
+    }
+
     const courses = props.courses.map(course => {
         const newCourse = Object.assign({}, course);
-        newCourse.offerings = newCourse.offerings.filter(filterSectionType).filter(filterStatus);
+        newCourse.offerings = newCourse.offerings.filter(filterSectionType).filter(filterStatus).filter(filterDays);
         return newCourse;
     }).filter(({offerings}) => offerings.length).sort(sortBy === "Name" ? sortByName : (sortBy === "GPA" ? sortByGPA : sortByRMP));
     if (direction === "Descending") {
