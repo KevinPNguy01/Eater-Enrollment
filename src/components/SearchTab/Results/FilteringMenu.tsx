@@ -1,10 +1,13 @@
+import { useContext } from "react";
 import { statusColors, typeColors } from "../../../constants/TextColors";
 import { ColoredText } from "../../Global/ColoredText";
 import { FilteringOptions } from "./SearchResults";
+import { SearchContext } from "../SearchTab";
 
 export function FilterMenu(props: {filteringOptions: FilteringOptions}) {
     const {sectionTypes, setSectionTypes, statusTypes, setStatusTypes, dayTypes, setDayTypes} = props.filteringOptions;
-    const sectionOptions = Array.from(typeColors.keys());
+    const {searchResults} = useContext(SearchContext);
+    const sectionOptions = Array.from(new Set(searchResults.map(({offerings}) => offerings.map(({section}) => section.type)).flat()));
     const statusOptions = Array.from(statusColors.keys())
     const dayOptions = ["M", "Tu", "W", "Th", "F"];
     return (
@@ -13,7 +16,7 @@ export function FilterMenu(props: {filteringOptions: FilteringOptions}) {
             <div className="grid grid-flow-col auto-cols-auto gap-4">
                 <fieldset className="border border-quaternary p-2">
                     <legend>Section Type</legend>
-                        <div className="grid grid-rows-6 grid-flow-col font-bold">
+                        <div className="grid grid-cols-2 font-bold">
                             {sectionOptions.map(option => {
                                 return (
                                     <div className="flex">
