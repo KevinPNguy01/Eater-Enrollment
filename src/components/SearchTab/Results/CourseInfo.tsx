@@ -8,25 +8,32 @@ export function CourseInfo(props: {course: Course}) {
                 <strong>Course Description:</strong>
                 <br/>
                 {course.description}
+                <br/><br/>
             </p>
-            <br/>
-            <p>
-                <strong>Prerequisites:</strong>
-                <br/>
-                {course.prerequisite_text || "None"}
-            </p>
-            <br/>
-            <p>
-                <strong>Prerequisite For:</strong>
-                <br/>
-                {course.prerequisite_for?.map(({department, number}) => `${department} ${number}`).join(", ") || "None"}
-            </p>
-            <br/>
-            <p>
-                <strong>General Education Categories:</strong>
-                <br/>
-                <p className="whitespace-pre">{course.ge_list.join("\n")}</p>
-            </p>
+            {course.prerequisite_text ? (
+                <p>
+                    <strong>Prerequisites:</strong>
+                    <br/>
+                    {course.prerequisite_text}
+                    <br/><br/>
+                </p>
+            ) : null }
+            {course.prerequisite_for.length ? (
+                <p>
+                    <strong>Prerequisite For:</strong>
+                    <br/>
+                    {course.prerequisite_for.map(({department, number}) => `${department} ${number}`).join(", ")}
+                    <br/><br/>
+                </p>
+            ) : null}
+            {course.ge_list.length ? (
+                <p>
+                    <strong>General Education Categories:</strong>
+                    <br/>
+                    <p className="whitespace-pre">{course.ge_list.join("\n")}</p>
+                    <br/>
+                </p>    
+            ) : null}
         </div>
     )
 }
