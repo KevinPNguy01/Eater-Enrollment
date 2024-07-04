@@ -59,7 +59,7 @@ export async function requestSchedule(queries: ScheduleOptions[], callBack=()=>{
                     ${number ? `course_number: "${number}"` : ""}
                     ${ge ? `ge: "${ge}"` : ""}
                 ) {
-                    quarter year num_total_enrolled max_capacity num_on_waitlist num_new_only_reserved status restrictions final_exam
+                    quarter year num_total_enrolled max_capacity num_on_waitlist num_new_only_reserved status restrictions final_exam units
                     meetings { time days building }
                     section { code type number }
                     instructors { shortened_name }

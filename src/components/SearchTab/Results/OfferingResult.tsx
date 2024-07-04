@@ -18,7 +18,13 @@ export function OfferingResult(props: {offering: CourseOffering}) {
         <tr className="course-result odd:bg-quaternary even:bg-tertiary" key={offering.section.code}>
             <td><CourseCheckBox course={course} offering={offering}/></td>
             <td>{offering.section.code}</td>
-            <td><ColoredText text={offering.section.type} colorRules={typeColors}/></td>
+            <td>
+                <div>
+                    <ColoredText text={offering.section.type} colorRules={typeColors}/>
+                    <p>{"Sec: " + offering.section.number}</p>
+                    <p>{"Units: " + offering.units}</p>
+                </div>
+            </td>
             <td>{offering.instructors.map((instructor, i) => <RateMyProfessorsLink key={`${instructor.shortened_name}-${i}`} instructor={instructor}/>)}</td>
             <td>{<ZotisticsLink grades={offering.grades} offering={offering}/>}</td>
             <td>{`${offering.meetings[0].days} ${offering.meetings[0].time}`}</td>
