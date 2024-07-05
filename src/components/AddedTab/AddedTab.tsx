@@ -2,6 +2,8 @@ import { useContext } from 'react'
 import { ScheduleContext } from '../Main/App';
 import { ScheduleResults } from '../SearchTab/Results/ScheduleResult';
 import { FilteringOptions, SortingOptions } from '../SearchTab/Results/SearchResults';
+import { restrictionCodes } from '../../constants/RestrictionCodes';
+import { statusColors, typeColors } from '../../constants/TextColors';
 
 export function AddedTab(props: {activeTab: string}) {
     const { scheduleIndex, addedCourses } = useContext(ScheduleContext);
@@ -11,9 +13,10 @@ export function AddedTab(props: {activeTab: string}) {
                 <ScheduleResults 
                     sortingOptions={{sortBy:"Name", direction:"Ascending"} as SortingOptions} 
                     filteringOptions={{
-                        sectionTypes: new Set(["Lec", "Dis", "Lab", "Sem", "Stu", "Tut", "Act", "Res", "Fld", "Col", "Qiz", "Tap"]),
-                        statusTypes: new Set(["OPEN", "NewOnly", "Waitl", "FULL"]),
-                        dayTypes: new Set(["M", "Tu", "W", "Th", "F"])
+                        sectionTypes: new Set(typeColors.keys()),
+                        statusTypes: new Set(statusColors.keys()),
+                        dayTypes: new Set(["M", "Tu", "W", "Th", "F"]),
+                        restrictionTypes: new Set(restrictionCodes.keys())
                     } as FilteringOptions} 
                     courses={addedCourses[scheduleIndex].courses}
                     />

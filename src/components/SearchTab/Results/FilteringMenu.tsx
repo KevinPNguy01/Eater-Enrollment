@@ -3,13 +3,15 @@ import { statusColors, typeColors } from "../../../constants/TextColors";
 import { ColoredText } from "../../Global/ColoredText";
 import { FilteringOptions } from "./SearchResults";
 import { SearchContext } from "../SearchTab";
+import { restrictionCodes } from "../../../constants/RestrictionCodes";
 
 export function FilterMenu(props: {filteringOptions: FilteringOptions}) {
-    const {sectionTypes, setSectionTypes, statusTypes, setStatusTypes, dayTypes, setDayTypes} = props.filteringOptions;
+    const {sectionTypes, setSectionTypes, statusTypes, setStatusTypes, dayTypes, setDayTypes, restrictionTypes, setRestrictionTypes} = props.filteringOptions;
     const {searchResults} = useContext(SearchContext);
     const sectionOptions = Array.from(new Set(searchResults.map(({offerings}) => offerings.map(({section}) => section.type)).flat()));
     const statusOptions = Array.from(statusColors.keys())
     const dayOptions = ["M", "Tu", "W", "Th", "F"];
+    const restrictionOptions = Array.from(new Set(searchResults.map(({offerings}) => offerings.map(({restrictions}) => restrictions.replace("or", "and").split(" and ")).flat()).flat().filter(s => s)));
     return (
         <div className="bg-secondary border top-full left-0 my-1 p-4 border-quaternary absolute z-10 text-base text-left">
             <p className="text-xl whitespace-pre border-b border-quaternary mb-2">{"Search Filters"}</p>
@@ -96,6 +98,54 @@ export function FilterMenu(props: {filteringOptions: FilteringOptions}) {
                                 </div>
                             );
                         })}
+                    </div>
+                </fieldset>
+                <fieldset className="border border-quaternary p-2">
+                    <legend>Restrictions</legend>
+                    <div>
+                        {restrictionOptions.map(option => {
+                            return (
+                                <div className="flex font-bold">
+                                    <input type="checkbox" id={option} name={option} defaultChecked={restrictionTypes.has(option)} className={`text-left my-1 checkbox-${option}`} onChange={e => {
+                                        if (e.target.checked) {
+                                            restrictionTypes.add(e.target.name);
+                                        } else {
+                                            restrictionTypes.delete(e.target.name);
+                                        }
+                                        setRestrictionTypes(new Set(restrictionTypes));
+                                        console.log(restrictionTypes)
+                                    }}/>
+                                    <div className="flex">
+                                        <p className="ml-1">{`${option}: `}</p>
+                                        <p className="whitespace-normal w-64">{restrictionCodes.get(option)}</p>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <div className="flex">
+                        <button className="border border-quaternary rounded hover:bg-tertiary m-1 p-1 text-sm" onClick={() => {
+                                // Select all the options.
+                                restrictionOptions.forEach(option => {
+                                    for (const checkbox of document.getElementsByClassName(`checkbox-${option}`)) {
+                                        (checkbox as HTMLInputElement).checked = true;
+                                    }
+                                    setRestrictionTypes(new Set(restrictionOptions));
+                                });
+                            }}>
+                                Select All
+                            </button>
+                            <button className="border border-quaternary rounded hover:bg-tertiary m-1 p-1 text-sm" onClick={() => {
+                                // Deselect all the options.
+                                restrictionOptions.forEach(option => {
+                                    for (const checkbox of document.getElementsByClassName(`checkbox-${option}`)) {
+                                        (checkbox as HTMLInputElement).checked = false;
+                                    }
+                                    setRestrictionTypes(new Set());
+                                });
+                            }}>
+                                Deselect All
+                            </button>
                     </div>
                 </fieldset>
             </div>
