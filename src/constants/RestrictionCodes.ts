@@ -1,0 +1,20 @@
+export const restrictionCodes = new Map([
+    ["A", "Prerequisite required"],
+    ["B", "Authorization code required"],
+    ["C", "Fee required"],
+    ["D", "Pass/Not Pass option only"],
+    ["E", "Freshmen only"],
+    ["F", "Sophomores only"],
+    ["G", "Lower-division only"],
+    ["H", "Juniors only"],
+    ["I", "Seniors only"],
+    ["J", "Upper-division only"],
+    ["K", "Graduate only"],
+    ["L", "Major only"],
+    ["M", "Non-major only"],
+    ["N", "School major only"],
+    ["O", "Non-school major only"],
+    ["R", "Biomedical Pass/Fail course (School of Medicine only)"],
+    ["S", "Satisfactory/Unsatisfactory only"],
+    ["X", "Separate authorization codes required to add, drop, or change enrollment"]
+]);

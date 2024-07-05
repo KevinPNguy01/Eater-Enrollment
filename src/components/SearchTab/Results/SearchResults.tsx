@@ -2,6 +2,7 @@ import { SearchResultsNavBar, SearchContext } from "../.."
 import { useContext, useState } from "react";
 import { ScheduleResults } from "./ScheduleResult";
 import { statusColors, typeColors } from "../../../constants/TextColors";
+import { restrictionCodes } from "../../../constants/RestrictionCodes";
 
 export type SortingOptions = {
     sortBy: string
@@ -17,6 +18,8 @@ export type FilteringOptions = {
     setStatusTypes: (_: Set<string>) => void
     dayTypes: Set<string>
     setDayTypes: (_: Set<string>) => void
+    restrictionTypes: Set<string>
+    setRestrictionTypes: (_: Set<string>) => void
 }
 
 export function SearchResults(props: {callBack: () => void}) {
@@ -33,13 +36,16 @@ export function SearchResults(props: {callBack: () => void}) {
     const [sectionTypes, setSectionTypes] = useState(new Set(typeColors.keys()));
     const [statusTypes, setStatusTypes] = useState(new Set(statusColors.keys()));
     const [dayTypes, setDayTypes] = useState(new Set(["M", "Tu", "W", "Th", "F"]));
+    const [restrictionTypes, setRestrictionTypes] = useState(new Set(restrictionCodes.keys()));
     const filteringOptions = {
         sectionTypes: sectionTypes,
         setSectionTypes: setSectionTypes,
         statusTypes: statusTypes,
         setStatusTypes: setStatusTypes,
         dayTypes: dayTypes,
-        setDayTypes: setDayTypes
+        setDayTypes: setDayTypes,
+        restrictionTypes: restrictionTypes,
+        setRestrictionTypes: setRestrictionTypes
     }
 
     return (

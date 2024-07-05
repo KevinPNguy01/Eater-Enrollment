@@ -7,7 +7,7 @@ import { FilteringOptions, SortingOptions } from './SearchResults'
  */
 export function ScheduleResults(props: {sortingOptions: SortingOptions, filteringOptions: FilteringOptions, courses: Course[]}) {
     const {sortBy, direction} = props.sortingOptions;
-    const {sectionTypes, statusTypes, dayTypes} = props.filteringOptions;
+    const {sectionTypes, statusTypes, dayTypes, restrictionTypes} = props.filteringOptions;
 
     const sortByName = (a: Course, b: Course) => {
         if (a.department < b.department) {
@@ -79,9 +79,22 @@ export function ScheduleResults(props: {sortingOptions: SortingOptions, filterin
         return days === "";
     }
 
+    const filterRestrictions = (offering: CourseOffering) => {
+        const restrictions = offering.restrictions
+        if (!restrictions) {
+            return true;
+        }
+
+        if (restrictions.includes("or")) {
+            return restrictionTypes.has(restrictions[0]) || restrictionTypes.has(restrictions[restrictions.length-1]);
+        } else {
+            return restrictionTypes.has(restrictions[0]) && restrictionTypes.has(restrictions[restrictions.length-1]);
+        }
+    }
+
     const courses = props.courses.map(course => {
         const newCourse = Object.assign({}, course);
-        newCourse.offerings = newCourse.offerings.filter(filterSectionType).filter(filterStatus).filter(filterDays);
+        newCourse.offerings = newCourse.offerings.filter(filterSectionType).filter(filterStatus).filter(filterDays).filter(filterRestrictions);
         return newCourse;
     }).filter(({offerings}) => offerings.length).sort(sortBy === "Name" ? sortByName : (sortBy === "GPA" ? sortByGPA : sortByRMP));
     if (direction === "Descending") {
