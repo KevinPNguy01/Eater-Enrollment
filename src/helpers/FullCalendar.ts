@@ -124,7 +124,7 @@ function hashString(str: string) {
 function getDay(days: number) {
     const d = new Date();
     const day = d.getDay()
-    const diff = d.getDate() - day + 1 + days; // Adjust when day is sunday.
+    const diff = d.getDate() - day + 1 + days + (day === 6 ? 7 : 0); // Adjust when day is saturday.
     return new Date(d.setDate(diff));
 }
 
