@@ -2,8 +2,8 @@ import { useContext } from "react";
 import { statusColors, typeColors } from "../../../constants/TextColors";
 import { ColoredText } from "../../Global/ColoredText";
 import { FilteringOptions } from "./SearchResults";
-import { SearchContext } from "../SearchTab";
 import { restrictionCodes } from "../../../constants/RestrictionCodes";
+import { SearchContext } from "../../CoursesWindow/Courses";
 
 export function FilterMenu(props: {filteringOptions: FilteringOptions}) {
     const {sectionTypes, setSectionTypes, statusTypes, setStatusTypes, dayTypes, setDayTypes, restrictionTypes, setRestrictionTypes} = props.filteringOptions;

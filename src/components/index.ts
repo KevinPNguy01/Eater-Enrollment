@@ -2,11 +2,11 @@ import App from "./Main/App";
 import { NavBar } from "./Main/NavBar";
 import { Calendar} from "./CalendarPane/Calendar";
 
-import { Courses } from "./CoursesWindow/Courses";
+import { Courses, SearchContext } from "./CoursesWindow/Courses";
 import { CoursesNavBar } from "./CoursesWindow/CoursesNavBar";
 import { CoursesNavButton } from "./CoursesWindow/CoursesNavButton";
 
-import { SearchTab, SearchContext } from "./SearchTab/SearchTab";
+import { SearchTab } from "./SearchTab/SearchTab";
 import { SearchForms } from "./SearchTab/Forms/SearchForms";
 import { SearchBox } from "./SearchTab/Forms/SearchBox";
 import { SearchResultsNavBar } from "./SearchTab/Results/SearchResultsNavBar";
