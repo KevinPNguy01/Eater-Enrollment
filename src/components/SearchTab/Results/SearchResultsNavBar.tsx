@@ -1,14 +1,14 @@
 import { useContext, useState } from "react";
-import { SearchContext } from "../..";
 import { requestSchedule } from "../../../helpers/PeterPortal";
 import { SortMenu } from "./SortMenu";
 import { FilteringOptions, SortingOptions } from "./SearchResults";
 import { FilterMenu } from "./FilteringMenu";
+import { SearchContext } from "../../CoursesWindow/Courses";
 
-export function SearchResultsNavBar(props: {sortingOptions: SortingOptions, filteringOptions: FilteringOptions, callBack: () => void}) {
+export function SearchResultsNavBar(props: {sortingOptions: SortingOptions, filteringOptions: FilteringOptions}) {
     const [sortMenuVisible, setSortMenuVisible] = useState(false);
     const [filterMenuVisible, SetFilterMenuVisible] = useState(false);
-    const { setSearchResultsVisibility, setSearchResults, setQueries, queries} = useContext(SearchContext);
+    const { setSearchResultsVisibility, setSearchResults, setQueries, queries, callBack} = useContext(SearchContext);
     return (
         <nav className="flex bg-secondary border border-quaternary p-1 mb-4 rounded text-2xl whitespace-pre text-center items-center">
             <button className="mr-4 hover:bg-tertiary rounded-full w-fit aspect-square" onClick={() => {
@@ -20,7 +20,7 @@ export function SearchResultsNavBar(props: {sortingOptions: SortingOptions, filt
             </button>
             <button className="mr-4 hover:bg-tertiary rounded-full w-fit aspect-square" onClick={async () => {
                 setSearchResults([]);
-                const courses = await requestSchedule(queries, props.callBack);
+                const courses = await requestSchedule(queries, callBack);
                 setSearchResults(courses);
             }}>
                 {" ↻ "}

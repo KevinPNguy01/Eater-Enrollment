@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { ScheduleOptions } from "../../../helpers/PeterPortal";
-import { SearchContext } from "../SearchTab";
+import { SearchContext } from "../../CoursesWindow/Courses";
 
 export function QueryBubble(props: {query: ScheduleOptions, index: number}) {
     const {queries, setQueries} = useContext(SearchContext);

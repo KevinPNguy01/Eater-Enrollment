@@ -1,11 +1,11 @@
 import { useContext } from "react"
-import { SearchContext } from "../.."
 import { autoSuggest } from "../../../helpers/FormHelpers";
 import { QueryBubble } from "./QueryBubble";
 import { requestSchedule } from "../../../helpers/PeterPortal";
+import { SearchContext } from "../../CoursesWindow/Courses";
 
-export function SearchBox(props: {callBack: () => void}) {
-    const { courseInput, setCourseInput, setCourseSuggestions, setSearchResults, setSearchResultsVisibility, queries} = useContext(SearchContext);
+export function SearchBox() {
+    const { courseInput, setCourseInput, setCourseSuggestions, setSearchResults, setSearchResultsVisibility, queries, callBack} = useContext(SearchContext);
     return (
         <div className="flex border-b">
             {queries.map((query, index) => <QueryBubble query={query} index={index}/>)}
@@ -22,7 +22,7 @@ export function SearchBox(props: {callBack: () => void}) {
                         setCourseInput("");
                         setCourseSuggestions([]);
                         setSearchResultsVisibility(true);
-                        const courses = await requestSchedule(queries, props.callBack);
+                        const courses = await requestSchedule(queries, callBack);
                         setSearchResults(courses);
                     }
                 }}

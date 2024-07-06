@@ -1,21 +1,22 @@
 import { useContext } from "react";
 import { requestSchedule } from "../../../helpers/PeterPortal";
-import { SearchContext } from "../SearchTab";
+import { SearchContext } from "../../CoursesWindow/Courses";
 
-export function SearchButton(props: {callBack: () => void}) {
+export function SearchButton() {
     const {
         setSearchResultsVisibility,
         setSearchResults,
         setCourseSuggestions,
         setCourseInput,
-        queries
+        queries,
+        callBack
     } = useContext(SearchContext);
 
     const handleSubmit = async () => {
         setCourseInput("");
         setCourseSuggestions([]);
         setSearchResultsVisibility(true);
-        const courses = await requestSchedule(queries, props.callBack);
+        const courses = await requestSchedule(queries, callBack);
         setSearchResults(courses);
     }
     return (

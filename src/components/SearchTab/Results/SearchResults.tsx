@@ -1,8 +1,9 @@
-import { SearchResultsNavBar, SearchContext } from "../.."
+import { SearchResultsNavBar } from "../.."
 import { useContext, useState } from "react";
 import { ScheduleResults } from "./ScheduleResult";
 import { statusColors, typeColors } from "../../../constants/TextColors";
 import { restrictionCodes } from "../../../constants/RestrictionCodes";
+import { SearchContext } from "../../CoursesWindow/Courses";
 
 export type SortingOptions = {
     sortBy: string
@@ -24,8 +25,8 @@ export type FilteringOptions = {
     setRestrictionTypes: (_: Set<string>) => void
 }
 
-export function SearchResults(props: {callBack: () => void}) {
-    const { searchResultsVisibility, searchResults } = useContext(SearchContext);
+export function SearchResults() {
+    const {searchResultsVisibility, searchResults} = useContext(SearchContext);
     const [sortBy, setSortBy] = useState("Name");
     const [direction, setDirection] = useState("Ascending");
     const [sortWithin, setSortWithin] = useState(false);
@@ -55,7 +56,7 @@ export function SearchResults(props: {callBack: () => void}) {
 
     return (
         <div className={`h-full flex flex-col ${searchResultsVisibility ? "block" : "hidden"}`}>
-            <SearchResultsNavBar sortingOptions={sortingOptions} filteringOptions={filteringOptions} callBack={props.callBack}/>
+            <SearchResultsNavBar sortingOptions={sortingOptions} filteringOptions={filteringOptions}/>
             {searchResults.length ? (<div className="h-1 overflow-y-scroll flex-grow">
                 <ScheduleResults sortingOptions={sortingOptions} filteringOptions={filteringOptions} courses={searchResults}/>
             </div>) : (

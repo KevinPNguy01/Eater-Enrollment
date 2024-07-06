@@ -94,6 +94,7 @@ export async function requestSchedule(queries: ScheduleOptions[], callBack=()=>{
 
     const courses = Array.from(courseOfferings.entries()).map(([id, offerings]) => {
         const course = Object.assign({}, courseMap.get(id)) as Course;
+        course.prerequisite_list = course.prerequisite_list.filter(course => course);   // Filter null.
         offerings.forEach(offering => offering.course = course);
         course.offerings = offerings;
         return course;

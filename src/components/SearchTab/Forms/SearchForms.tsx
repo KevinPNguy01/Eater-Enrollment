@@ -1,8 +1,9 @@
 import { useContext } from "react";
-import { DropDown, SearchContext, SearchList, SearchBox } from "../..";
+import { DropDown, SearchList, SearchBox } from "../..";
 import { SearchButton } from "./SearchButton";
+import { SearchContext } from "../../CoursesWindow/Courses";
 
-export function SearchForms(props: {callBack: () => void}) {
+export function SearchForms() {
     const {
         searchResultsVisibility,
         courseSuggestions, setCourseSuggestions,
@@ -40,8 +41,8 @@ export function SearchForms(props: {callBack: () => void}) {
                 />
             </div>
             <br></br>
-            <SearchBox callBack={props.callBack}/>
-            {courseSuggestions.length ? <SearchList/> : <SearchButton callBack={props.callBack}/>}
+            <SearchBox/>
+            {courseSuggestions.length ? <SearchList/> : <SearchButton/>}
         </form>
     )
 }
