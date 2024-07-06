@@ -9,6 +9,8 @@ export type SortingOptions = {
     setSortBy: (_: string) => void
     direction: string
     setDirection: (_: string) => void
+    sortWithin: boolean
+    setSortWithin: (_: boolean) => void
 }
 
 export type FilteringOptions = {
@@ -26,11 +28,14 @@ export function SearchResults(props: {callBack: () => void}) {
     const { searchResultsVisibility, searchResults } = useContext(SearchContext);
     const [sortBy, setSortBy] = useState("Name");
     const [direction, setDirection] = useState("Ascending");
+    const [sortWithin, setSortWithin] = useState(false);
     const sortingOptions = {
         sortBy: sortBy,
         setSortBy: setSortBy,
         direction: direction,
-        setDirection: setDirection
+        setDirection: setDirection,
+        sortWithin: sortWithin,
+        setSortWithin: setSortWithin
     }
 
     const [sectionTypes, setSectionTypes] = useState(new Set(typeColors.keys()));
