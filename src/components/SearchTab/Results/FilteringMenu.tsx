@@ -23,11 +23,7 @@ export function FilterMenu(props: {filteringOptions: FilteringOptions}) {
                                 return (
                                     <div className="flex">
                                         <input type="checkbox" id={option} name={option} defaultChecked={sectionTypes.has(option)} className={`text-left my-1 checkbox-${option}`} onChange={e => {
-                                            if (e.target.checked) {
-                                                sectionTypes.add(e.target.name);
-                                            } else {
-                                                sectionTypes.delete(e.target.name);
-                                            }
+                                            e.target.checked ? sectionTypes.add(e.target.name) : sectionTypes.delete(e.target.name);
                                             setSectionTypes(new Set(sectionTypes));
                                         }}/>
                                         <ColoredText className="ml-1" text={option} colorRules={typeColors}/>
