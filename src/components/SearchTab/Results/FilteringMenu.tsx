@@ -109,7 +109,6 @@ export function FilterMenu(props: {filteringOptions: FilteringOptions}) {
                                             restrictionTypes.delete(e.target.name);
                                         }
                                         setRestrictionTypes(new Set(restrictionTypes));
-                                        console.log(restrictionTypes)
                                     }}/>
                                     <div className="flex">
                                         <p className="ml-1">{`${option}: `}</p>

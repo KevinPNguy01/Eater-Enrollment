@@ -23,6 +23,7 @@ export function CourseResult(props: {course: Course}) {
                 {infoVisible ? <CourseInfo course={course}/>: null}
             </tr>
             {spacerRow}
+
             {/* Header row. */}
             <tr className="course-result bg-secondary">
                 <th></th>
@@ -36,6 +37,7 @@ export function CourseResult(props: {course: Course}) {
                 <th>Status</th>
                 <th>Restrictions</th>
             </tr>
+            
             {/* Create an OfferingResult for each offering of this course. */}
             {course.offerings.map(offering => <OfferingResult key={`${course.id}-${offering.section.code}`} offering={offering}/>)}
             {spacerRow}
