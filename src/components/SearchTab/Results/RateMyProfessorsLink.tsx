@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Instructor } from "../../../constants/Types";
-import { RateMyProfessorsReview } from "./RateMyProfessorsReview";
+import { Instructor, Review } from "../../../constants/Types";
 
 /**
  * RateMyProfessors link tag for the given instructor, or a regular text tag if the instructor is STAFF.
@@ -9,24 +8,70 @@ import { RateMyProfessorsReview } from "./RateMyProfessorsReview";
  */
 export function RateMyProfessorsLink(props: {instructor: Instructor}) {
     const [reviewVisible, setReviewVisible] = useState(false);
-    const name = props.instructor.shortened_name;
-    const review = props.instructor.review;
-    const rmp_link = review ? review.url : `https://www.ratemyprofessors.com/search/professors/1074?q=${name.replace(/,/g, '').replace(/\./g, '')}`;
+    const {shortened_name, review} = props.instructor;
     
-    if (name === "STAFF") return <p>{name}</p>;
+    // If the instructor is STAFF, return regular text.
+    if (shortened_name === "STAFF") {
+        return <p>{shortened_name}</p>;
+    }
+
+    // If the instructor has a review on RMP, use that link. Otherwise, link to search for that instructor.
+    const rmpLink = review ? review.url : `https://www.ratemyprofessors.com/search/professors/1074?q=${shortened_name.replace(/,/g, '').replace(/\./g, '')}`;
+
     return (
         <div className="relative" >
+            {/** On click, open RMP in a new tab. On hover, set RMP info card visible. */}
             <a 
                 className="text-sky-500 underline" 
-                href={rmp_link} 
+                href={rmpLink} 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 onMouseEnter={()=>setReviewVisible(true)} 
                 onMouseLeave={()=>setReviewVisible(false)}
-            >{name}
+            >
+                {shortened_name}
                 <br/>
             </a>
+
+            {/** Display RMP info card if link is hovered over. */}
             {reviewVisible ? <RateMyProfessorsReview review={review}/> : null}
+        </div>
+    );
+}
+
+/**
+ * Preview of an instructor on RateMyProfessors.
+ * @param review The review to render.
+ */
+function RateMyProfessorsReview(props: {review: Review}) {
+    // Return null if review doesn't exist.
+    if (!props.review) {
+        return null;
+    }
+
+    const {avgRating, numRatings, firstName, lastName, department, wouldTakeAgainPercent, avgDifficulty} = props.review;
+    return (
+        <div className={`absolute left-full -translate-y-1/2 text-nowrap text-white text-left border border-quaternary bg-tertiary mx-4 p-4 z-20 w-fit`}>
+            <div className="flex">
+                <p className="text-4xl font-extrabold">{`${avgRating}`}</p>
+                <p className="whitespace-pre text-gray-300 text-base font-bold">{` / 5`}</p>
+            </div>
+            <p className="text-sm font-bold">{`Overall Quality Based on ${numRatings} ratings.`}</p>
+            <br/>
+            <p className="text-4xl font-extrabold">{`${firstName} ${lastName}`}</p>
+            <p className="text-base font-bold">{`${department}`}</p>
+            <br/>
+            <div className="flex justify-around">
+                <div>
+                    <p className="text-2xl font-extrabold">{`${wouldTakeAgainPercent.toFixed(0)}%`}</p>
+                    <p className="text-sm font-bold">Would take again</p>
+                </div>
+                <div className="border mx-4"></div>
+                <div>
+                    <p className="text-2xl font-extrabold">{`${avgDifficulty.toFixed(1)}`}</p>
+                    <p className="text-sm font-bold">Level of Difficulty</p>
+                </div>
+            </div>
         </div>
     );
 }
