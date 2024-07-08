@@ -7,7 +7,6 @@ import { SearchContext } from "./CoursesPane";
 
 export function SearchForms() {
     const {
-        searchResultsVisibility,
         courseSuggestions, setCourseSuggestions,
         setCourseInput,
         term, setTerm,
@@ -22,7 +21,7 @@ export function SearchForms() {
     }
 
     return (
-        <form autoComplete="off" id="searchForm" className={`flex flex-col h-1 grow ${searchResultsVisibility ? "hidden" : "block"}`} onSubmit={handleSubmit}>
+        <form autoComplete="off" id="searchForm" className={`flex flex-col h-1 grow`} onSubmit={handleSubmit}>
             <div className="grid grid-cols-2">
                 <DropDown
                     label = "Term"
