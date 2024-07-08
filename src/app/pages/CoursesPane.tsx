@@ -46,8 +46,15 @@ export const Courses = () => {
         }}>
             <div className="relative m-1 flex flex-col h-full">
                 <CoursesNavBar activeTab={activeTab} setActiveTab={setActiveTab}/>
-                <SearchTab activeTab={activeTab}/>
-                <AddedTab activeTab={activeTab}/>
+                {
+                    (function getActiveTab() {
+                        switch(activeTab) {
+                            case "search": return <SearchTab/>;
+                            case "added": return <AddedTab/>;
+                            default: return null;
+                        }
+                    })()
+                }
             </div>
         </SearchContext.Provider>
     )

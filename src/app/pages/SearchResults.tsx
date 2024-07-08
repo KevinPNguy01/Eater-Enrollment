@@ -28,7 +28,7 @@ export type FilteringOptions = {
 }
 
 export function SearchResults() {
-    const {searchResultsVisibility, searchResults} = useContext(SearchContext);
+    const {searchResults} = useContext(SearchContext);
     const [sortBy, setSortBy] = useState("Name");
     const [direction, setDirection] = useState("Ascending");
     const [sortWithin, setSortWithin] = useState(false);
@@ -57,7 +57,7 @@ export function SearchResults() {
     }
 
     return (
-        <div className={`h-full flex flex-col ${searchResultsVisibility ? "block" : "hidden"}`}>
+        <div className={`h-full flex flex-col`}>
             <SearchResultsNavBar sortingOptions={sortingOptions} filteringOptions={filteringOptions}/>
             {searchResults.length ? (<div className="h-1 overflow-y-scroll flex-grow">
                 <ScheduleResults sortingOptions={sortingOptions} filteringOptions={filteringOptions} courses={searchResults}/>
