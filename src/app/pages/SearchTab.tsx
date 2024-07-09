@@ -5,6 +5,5 @@ import { SearchResults } from "./SearchResults";
 
 export function SearchTab() {
     const {searchResultsVisibility} = useContext(SearchContext);
-
     return !searchResultsVisibility ? <SearchForms/> : <SearchResults/>;   
 }

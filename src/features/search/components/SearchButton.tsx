@@ -15,6 +15,7 @@ export function SearchButton() {
     const handleSubmit = async () => {
         setCourseInput("");
         setCourseSuggestions([]);
+        setSearchResults([])
         setSearchResultsVisibility(true);
         const courses = await requestSchedule(queries, callBack);
         setSearchResults(courses);

@@ -1,4 +1,5 @@
-import { CourseOffering } from "../constants/Types";
+import { restrictionCodes } from "../../../constants/RestrictionCodes";
+import { CourseOffering } from "../../../constants/Types";
 
 /**
  * @param sectionTypes A set of strings representing the valid sectionTypes types.
@@ -42,7 +43,8 @@ export function filterRestrictions(restrictionTypes: Set<string>) {
     
         // If the offering specifies either of two codes can be met, OR the codes, else AND them.
         const [code1, code2] = [restrictions[0], restrictions[restrictions.length-1]];
-        const [hasCode1, hasCode2] = [restrictionTypes.has(code1), restrictionTypes.has(code2)];
+        const [restriction1, restriction2] = [`${code1}: ${restrictionCodes.get(code1)}`, `${code2}: ${restrictionCodes.get(code2)}`]
+        const [hasCode1, hasCode2] = [restrictionTypes.has(restriction1), restrictionTypes.has(restriction2)];
         return restrictions.includes("or") ? hasCode1 || hasCode2 : hasCode1 && hasCode2;
     }
 }
