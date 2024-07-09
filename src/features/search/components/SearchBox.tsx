@@ -22,6 +22,7 @@ export function SearchBox() {
                         setCourseInput("");
                         setCourseSuggestions([]);
                         setSearchResultsVisibility(true);
+                        setSearchResults([]);
                         const courses = await requestSchedule(queries, callBack);
                         setSearchResults(courses);
                     }
