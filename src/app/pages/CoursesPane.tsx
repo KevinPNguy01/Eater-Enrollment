@@ -6,9 +6,9 @@ import { AddedTab } from "./AddedTab";
 import { SearchForms } from "./SearchForms";
 import { SearchResults } from "./SearchResults";
 
-export const SearchContext = createContext((department: string, number: string) => {department; number;});
+const SearchContext = createContext((department: string, number: string) => {department; number;});
 
-export function Courses() {
+function CoursesPane() {
     const [activeTab, setActiveTab] = useState("search");
     const [showResults, setShowResults] = useState(false);
     const [searchResults, setSearchResults] = useState(new Array<Course>());
@@ -69,3 +69,5 @@ export function Courses() {
         </div>
     )
 }
+
+export {CoursesPane, SearchContext};
