@@ -2,8 +2,9 @@ import { statusColors, typeColors } from "../../../constants/TextColors";
 import { ColoredText } from "../../../components/ColoredText";
 import { FilterOptions } from "../types/options";
 
-export function FilterMenu(props: {options: FilterOptions, defaultOptions: FilterOptions, setOptions: (_: FilterOptions) => void}) {
-    const {options, defaultOptions, setOptions} = props;
+export function FilterMenu(props: {optionsState: [FilterOptions, (options: FilterOptions) => void], defaultOptions: FilterOptions}) {
+    const [options, setOptions] = props.optionsState;
+    const {defaultOptions} = props;
     const updateOptions = () => setOptions(Object.assign({}, options));
     const {sectionTypes, statusTypes, dayTypes, restrictionTypes} = options;
     const {
@@ -16,22 +17,22 @@ export function FilterMenu(props: {options: FilterOptions, defaultOptions: Filte
         <div className="bg-secondary border top-full left-0 my-1 p-4 border-quaternary absolute z-10 text-base text-left">
             <p className="text-xl whitespace-pre border-b border-quaternary mb-2">{"Search Filters"}</p>
             <div className="grid grid-flow-col auto-cols-auto gap-4">
-                <fieldset className="border border-quaternary p-2">
+                <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
                     <legend>Section Type</legend>
                     <OptionList className="grid grid-cols-2" options={sectionTypes} defaultOptions={defaultSections} updateOptions={updateOptions} colorRules={typeColors}/>
                     <SelectDeselectAll options={sectionTypes} defaultOptions={defaultSections} updateOptions={updateOptions}/>
                 </fieldset>
-                <fieldset className="border border-quaternary p-2">
+                <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
                     <legend>Status</legend>
                     <OptionList options={statusTypes} defaultOptions={defaultStatuses} updateOptions={updateOptions} colorRules={statusColors}/>
                     <SelectDeselectAll options={statusTypes} defaultOptions={defaultStatuses} updateOptions={updateOptions}/>
                 </fieldset>
-                <fieldset className="border border-quaternary p-2">
+                <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
                     <legend>Days</legend>
                     <OptionList options={dayTypes} defaultOptions={defaultDays} updateOptions={updateOptions}/>
                     <SelectDeselectAll options={dayTypes} defaultOptions={defaultDays} updateOptions={updateOptions}/>
                 </fieldset>
-                <fieldset className="border border-quaternary p-2">
+                <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
                     <legend>Restrictions</legend>
                     <OptionList options={restrictionTypes} defaultOptions={defaultRestrictions} updateOptions={updateOptions}/>
                     <SelectDeselectAll options={restrictionTypes} defaultOptions={defaultRestrictions} updateOptions={updateOptions}/>
@@ -63,9 +64,9 @@ function SelectDeselectAll(props: {options: Set<string>, defaultOptions: Set<str
     const buttonStyle = "border border-quaternary rounded hover:bg-tertiary m-1 p-1 text-sm";
 
     return (
-        <div className="flex">
-            <button className={buttonStyle} onClick={clickHandler(true)}>Select All</button>
-            <button className={buttonStyle} onClick={clickHandler(false)}>Deselect All</button>
+        <div className="grid grid-cols-2 w-fit">
+            <button className={buttonStyle} onClick={clickHandler(true)}>All</button>
+            <button className={buttonStyle} onClick={clickHandler(false)}>None</button>
         </div>
     )
 }

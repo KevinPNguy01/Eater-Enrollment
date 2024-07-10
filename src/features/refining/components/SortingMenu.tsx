@@ -1,7 +1,7 @@
 import { SortBy, SortDirection, SortOptions } from "../types/options";
 
-export function SortingMenu(props: {options: SortOptions, setOptions: (_: SortOptions) => void}) {
-    const {options, setOptions} = props;
+export function SortingMenu(props: {optionsState: [SortOptions, (options: SortOptions) => void]}) {
+    const [options, setOptions] = props.optionsState;
     const {sortBy, direction, sortWithin} = options;
 
     // Event handlers that for the inputs and buttons.

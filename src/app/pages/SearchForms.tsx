@@ -1,49 +1,30 @@
-import { useContext } from "react";
 import { DropDown } from "../../components/DropDown";
 import { SearchBox } from "../../features/search/components/SearchBox";
 import { SearchButton } from "../../features/search/components/SearchButton";
-import { SearchList } from "../../features/search/components/SearchList";
-import { SearchContext } from "./CoursesPane";
+import { Query } from "../../utils/PeterPortal";
 
-export function SearchForms() {
-    const {
-        courseSuggestions, setCourseSuggestions,
-        setCourseInput,
-        term, setTerm,
-        year, setYear
-    } = useContext(SearchContext);
+export function SearchForms(props: {queriesState: [Query[], (queries: Query[]) => void], defaultQueryState: [Query, (queries: Query) => void], submit: () => void}) {
+    const {submit} = props;
+    const [queries, setQueries] = props.queriesState;
+    const [defaultQuery, setDefaultQuery] = props.defaultQueryState;
 
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        if (!courseSuggestions.length) return;
-        setCourseInput("");
-        setCourseSuggestions([]);
-    }
-
+    const {quarter, year} = defaultQuery;
+    const setQuarter = (quarter: string) => setDefaultQuery({...defaultQuery, quarter});
+    const setYear = (year: string) => setDefaultQuery({...defaultQuery, year});
+    
+    const termOptions = ["Fall", "Winter", "Spring", "Summer Session 1", "Summer Session 2", "10-wk Summer"];
+    const yearOptions = Array.from({ length: new Date().getFullYear() - 2015 + 2}, (_, index) => (new Date().getFullYear()+1 - index).toString());
     return (
-        <form autoComplete="off" id="searchForm" className={`flex flex-col h-1 grow`} onSubmit={handleSubmit}>
+        <form autoComplete="off" id="searchForm" className={`flex flex-col h-1 grow`} onSubmit={e => e.preventDefault()}>
             <div className="grid grid-cols-2">
-                <DropDown
-                    label = "Term"
-                    name = "term"
-                    options={[
-                        "Fall", "Winter", "Spring", 
-                        "Summer Session 1", "Summer Session 2", "10-wk Summer"
-                    ]}
-                    default={term}
-                    setter={setTerm}
-                />
-                <DropDown
-                    label = "Year"
-                    name = "year"
-                    options={Array.from({ length: new Date().getFullYear() - 2015 + 2}, (_, index) => (new Date().getFullYear()+1 - index).toString())}
-                    default={year}
-                    setter={setYear}
-                />
+                <DropDown label="Quarter" options={termOptions} default={quarter} setter={setQuarter}/>
+                <DropDown label="Year" options={yearOptions} default={year} setter={setYear}/>
             </div>
             <br></br>
-            <SearchBox/>
-            {courseSuggestions.length ? <SearchList/> : <SearchButton/>}
+            <div className="relative flex-grow">
+                <SearchBox queriesState={[queries, setQueries]} defaultQuery={{quarter, year}} submit={submit}/>
+                <SearchButton submit={submit}/>
+            </div>
         </form>
     )
 }

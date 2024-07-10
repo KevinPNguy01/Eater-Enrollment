@@ -1,71 +1,61 @@
-import { useContext, useEffect, useState } from "react"
 import { ScheduleResults } from "../../features/results/components/ScheduleResult"
 import { FilterMenu } from "../../features/refining/components/FilteringMenu"
 import { SortingMenu } from "../../features/refining/components/SortingMenu"
-import { requestSchedule } from "../../utils/PeterPortal"
-import { SearchContext } from "./CoursesPane"
 import { FilterOptions, SortBy, SortDirection, SortOptions } from "../../features/refining/types/options"
 import { filterCourses, newFilterOptions, sortCourses } from "../../features/refining/utils"
 import { statusColors } from "../../constants/TextColors"
 import { restrictionCodes } from "../../constants/RestrictionCodes"
+import { Course } from "../../constants/Types"
+import { useState, useEffect } from "react"
 
-export function SearchResults() {
-    const {searchResults} = useContext(SearchContext);
+export function SearchResults(props: {courses: Course[], submitSearch: () => void, resetSearch: () => void}) {
+    const {courses, submitSearch, resetSearch} = props;
     const [sortOptions, setSortOptions] = useState({
         sortBy: SortBy.Name,
         direction: SortDirection.Ascending,
         sortWithin: false,
     } as SortOptions);
-    const [defaultFilterOptions, setDefaultFilterOptions] = useState(null as unknown as FilterOptions);
     const [filterOptions, setFilterOptions] = useState(null as unknown as FilterOptions);
 
-    // Reset filter options when the search results change.
-    useEffect(() => {
-        setDefaultFilterOptions({
-            sectionTypes: new Set(searchResults.map(({offerings}) => offerings.map(({section}) => section.type)).flat()),
-            statusTypes: new Set(statusColors.keys()),
-            dayTypes: new Set(["M", "Tu", "W", "Th", "F"]),
-            restrictionTypes: new Set(
-                searchResults.map(
-                    ({offerings}) => offerings.map(
-                        ({restrictions}) => restrictions.replace("or", "and").split(" and ")
-                    ).flat()
-                ).flat().filter(s => s).map(
-                    code => `${code}: ${restrictionCodes.get(code)}`
-                )
+    // Reset filters when courses change.
+    useEffect(() => setFilterOptions(newFilterOptions()), [courses]);
+
+    // Default filter options only include values found in courses.
+    const defaultFilterOptions = {
+        sectionTypes: new Set(courses.map(({offerings}) => offerings.map(({section}) => section.type)).flat()),
+        statusTypes: new Set(statusColors.keys()),
+        dayTypes: new Set(["M", "Tu", "W", "Th", "F"]),
+        restrictionTypes: new Set(
+            courses.map(
+                ({offerings}) => offerings.map(
+                    ({restrictions}) => restrictions.replace("or", "and").split(" and ")
+                ).flat()
+            ).flat().filter(s => s).map(
+                code => `${code}: ${restrictionCodes.get(code)}`
             )
-        } as FilterOptions);
-        setFilterOptions(newFilterOptions());
-    }, [searchResults]);
+        )
+    };
 
     // Filter courses if the filter options have been defined. Always sort.
-    const courses = filterOptions ? filterCourses(searchResults, filterOptions) : searchResults;
-    sortCourses(courses, sortOptions);
+    const filteredCourses = filterOptions ? filterCourses(courses, filterOptions) : courses;
+    sortCourses(filteredCourses, sortOptions);
 
     return (
         <div className={`h-full flex flex-col`}>
-            <SearchResultsNavBar sortOptions={sortOptions} setSortOptions={setSortOptions} filterOptions={filterOptions} defaultFilterOptions={defaultFilterOptions} setFilterOptions={setFilterOptions}/>
-            {searchResults.length ? <ScheduleResults courses={courses}/> : <LoadingSymbol/>}
+            <SearchResultsNavBar sortOptionsState={[sortOptions, setSortOptions]} filterOptionsState={[filterOptions, setFilterOptions]} defaultFilterOptions={defaultFilterOptions} submitSearch={submitSearch} resetSearch={resetSearch}/>
+            {filteredCourses.length ? <ScheduleResults courses={filteredCourses}/> : <LoadingSymbol/>}
         </div>
     ) 
 }
 
-function SearchResultsNavBar(props: {sortOptions: SortOptions, setSortOptions: (_: SortOptions) => void, filterOptions: FilterOptions, defaultFilterOptions: FilterOptions, setFilterOptions: (_: FilterOptions) => void}) {
+function SearchResultsNavBar(props: {sortOptionsState: [SortOptions, (options: SortOptions) => void], filterOptionsState: [FilterOptions, (options: FilterOptions) => void], defaultFilterOptions: FilterOptions, submitSearch: () => void, resetSearch: () => void}) {
+    const {submitSearch, resetSearch} = props;
     const [sortMenuVisible, setSortMenuVisible] = useState(false);
     const [filterMenuVisible, setFilterMenuVisible] = useState(false);
-    const { setSearchResultsVisibility, setSearchResults, setQueries, queries, callBack} = useContext(SearchContext);
 
     // Click event handlers.
-    const clickBack = () => {
-        setSearchResultsVisibility(false);
-        setSearchResults([]);
-        setQueries([]);
-    };
-    const clickRefresh = async () => {
-        setSearchResults([]);
-        const courses = await requestSchedule(queries, callBack);
-        setSearchResults(courses);
-    };
+    const clickBack = resetSearch;
+    const clickRefresh = submitSearch;
     const clickSortMenu = () => setSortMenuVisible(!sortMenuVisible);
     const clickFilterMenu = () => setFilterMenuVisible(!filterMenuVisible);
 
@@ -76,11 +66,11 @@ function SearchResultsNavBar(props: {sortOptions: SortOptions, setSortOptions: (
             <button className={buttonStyle} onClick={clickRefresh}>{" ↻ "}</button>
             <div>
                 <button className={buttonStyle} onClick={clickSortMenu}>{" ⇅ "}</button>
-                {sortMenuVisible ? <SortingMenu options={props.sortOptions} setOptions={props.setSortOptions}/> : null}
+                {sortMenuVisible ? <SortingMenu optionsState={props.sortOptionsState}/> : null}
             </div>
             <div>
                 <button className={buttonStyle} onClick={clickFilterMenu}>{" ⚙ "}</button>
-                {filterMenuVisible ? <FilterMenu options={props.filterOptions} defaultOptions={props.defaultFilterOptions} setOptions={props.setFilterOptions}/> : null}
+                {filterMenuVisible ? <FilterMenu optionsState={props.filterOptionsState} defaultOptions={props.defaultFilterOptions}/> : null}
             </div>
         </nav>
     )
