@@ -170,3 +170,7 @@ h1 {
 line {
   shape-rendering: crispEdges;
 }
+
+fieldset {
+  min-width: 0;
+}
