@@ -6,7 +6,7 @@ import { anteater } from "../assets";
 import { Course, CourseOffering } from "../constants/Types";
 import { addOfferingsToCalendar, removeOfferingsFromCalendar } from "../utils/FullCalendar";
 import { requestSchedule } from "../utils/PeterPortal";
-import { Courses } from "./pages/CoursesPane";
+import { CoursesPane } from "./pages/CoursesPane";
 import { CalendarPane } from "./pages/CalendarPane";
 
 // Define the context type of schedule related functions and data.
@@ -218,7 +218,7 @@ export function App() {
 				<NavBar/>
 				<div id="main" className={`h-1 grow bg-secondary grid grid-cols-2`}>
 					<CalendarPane showingFinals={showingFinals} setShowingFinals={setShowingFinals}/>
-					<Courses/>
+					<CoursesPane/>
 				</div>
 			</div>
 		</ScheduleContext.Provider>

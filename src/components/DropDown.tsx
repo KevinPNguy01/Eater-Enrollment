@@ -3,7 +3,6 @@
  * @param options The options to select.
  * @param default The default option to be selected.
  * @param setter The setter function to call when an option is selected. 
- * @returns 
  */
 export function DropDown(props: {label: string, options: string[], default: string, setter: (_: string) => void}) {
     return (
