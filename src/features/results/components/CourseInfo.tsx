@@ -12,12 +12,6 @@ export function CourseInfo(props: {course: Course}) {
                 {course.description}
                 <br/><br/>
             </p>
-            {course.prerequisite_text ? (
-                <PrerequisiteInfo course={course}/>
-            ) : null }
-            {course.prerequisite_for.length ? (
-                <PrerequisiteFor course={course}/>
-            ) : null}
             {course.ge_list.length ? (
                 <p>
                     <strong>General Education Categories:</strong>
@@ -25,6 +19,12 @@ export function CourseInfo(props: {course: Course}) {
                     <p className="whitespace-pre">{course.ge_list.join("\n")}</p>
                     <br/>
                 </p>    
+            ) : null}
+            {course.prerequisite_text ? (
+                <PrerequisiteInfo course={course}/>
+            ) : null }
+            {course.prerequisite_for.length ? (
+                <PrerequisiteFor course={course}/>
             ) : null}
         </div>
     )
@@ -72,7 +72,7 @@ function PrerequisiteInfo(props: {course: Course}) {
                     }
                 })}
             </div>
-            <br/><br/>
+            <br/>
         </div>
     );
 }
@@ -81,18 +81,32 @@ function PrerequisiteFor(props: {course: Course}) {
     const searchCourse = useContext(SearchContext);
     const {course} = props;
 
+    const prerequisites = new Map<string, string[]>();
+    course.prerequisite_for.map(({department, number}) => {
+        if (!prerequisites.has(department)) {
+            prerequisites.set(department, []);
+        }
+        prerequisites.get(department)!.push(number);
+    });
+
     return (
         <div>
             <strong>Prerequisite For:</strong>
             <br/>
             <div>
-                {course.prerequisite_for.map(({department, number}, index) => {
-                    return <a className="text-sky-500 hover:cursor-pointer" onClick={() => searchCourse({department, number})}>
-                        {`${index ? ", " : ""}${department} ${number}`}
-                    </a>
-                })}
+                {[...prerequisites].sort(([,a], [,b]) => b.length - a.length).map(([department, numbers]) => (
+                    <fieldset className="border border-quaternary rounded px-4 py-2 my-2 w-full flex flex-wrap flex-1 gap-x-4">
+                        <legend className="text-base">{department}</legend>
+                        {numbers.map(number => (
+                            <a className="text-nowrap text-sky-500 hover:cursor-pointer" onClick={() => searchCourse({department, number})}>
+                                {`${department} ${number}`}
+                                <br/>
+                            </a>
+                        ))}
+                    </fieldset>
+                ))}
             </div>
-            <br/><br/>
+            <br/>
         </div>
     );
 }
