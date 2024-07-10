@@ -1,28 +1,20 @@
-import { useContext } from "react";
-import { SearchContext } from "../../../app/pages/CoursesPane";
+import { SearchSuggestion } from "../utils/FormHelpers";
+import { Query } from "../../../utils/PeterPortal";
 
-export function SearchList() {
-    const { courseSuggestions, queries, setQueries, term, year } = useContext(SearchContext);
+/**
+ * Displays a list of clickable and selectable search suggestions.
+ * @param suggestions The array of search suggestions to display.
+ * @param appendFunction Called when a search suggestion is selected to add a query.
+ */
+export function SearchList(props: {suggestions: SearchSuggestion[], appendFunction: (query: Query) => void}) {
+    const {suggestions, appendFunction} = props;
+    const buttonStyle = "p-2 bg-tertiary text-left border-b border-quaternary hover:bg-quaternary";
+
     return (
-        <div className="grid rounded-xl max-h-full mx-1 my-4 overflow-y-scroll">
-            {courseSuggestions.map(({text, value}) => (
-                <button 
-                    key={text} 
-                    className="search-course-option p-2"
-                    type="submit"
-                    onClick={() => {
-                        const query = Object.assign({
-                            quarter: term,
-                            year: year,
-                            department: "",
-                            number: "",
-                        }, value)
-                        setQueries(queries.concat(query));
-                    }}
-                >
-                    {text}
-                </button>
+        <div className="absolute left-0 top-full grid rounded w-full max-h-content">
+            {suggestions.map(({text, value}) => (
+                <button key={text} className={buttonStyle} type="submit" onClick={() => appendFunction(value)}>{text}</button>
             ))}
         </div>
-    )
+    );
 }

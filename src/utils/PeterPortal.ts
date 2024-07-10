@@ -20,7 +20,7 @@ async function makeRequest(query: string) {
     return (await response.json());
 }
 
-export interface ScheduleOptions {
+export type Query = {
     // Required:
     quarter: string
     year: string
@@ -35,7 +35,7 @@ export interface ScheduleOptions {
  * Requests a schedule from the Peter Portal API with the given arguments.
  * @returns A list of courses representing the schedule.
  */
-export async function requestSchedule(queries: ScheduleOptions[], callBack=()=>{}): Promise<Course[]> {
+export async function requestSchedule(queries: Query[], callBack=()=>{}): Promise<Course[]> {
     let numQueries = 0;
 
     const query =  `

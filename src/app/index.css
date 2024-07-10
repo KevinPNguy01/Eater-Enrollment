@@ -18,17 +18,6 @@
   scroll-behavior: smooth;
 }
 
-.search-course-option {
-  background: var(--color-tertiary);
-  color: white;
-  text-align: left;
-  border-bottom: 1px solid var(--color-quaternary);
-}
-
-.search-course-option:hover {
-  background: var(--color-quaternary)
-}
-
 /* Reduce margin between columns */
 .fc-timegrid-col-events {
   margin: 0px 2px 0px 2px !important;
@@ -66,10 +55,6 @@
   background: #555;
 }
 
-.drop-down label {
-  color: var(--color-dim-white);
-  font-size: .75rem;
-}
 
 input, select {
   color: white;
@@ -79,14 +64,6 @@ input, select {
 
 input:focus {
   outline: none;
-}
-
-.drop-down option {
-  background: var(--color-secondary);
-}
-
-.courses-nav-button {
-  color: var(--color-dim-white);
 }
 
 .courses-nav-button.active {

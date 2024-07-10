@@ -214,7 +214,7 @@ export function App() {
 				setColorRules: setColorRules
 			}
 		}>
-			<div className="h-screen flex text-white flex-col">
+			<div className="h-screen flex text-white flex-col overflow-y-clip">
 				<NavBar/>
 				<div id="main" className={`h-1 grow bg-secondary grid grid-cols-2`}>
 					<CalendarPane showingFinals={showingFinals} setShowingFinals={setShowingFinals}/>

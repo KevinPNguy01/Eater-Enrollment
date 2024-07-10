@@ -1,7 +1,6 @@
 import { useContext } from "react";
 import { SearchContext } from "../../../app/pages/CoursesPane";
 import { Course } from "../../../constants/Types";
-import { requestSchedule } from "../../../utils/PeterPortal";
 
 export function CourseInfo(props: {course: Course}) {
     const {course} = props;
@@ -32,7 +31,7 @@ export function CourseInfo(props: {course: Course}) {
 }
 
 function PrerequisiteInfo(props: {course: Course}) {
-    const {setActiveTab, setQueries, term, year, setSearchResults, setCourseInput, setCourseSuggestions, setSearchResultsVisibility, callBack} = useContext(SearchContext);
+    const searchCourse = useContext(SearchContext);
     const {course} = props;
 
     // Combine course department and numbers into ids.
@@ -64,22 +63,7 @@ function PrerequisiteInfo(props: {course: Course}) {
                 {strings.map(string => {
                     if (courseIds.has(string)) {
                         const {department, number} = courseIds.get(string)!;
-                        return <a className="text-sky-500 hover:cursor-pointer" onClick={async () => {
-                            const query = {
-                                quarter: term,
-                                year: year,
-                                department: department,
-                                number: number,
-                            };
-                            setActiveTab("search");
-                            setQueries([query]);
-                            setCourseInput("");
-                            setCourseSuggestions([]);
-                            setSearchResultsVisibility(true);
-                            setSearchResults([]);
-                            const courses = await requestSchedule([query], callBack);
-                            setSearchResults(courses);
-                        }}>
+                        return <a className="text-sky-500 hover:cursor-pointer" onClick={() => searchCourse(department, number)}>
                             {`${department} ${number} `}
                         </a>
                     } else {
@@ -93,7 +77,7 @@ function PrerequisiteInfo(props: {course: Course}) {
 }
 
 function PrerequisiteFor(props: {course: Course}) {
-    const {setActiveTab, setQueries, term, year, setSearchResults, setCourseInput, setCourseSuggestions, setSearchResultsVisibility, callBack} = useContext(SearchContext);
+    const searchCourse = useContext(SearchContext);
     const {course} = props;
 
     return (
@@ -102,22 +86,7 @@ function PrerequisiteFor(props: {course: Course}) {
             <br/>
             <div>
                 {course.prerequisite_for.map(({department, number}, index) => {
-                    return <a className="text-sky-500 hover:cursor-pointer" onClick={async () => {
-                        const query = {
-                            quarter: term,
-                            year: year,
-                            department: department,
-                            number: number,
-                        };
-                        setActiveTab("search");
-                        setQueries([query]);
-                        setCourseInput("");
-                        setCourseSuggestions([]);
-                        setSearchResultsVisibility(true);
-                        setSearchResults([]);
-                        const courses = await requestSchedule([query], callBack);
-                        setSearchResults(courses);
-                    }}>
+                    return <a className="text-sky-500 hover:cursor-pointer" onClick={() => searchCourse(department, number)}>
                         {`${index ? ", " : ""}${department} ${number}`}
                     </a>
                 })}
