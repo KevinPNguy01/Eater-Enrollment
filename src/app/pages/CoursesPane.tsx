@@ -6,7 +6,7 @@ import { AddedTab } from "./AddedTab";
 import { SearchForms } from "./SearchForms";
 import { SearchResults } from "./SearchResults";
 
-const SearchContext = createContext((department: string, number: string) => {department; number;});
+const SearchContext = createContext((query: Partial<Query>) => {query});
 
 function CoursesPane() {
     const [activeTab, setActiveTab] = useState("search");
@@ -18,6 +18,8 @@ function CoursesPane() {
     const [queries, setQueries] = queriesState;
     const defaultQueryState = useState({quarter: "Fall", year: "2024"} as Query);
     const [defaultQuery] = defaultQueryState;
+    const [backQueries, setBackQueries] = useState([] as Query[][]);
+    const [forwardQueries, setForwardQueries] = useState([] as Query[][]);
 
     // React State hook for rerendering this component. 
     const [, setUpdateCounter] = useState(0);
@@ -35,9 +37,26 @@ function CoursesPane() {
     const resetSearch = () => {
         setShowResults(false);
         setQueries([]);
+        setBackQueries([]);
+        setForwardQueries([]);
     }
-    const searchCourse = (department: string, number: string) => {
-        const newQueries = [{...defaultQuery, department, number}];
+    const backSearch = async () => {
+        if (!backQueries.length) return;
+        if (queries.length) setForwardQueries([...forwardQueries, queries]);
+        const newQueries = backQueries.pop()!;
+        setQueries(newQueries);
+        submitSearch(newQueries);
+    }
+    const forwardSearch = async () => {
+        if (!forwardQueries.length) return;
+        if (queries.length) setBackQueries([...backQueries, queries]);
+        const newQueries = forwardQueries.pop()!;
+        setQueries(newQueries);
+        submitSearch(newQueries);
+    }
+    const searchCourse = (query: Partial<Query>) => {
+        if (queries.length) setBackQueries([...backQueries, queries]);
+        const newQueries = [{...defaultQuery, ...query}];
         setQueries(newQueries);
         submitSearch(newQueries);
     }
@@ -57,7 +76,7 @@ function CoursesPane() {
                     // Return page components depending on the active tab.
                     switch(activeTab) {
                         case "search": return showResults ? (
-                            <SearchResults courses={searchResults} submitSearch={submitSearch} resetSearch={resetSearch}/>
+                            <SearchResults courses={searchResults} submitSearch={submitSearch} resetSearch={resetSearch} backSearch={backSearch} forwardSearch={forwardSearch}/>
                         ) : (
                             <SearchForms queriesState={queriesState} defaultQueryState={defaultQueryState} submit={submitSearch}/>
                         );
