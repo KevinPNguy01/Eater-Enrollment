@@ -40,12 +40,17 @@ export function OfferingResult(props: {offering: CourseOffering}) {
                 {`${offering.meetings[0].days} ${offering.meetings[0].time}`}
             </td>
             <td>
-                <p className="group relative hover:cursor-pointer">
+                <a 
+                    className="group relative text-sky-500 hover:cursor-pointer" 
+                    href={"https://classrooms.uci.edu/classrooms/" + offering.meetings[0].building.split(" ")[0]} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                >
                     {offering.meetings[0].building}
-                    <p className="whitespace-nowrap hidden group-hover:absolute group-hover:block bottom-full left-1/2 -translate-x-1/2 bg-tertiary border border-quaternary p-2 mb-2 rounded text-base">
+                    <p className="text-white whitespace-nowrap hidden group-hover:absolute group-hover:block bottom-full left-1/2 -translate-x-1/2 bg-tertiary border border-quaternary p-2 mb-2 rounded text-base">
                         {buildingCodes.get(offering.meetings[0].building.split(" ")[0])}
                     </p>
-                </p>
+                </a>
             </td>
             <td>
                 <p>{`${offering.num_total_enrolled}/${offering.max_capacity}`}</p>
