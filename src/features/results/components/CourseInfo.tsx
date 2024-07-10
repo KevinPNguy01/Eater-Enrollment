@@ -35,12 +35,13 @@ function PrerequisiteInfo(props: {course: Course}) {
     const {course} = props;
 
     // Combine course department and numbers into ids.
-    let text = course.prerequisite_text.slice().replaceAll('(', "( ").replaceAll(')', " )").replaceAll("  ", ' ');
+    let text = course.prerequisite_text.slice();
     course.prerequisite_list.forEach(course => {
         course.id = `${course.department}${course.number}`.replaceAll(' ', '');
         const {department, number, id} = course;
-        text = text.replaceAll(`${department} ${number}`, id);
+        text = text.replaceAll(`${department} ${number}`, ` ${id} `);
     });
+    text = text.replaceAll("  ", ' ');
 
     // Map course ids to corresponding course.
     const courseIds = new Map(course.prerequisite_list.map(course => [course.id, course]));
@@ -63,7 +64,7 @@ function PrerequisiteInfo(props: {course: Course}) {
                 {strings.map(string => {
                     if (courseIds.has(string)) {
                         const {department, number} = courseIds.get(string)!;
-                        return <a className="text-sky-500 hover:cursor-pointer" onClick={() => searchCourse(department, number)}>
+                        return <a className="text-sky-500 hover:cursor-pointer" onClick={() => searchCourse({department, number})}>
                             {`${department} ${number} `}
                         </a>
                     } else {
@@ -86,7 +87,7 @@ function PrerequisiteFor(props: {course: Course}) {
             <br/>
             <div>
                 {course.prerequisite_for.map(({department, number}, index) => {
-                    return <a className="text-sky-500 hover:cursor-pointer" onClick={() => searchCourse(department, number)}>
+                    return <a className="text-sky-500 hover:cursor-pointer" onClick={() => searchCourse({department, number})}>
                         {`${index ? ", " : ""}${department} ${number}`}
                     </a>
                 })}

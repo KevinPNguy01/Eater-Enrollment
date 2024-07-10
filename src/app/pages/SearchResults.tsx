@@ -8,8 +8,8 @@ import { restrictionCodes } from "../../constants/RestrictionCodes"
 import { Course } from "../../constants/Types"
 import { useState, useEffect } from "react"
 
-export function SearchResults(props: {courses: Course[], submitSearch: () => void, resetSearch: () => void}) {
-    const {courses, submitSearch, resetSearch} = props;
+export function SearchResults(props: {courses: Course[], submitSearch: () => void, resetSearch: () => void, backSearch: () => void, forwardSearch: () => void}) {
+    const {courses, submitSearch, resetSearch, backSearch, forwardSearch} = props;
     const [sortOptions, setSortOptions] = useState({
         sortBy: SortBy.Name,
         direction: SortDirection.Ascending,
@@ -42,28 +42,28 @@ export function SearchResults(props: {courses: Course[], submitSearch: () => voi
 
     return (
         <div className={`h-full flex flex-col`}>
-            <SearchResultsNavBar sortOptionsState={[sortOptions, setSortOptions]} filterOptionsState={[filterOptions, setFilterOptions]} defaultFilterOptions={defaultFilterOptions} submitSearch={submitSearch} resetSearch={resetSearch}/>
+            <SearchResultsNavBar sortOptionsState={[sortOptions, setSortOptions]} filterOptionsState={[filterOptions, setFilterOptions]} defaultFilterOptions={defaultFilterOptions} submitSearch={submitSearch} resetSearch={resetSearch} backSearch={backSearch} forwardSearch={forwardSearch}/>
             {filteredCourses.length ? <ScheduleResults courses={filteredCourses}/> : <LoadingSymbol/>}
         </div>
     ) 
 }
 
-function SearchResultsNavBar(props: {sortOptionsState: [SortOptions, (options: SortOptions) => void], filterOptionsState: [FilterOptions, (options: FilterOptions) => void], defaultFilterOptions: FilterOptions, submitSearch: () => void, resetSearch: () => void}) {
-    const {submitSearch, resetSearch} = props;
+function SearchResultsNavBar(props: {sortOptionsState: [SortOptions, (options: SortOptions) => void], filterOptionsState: [FilterOptions, (options: FilterOptions) => void], defaultFilterOptions: FilterOptions, submitSearch: () => void, resetSearch: () => void, backSearch: () => void, forwardSearch: () => void}) {
+    const {submitSearch, resetSearch, backSearch, forwardSearch} = props;
     const [sortMenuVisible, setSortMenuVisible] = useState(false);
     const [filterMenuVisible, setFilterMenuVisible] = useState(false);
 
     // Click event handlers.
-    const clickBack = resetSearch;
-    const clickRefresh = submitSearch;
     const clickSortMenu = () => setSortMenuVisible(!sortMenuVisible);
     const clickFilterMenu = () => setFilterMenuVisible(!filterMenuVisible);
 
     const buttonStyle = "mr-4 hover:bg-tertiary rounded-full w-fit aspect-square";
     return (
         <nav className="relative flex bg-secondary border border-quaternary p-1 mb-4 rounded text-2xl whitespace-pre text-center items-center">
-            <button className={buttonStyle} onClick={clickBack}>{" ← "}</button>
-            <button className={buttonStyle} onClick={clickRefresh}>{" ↻ "}</button>
+            <button className={buttonStyle} onClick={resetSearch}>{" 🏠︎ "}</button>
+            <button className={buttonStyle} onClick={backSearch}>{" ← "}</button>
+            <button className={buttonStyle} onClick={forwardSearch}>{" → "}</button>
+            <button className={buttonStyle} onClick={() => submitSearch()}>{" ↻ "}</button>
             <div>
                 <button className={buttonStyle} onClick={clickSortMenu}>{" ⇅ "}</button>
                 {sortMenuVisible ? <SortingMenu optionsState={props.sortOptionsState}/> : null}
