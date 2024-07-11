@@ -1,6 +1,7 @@
 import { CalendarApi } from "fullcalendar/index.js";
 import { CourseOffering } from "../constants/Types";
 import { RGBColor } from "react-color";
+import { parseTime } from "./Time";
 
 /**
  * Add the given CourseOfferings to the Calendar.
@@ -30,11 +31,9 @@ function createEvents(offerings: CourseOffering[], colorRules: Map<string, RGBCo
         return dayOffsets.map(days => {
             const day = getDay(days);
             const startDate = new Date(day);
-            startDate.setHours(startTime.getHours());
-            startDate.setMinutes(startTime.getMinutes());
+            startDate.setMinutes(startTime);
             const endDate = new Date(day);
-            endDate.setHours(endTime.getHours());
-            endDate.setMinutes(endTime.getMinutes());
+            endDate.setMinutes(endTime);
             return Object.assign({
                 title: `${offering.course.department} ${offering.course.number} ${offering.section.type}`,
                 start: startDate.toISOString(),
@@ -77,11 +76,9 @@ function createFinalEvents(offerings: CourseOffering[], colorRules: Map<string, 
         const day = getDay(dayOffsets.get(dayString)!);
 
         const startDate = new Date(day);
-        startDate.setHours(startTime.getHours());
-        startDate.setMinutes(startTime.getMinutes());
+        startDate.setMinutes(startTime);
         const endDate = new Date(day);
-        endDate.setHours(endTime.getHours());
-        endDate.setMinutes(endTime.getMinutes());
+        endDate.setMinutes(endTime);
         
         return Object.assign({
             title: `${offering.course.department} ${offering.course.number} Final`,
@@ -126,53 +123,6 @@ function getDay(days: number) {
     const day = d.getDay()
     const diff = d.getDate() - day + 1 + days + (day === 6 ? 7 : 0); // Adjust when day is saturday.
     return new Date(d.setDate(diff));
-}
-
-/**
- * 
- * @param time The times to parse as a string.
- * @returns Two Date objects storing the start/end times represented by the given time string.
- */
-function parseTime(time: string) {
-    time = time.replace(/\s+/g, "").replace("am", "").replace("pm", "p")    // Normalize string.
-    const pm = time[time.length-1] === "p" ? true : false;                  // The time ends past 12 if the string ends in 'p'.
-    const timeArray = time.replace("p", "").split("-");                     // Drop the p and split by '-' into two separate times.
-
-    // Isolate the start/end hours and minutes.
-    const startArray = timeArray[0].split(":");             
-    const endArray = timeArray[1].split(":");
-    let startHour = parseInt(startArray[0]);
-    const startMinutes = parseInt(startArray[1]);
-    let endHour = parseInt(endArray[0]);
-    const endMinutes = parseInt(endArray[1]);
-
-    // If the end time is in the pm, add 12 to the hours.
-    if (pm) {
-        startHour += 12;
-        endHour += 12;
-    }
-
-    // Adjust for if the end time is actually at 12.
-    if (endHour >= 24) {
-        endHour = 12;
-    }
-
-    // Make sure start hour <= end hour.
-    if (startHour > endHour) {
-        startHour -= 12;
-    }
-
-    // Date object for the start time.
-    const startTime = new Date();
-    startTime.setHours(startHour);
-    startTime.setMinutes(startMinutes);
-
-    // Date object for the end time.
-    const endTime = new Date(startTime);
-    endTime.setHours(endHour);
-    endTime.setMinutes(endMinutes);
-
-    return [startTime, endTime]
 }
 
 /**

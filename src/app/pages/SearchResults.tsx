@@ -33,8 +33,9 @@ export function SearchResults(props: {courses: Course[], submitSearch: () => voi
             ).flat().filter(s => s).map(
                 code => `${code}: ${restrictionCodes.get(code)}`
             )
-        )
-    };
+        ),
+        timeRange: [480, 1320]
+    } as FilterOptions;
 
     // Filter courses if the filter options have been defined. Always sort.
     const filteredCourses = filterOptions ? filterCourses(courses, filterOptions) : courses;

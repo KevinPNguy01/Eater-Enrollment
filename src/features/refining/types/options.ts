@@ -20,4 +20,5 @@ export type FilterOptions = {
     statusTypes: Set<string>
     dayTypes: Set<string>
     restrictionTypes: Set<string>
+    timeRange: [number, number]
 }
