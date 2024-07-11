@@ -1,11 +1,13 @@
 import { statusColors, typeColors } from "../../../constants/TextColors";
 import { ColoredText } from "../../../components/ColoredText";
 import { FilterOptions } from "../types/options";
+import MultiRangeSlider from "multi-range-slider-react";
+import { useState } from "react";
 
 export function FilterMenu(props: {optionsState: [FilterOptions, (options: FilterOptions) => void], defaultOptions: FilterOptions}) {
     const [options, setOptions] = props.optionsState;
     const {defaultOptions} = props;
-    const updateOptions = () => setOptions(Object.assign({}, options));
+    const updateOptions = () => setOptions({...options});
     const {sectionTypes, statusTypes, dayTypes, restrictionTypes} = options;
     const {
         sectionTypes: defaultSections, 
@@ -13,6 +15,8 @@ export function FilterMenu(props: {optionsState: [FilterOptions, (options: Filte
         dayTypes: defaultDays, 
         restrictionTypes: defaultRestrictions
     } = defaultOptions;
+    const [minCaption, setMinCaption] = useState("");
+    const [maxCaption, setMaxCaption] = useState("");
     return (
         <div className="bg-secondary border top-full left-0 my-1 p-4 border-quaternary absolute z-10 text-base text-left">
             <p className="text-xl whitespace-pre border-b border-quaternary mb-2">{"Search Filters"}</p>
@@ -27,11 +31,33 @@ export function FilterMenu(props: {optionsState: [FilterOptions, (options: Filte
                     <OptionList options={statusTypes} defaultOptions={defaultStatuses} updateOptions={updateOptions} colorRules={statusColors}/>
                     <SelectDeselectAll options={statusTypes} defaultOptions={defaultStatuses} updateOptions={updateOptions}/>
                 </fieldset>
-                <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
-                    <legend>Days</legend>
-                    <OptionList options={dayTypes} defaultOptions={defaultDays} updateOptions={updateOptions}/>
-                    <SelectDeselectAll options={dayTypes} defaultOptions={defaultDays} updateOptions={updateOptions}/>
-                </fieldset>
+                <div className="grid">
+                    <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
+                        <legend>Days</legend>
+                        <OptionList className="flex gap-8" options={dayTypes} defaultOptions={defaultDays} updateOptions={updateOptions}/>
+                        <SelectDeselectAll options={dayTypes} defaultOptions={defaultDays} updateOptions={updateOptions}/>
+                    </fieldset>
+                    <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
+                        <legend>Time</legend>
+                        <MultiRangeSlider
+                            className="!border-none !shadow-none"
+                            labels={["8","10","12","2","4","6","8","10"]}
+                            min={480} minValue={options.timeRange[0]} max={1320} maxValue={options.timeRange[1]} step={10} stepOnly={true}
+                            minCaption={minCaption}
+                            maxCaption={maxCaption}
+                            onInput={e => {
+                                const toTimeString = (totalMinutes: number) => {
+                                    const hours = Math.floor(totalMinutes/60);
+                                    const minutes = totalMinutes % 60;
+                                    return `${(hours%12) || 12}:${minutes.toString().padEnd(2, "0")} ${hours >= 12 ? "pm" : "am"}`;
+                                }
+                                setMinCaption(toTimeString(e.minValue));
+                                setMaxCaption(toTimeString(e.maxValue));
+                            }}
+                            onChange={e => setOptions({...options, timeRange: [e.minValue, e.maxValue]})}
+                        />
+                    </fieldset>
+                </div>
                 <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
                     <legend>Restrictions</legend>
                     <OptionList options={restrictionTypes} defaultOptions={defaultRestrictions} updateOptions={updateOptions}/>

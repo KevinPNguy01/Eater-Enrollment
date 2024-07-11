@@ -2,7 +2,7 @@ import { restrictionCodes } from "../../../constants/RestrictionCodes";
 import { statusColors, typeColors } from "../../../constants/TextColors";
 import { Course } from "../../../constants/Types";
 import { FilterOptions, SortBy, SortDirection, SortOptions } from "../types/options";
-import { filterDays, filterRestrictions, filterSectionTypes, filterStatus } from "./FilterFunctions";
+import { filterDays, filterRestrictions, filterSectionTypes, filterStatus, filterTime } from "./FilterFunctions";
 import { sortOfferingsByGPA, sortOfferingsByRMP, sortInstructorsByRMP, sortCoursesByGPA, sortCoursesByName, sortCoursesByRMP } from "./SortFunctions";
 
 /**
@@ -11,7 +11,7 @@ import { sortOfferingsByGPA, sortOfferingsByRMP, sortInstructorsByRMP, sortCours
  * @returns A new array of filtered courses.
  */
 export function filterCourses(courses: Course[], filterOptions: FilterOptions) {
-    const {sectionTypes, statusTypes, dayTypes, restrictionTypes} = filterOptions;
+    const {sectionTypes, statusTypes, dayTypes, restrictionTypes, timeRange} = filterOptions;
     const filteredCourses = courses.map(course => Object.assign({}, course));
 
     // Filter offerings of each course by options specified.
@@ -20,6 +20,7 @@ export function filterCourses(courses: Course[], filterOptions: FilterOptions) {
             .filter(filterSectionTypes(sectionTypes))
             .filter(filterStatus(statusTypes))
             .filter(filterDays(dayTypes))
+            .filter(filterTime(timeRange))
             .filter(filterRestrictions(restrictionTypes))
     );
     return filteredCourses.filter(({offerings}) => offerings.length);
@@ -81,6 +82,7 @@ export function newFilterOptions() {
         sectionTypes: new Set(typeColors.keys()),
         statusTypes: new Set(statusColors.keys()),
         dayTypes: new Set(["M", "Tu", "W", "Th", "F"]),
-        restrictionTypes: new Set([...restrictionCodes.keys()].map(code => `${code}: ${restrictionCodes.get(code)}`))
+        restrictionTypes: new Set([...restrictionCodes.keys()].map(code => `${code}: ${restrictionCodes.get(code)}`)),
+        timeRange: [480, 1320]
     } as FilterOptions;
 }
