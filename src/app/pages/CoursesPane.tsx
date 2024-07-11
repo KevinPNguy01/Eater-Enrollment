@@ -5,6 +5,7 @@ import { requestSchedule, Query } from "../../utils/PeterPortal";
 import { AddedTab } from "./AddedTab";
 import { SearchForms } from "./SearchForms";
 import { SearchResults } from "./SearchResults";
+import { MapTab } from "./MapTab";
 
 const SearchContext = createContext((query: Partial<Query>) => {query});
 
@@ -81,6 +82,7 @@ function CoursesPane() {
                             <SearchForms queriesState={queriesState} defaultQueryState={defaultQueryState} submit={submitSearch}/>
                         );
                         case "added": return <AddedTab/>;
+                        case "map": return <MapTab/>;
                         default: return null;
                     }
                 })()}

@@ -12,7 +12,7 @@ export const navLinks = [
       title: "Added",
     },
     {
-      id: "combinations",
-      title: "Combinations",
+      id: "map",
+      title: "Map",
     }
 ];
