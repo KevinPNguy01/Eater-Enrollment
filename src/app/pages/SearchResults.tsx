@@ -3,7 +3,6 @@ import { FilterMenu } from "../../features/refining/components/FilteringMenu"
 import { SortingMenu } from "../../features/refining/components/SortingMenu"
 import { FilterOptions, SortBy, SortDirection, SortOptions } from "../../features/refining/types/options"
 import { filterCourses, newFilterOptions, sortCourses } from "../../features/refining/utils"
-import { statusColors } from "../../constants/TextColors"
 import { restrictionCodes } from "../../constants/RestrictionCodes"
 import { Course } from "../../constants/Types"
 import { useState, useEffect } from "react"
@@ -20,11 +19,10 @@ export function SearchResults(props: {courses: Course[], submitSearch: () => voi
     // Reset filters when courses change.
     useEffect(() => setFilterOptions(newFilterOptions()), [courses]);
 
-    // Default filter options only include values found in courses.
+    // Default filter options only include section and restriction types found in courses.
     const defaultFilterOptions = {
+        ...newFilterOptions(),
         sectionTypes: new Set(courses.map(({offerings}) => offerings.map(({section}) => section.type)).flat()),
-        statusTypes: new Set(statusColors.keys()),
-        dayTypes: new Set(["M", "Tu", "W", "Th", "F"]),
         restrictionTypes: new Set(
             courses.map(
                 ({offerings}) => offerings.map(
@@ -33,8 +31,7 @@ export function SearchResults(props: {courses: Course[], submitSearch: () => voi
             ).flat().filter(s => s).map(
                 code => `${code}: ${restrictionCodes.get(code)}`
             )
-        ),
-        timeRange: [480, 1320]
+        )
     } as FilterOptions;
 
     // Filter courses if the filter options have been defined. Always sort.
