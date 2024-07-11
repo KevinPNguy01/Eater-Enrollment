@@ -31,9 +31,9 @@ function createEvents(offerings: CourseOffering[], colorRules: Map<string, RGBCo
         return dayOffsets.map(days => {
             const day = getDay(days);
             const startDate = new Date(day);
-            startDate.setMinutes(startTime);
+            startDate.setHours(0, startTime);
             const endDate = new Date(day);
-            endDate.setMinutes(endTime);
+            endDate.setHours(0, endTime);
             return Object.assign({
                 title: `${offering.course.department} ${offering.course.number} ${offering.section.type}`,
                 start: startDate.toISOString(),
@@ -76,9 +76,9 @@ function createFinalEvents(offerings: CourseOffering[], colorRules: Map<string, 
         const day = getDay(dayOffsets.get(dayString)!);
 
         const startDate = new Date(day);
-        startDate.setMinutes(startTime);
+        startDate.setHours(0, startTime);
         const endDate = new Date(day);
-        endDate.setMinutes(endTime);
+        endDate.setHours(0, endTime);
         
         return Object.assign({
             title: `${offering.course.department} ${offering.course.number} Final`,
