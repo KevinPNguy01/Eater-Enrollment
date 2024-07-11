@@ -2,7 +2,7 @@ import { restrictionCodes } from "../../../constants/RestrictionCodes";
 import { statusColors, typeColors } from "../../../constants/TextColors";
 import { Course } from "../../../constants/Types";
 import { FilterOptions, SortBy, SortDirection, SortOptions } from "../types/options";
-import { filterDays, filterRestrictions, filterSectionTypes, filterStatus, filterTime } from "./FilterFunctions";
+import { filterDays, filterLevel, filterRestrictions, filterSectionTypes, filterStatus, filterTime } from "./FilterFunctions";
 import { sortOfferingsByGPA, sortOfferingsByRMP, sortInstructorsByRMP, sortCoursesByGPA, sortCoursesByName, sortCoursesByRMP } from "./SortFunctions";
 
 /**
@@ -11,8 +11,9 @@ import { sortOfferingsByGPA, sortOfferingsByRMP, sortInstructorsByRMP, sortCours
  * @returns A new array of filtered courses.
  */
 export function filterCourses(courses: Course[], filterOptions: FilterOptions) {
-    const {sectionTypes, statusTypes, dayTypes, restrictionTypes, timeRange} = filterOptions;
-    const filteredCourses = courses.map(course => Object.assign({}, course));
+    const {sectionTypes, statusTypes, dayTypes, restrictionTypes, levelTypes, timeRange} = filterOptions;
+    const filteredCourses = courses.map(course => ({...course}))
+        .filter(filterLevel(levelTypes));
 
     // Filter offerings of each course by options specified.
     filteredCourses.forEach(course => 
@@ -83,6 +84,7 @@ export function newFilterOptions() {
         statusTypes: new Set(statusColors.keys()),
         dayTypes: new Set(["M", "Tu", "W", "Th", "F"]),
         restrictionTypes: new Set([...restrictionCodes.keys()].map(code => `${code}: ${restrictionCodes.get(code)}`)),
+        levelTypes: new Set(["Lower Division", "Upper Division", "Graduate"]),
         timeRange: [480, 1320]
     } as FilterOptions;
 }

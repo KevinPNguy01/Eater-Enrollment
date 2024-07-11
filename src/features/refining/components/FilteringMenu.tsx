@@ -8,12 +8,13 @@ export function FilterMenu(props: {optionsState: [FilterOptions, (options: Filte
     const [options, setOptions] = props.optionsState;
     const {defaultOptions} = props;
     const updateOptions = () => setOptions({...options});
-    const {sectionTypes, statusTypes, dayTypes, restrictionTypes} = options;
+    const {sectionTypes, statusTypes, dayTypes, restrictionTypes, levelTypes} = options;
     const {
         sectionTypes: defaultSections, 
         statusTypes: defaultStatuses, 
         dayTypes: defaultDays, 
-        restrictionTypes: defaultRestrictions
+        restrictionTypes: defaultRestrictions,
+        levelTypes: defaultLevels
     } = defaultOptions;
     const [minCaption, setMinCaption] = useState("");
     const [maxCaption, setMaxCaption] = useState("");
@@ -58,6 +59,11 @@ export function FilterMenu(props: {optionsState: [FilterOptions, (options: Filte
                         />
                     </fieldset>
                 </div>
+                <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
+                    <legend>Course Level</legend>
+                    <OptionList options={levelTypes} defaultOptions={defaultLevels} updateOptions={updateOptions}/>
+                    <SelectDeselectAll options={levelTypes} defaultOptions={defaultLevels} updateOptions={updateOptions}/>
+                </fieldset>
                 <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
                     <legend>Restrictions</legend>
                     <OptionList options={restrictionTypes} defaultOptions={defaultRestrictions} updateOptions={updateOptions}/>

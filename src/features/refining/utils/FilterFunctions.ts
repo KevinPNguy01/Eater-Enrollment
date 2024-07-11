@@ -1,5 +1,5 @@
 import { restrictionCodes } from "../../../constants/RestrictionCodes";
-import { CourseOffering } from "../../../constants/Types";
+import { Course, CourseOffering } from "../../../constants/Types";
 import { parseTime } from "../../../utils/Time";
 
 /**
@@ -39,6 +39,19 @@ export function filterTime(timeRange: [number, number]) {
         if (offering.meetings[0].time === "TBA") return true;
         const [start, end] = parseTime(offering.meetings[0].time);
         return timeRange[0] <= start && start <= timeRange[1] && timeRange[0] <= end && end <= timeRange[1];
+    }
+}
+
+/**
+ * @param levelTypes A set of strings representing the valid course levels.
+ * @returns A function to filter out courses that are not one of the included levels.
+ */
+export function filterLevel(levelTypes: Set<string>) {
+    return (course: Course) => {
+        for (const level of levelTypes) {
+            if (course.course_level.includes(level)) return true;
+        }
+        return false;
     }
 }
 
