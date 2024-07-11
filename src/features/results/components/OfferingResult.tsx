@@ -1,11 +1,11 @@
 import { useContext } from "react";
 import { ScheduleContext } from "../../../app/App";
 import { ColoredText } from "../../../components/ColoredText";
-import { buildingCodes } from "../../../constants/BuildingCodes";
 import { typeColors, statusColors } from "../../../constants/TextColors";
 import { CourseOffering } from "../../../constants/Types";
 import { RateMyProfessorsLink } from "./RateMyProfessorsLink";
 import { ZotisticsLink } from "./ZotisticsLink";
+import { BuildingLink } from "./BuildingLink";
 
 /**
  * Component for displaying a course result as a tr, to be used in CourseResult.
@@ -40,17 +40,7 @@ export function OfferingResult(props: {offering: CourseOffering}) {
                 {`${offering.meetings[0].days} ${offering.meetings[0].time}`}
             </td>
             <td>
-                <a 
-                    className="group relative text-sky-500 hover:cursor-pointer" 
-                    href={"https://classrooms.uci.edu/classrooms/" + offering.meetings[0].building.split(" ")[0]} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                >
-                    {offering.meetings[0].building}
-                    <p className="text-white whitespace-nowrap hidden group-hover:absolute group-hover:block bottom-full left-1/2 -translate-x-1/2 bg-tertiary border border-quaternary p-2 mb-2 rounded text-base">
-                        {buildingCodes.get(offering.meetings[0].building.split(" ")[0])}
-                    </p>
-                </a>
+                <BuildingLink location={offering.meetings[0].building}/>
             </td>
             <td>
                 <p>{`${offering.num_total_enrolled}/${offering.max_capacity}`}</p>
