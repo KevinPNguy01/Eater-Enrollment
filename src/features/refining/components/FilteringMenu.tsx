@@ -19,11 +19,11 @@ export function FilterMenu(props: {optionsState: [FilterOptions, (options: Filte
     const [minCaption, setMinCaption] = useState("");
     const [maxCaption, setMaxCaption] = useState("");
     return (
-        <div className="bg-secondary border top-full left-0 my-1 p-4 border-quaternary absolute z-10 text-base text-left">
+        <div className="bg-secondary border top-full left-0 my-1 p-4 border-quaternary absolute z-10 text-base text-left max-w-full">
             <p className="text-xl whitespace-pre border-b border-quaternary mb-2">{"Search Filters"}</p>
-            <div className="grid grid-flow-col auto-cols-auto gap-4">
+            <div className="flex flex-wrap *:flex-grow gap-4">
                 <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
-                    <legend>Section Type</legend>
+                    <legend><button></button>Section Type</legend>
                     <OptionList className="grid grid-cols-2" options={sectionTypes} defaultOptions={defaultSections} updateOptions={updateOptions} colorRules={typeColors}/>
                     <SelectDeselectAll options={sectionTypes} defaultOptions={defaultSections} updateOptions={updateOptions}/>
                 </fieldset>
@@ -35,7 +35,7 @@ export function FilterMenu(props: {optionsState: [FilterOptions, (options: Filte
                 <div className="grid">
                     <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
                         <legend>Days</legend>
-                        <OptionList className="flex gap-8" options={dayTypes} defaultOptions={defaultDays} updateOptions={updateOptions}/>
+                        <OptionList className="flex gap-4" options={dayTypes} defaultOptions={defaultDays} updateOptions={updateOptions}/>
                         <SelectDeselectAll options={dayTypes} defaultOptions={defaultDays} updateOptions={updateOptions}/>
                     </fieldset>
                     <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
