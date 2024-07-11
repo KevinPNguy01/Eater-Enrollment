@@ -16,9 +16,6 @@ export function SearchResults(props: {courses: Course[], submitSearch: () => voi
     } as SortOptions);
     const [filterOptions, setFilterOptions] = useState(null as unknown as FilterOptions);
 
-    // Reset filters when courses change.
-    useEffect(() => setFilterOptions(newFilterOptions()), [courses]);
-
     // Default filter options only include section and restriction types found in courses.
     const defaultFilterOptions = {
         ...newFilterOptions(),
@@ -33,6 +30,10 @@ export function SearchResults(props: {courses: Course[], submitSearch: () => voi
             )
         )
     } as FilterOptions;
+
+    // Reset filters when courses change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => setFilterOptions({...defaultFilterOptions}), [courses]);
 
     // Filter courses if the filter options have been defined. Always sort.
     const filteredCourses = filterOptions ? filterCourses(courses, filterOptions) : courses;

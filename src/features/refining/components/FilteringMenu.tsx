@@ -23,20 +23,26 @@ export function FilterMenu(props: {optionsState: [FilterOptions, (options: Filte
             <p className="text-xl whitespace-pre border-b border-quaternary mb-2">{"Search Filters"}</p>
             <div className="flex flex-wrap *:flex-grow gap-4">
                 <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
-                    <legend><button></button>Section Type</legend>
+                    <legend>
+                        <SelectDeselectAll options={sectionTypes} defaultOptions={defaultSections} updateOptions={updateOptions}/>
+                        Section Type
+                    </legend>
                     <OptionList className="grid grid-cols-2" options={sectionTypes} defaultOptions={defaultSections} updateOptions={updateOptions} colorRules={typeColors}/>
-                    <SelectDeselectAll options={sectionTypes} defaultOptions={defaultSections} updateOptions={updateOptions}/>
                 </fieldset>
                 <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
-                    <legend>Status</legend>
+                    <legend>
+                        <SelectDeselectAll options={statusTypes} defaultOptions={defaultStatuses} updateOptions={updateOptions}/>
+                        Status
+                    </legend>
                     <OptionList options={statusTypes} defaultOptions={defaultStatuses} updateOptions={updateOptions} colorRules={statusColors}/>
-                    <SelectDeselectAll options={statusTypes} defaultOptions={defaultStatuses} updateOptions={updateOptions}/>
                 </fieldset>
                 <div className="grid">
                     <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
-                        <legend>Days</legend>
+                        <legend>
+                            <SelectDeselectAll options={dayTypes} defaultOptions={defaultDays} updateOptions={updateOptions}/>
+                            Days
+                        </legend>
                         <OptionList className="flex gap-4" options={dayTypes} defaultOptions={defaultDays} updateOptions={updateOptions}/>
-                        <SelectDeselectAll options={dayTypes} defaultOptions={defaultDays} updateOptions={updateOptions}/>
                     </fieldset>
                     <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
                         <legend>Time</legend>
@@ -60,14 +66,18 @@ export function FilterMenu(props: {optionsState: [FilterOptions, (options: Filte
                     </fieldset>
                 </div>
                 <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
-                    <legend>Course Level</legend>
+                    <legend>
+                        <SelectDeselectAll options={levelTypes} defaultOptions={defaultLevels} updateOptions={updateOptions}/>
+                        Course Level
+                    </legend>
                     <OptionList options={levelTypes} defaultOptions={defaultLevels} updateOptions={updateOptions}/>
-                    <SelectDeselectAll options={levelTypes} defaultOptions={defaultLevels} updateOptions={updateOptions}/>
                 </fieldset>
                 <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
-                    <legend>Restrictions</legend>
+                    <legend>
+                        <SelectDeselectAll options={restrictionTypes} defaultOptions={defaultRestrictions} updateOptions={updateOptions}/>
+                        Restrictions
+                    </legend>
                     <OptionList options={restrictionTypes} defaultOptions={defaultRestrictions} updateOptions={updateOptions}/>
-                    <SelectDeselectAll options={restrictionTypes} defaultOptions={defaultRestrictions} updateOptions={updateOptions}/>
                 </fieldset>
             </div>
         </div>
@@ -84,23 +94,20 @@ function SelectDeselectAll(props: {options: Set<string>, defaultOptions: Set<str
     const {options, defaultOptions, updateOptions} = props;
 
     // Event handler to either select or deselect all the options when button is clicked.
-    const clickHandler = (select: boolean) => () => {
+    const clickHandler = () => {
+        const select = !options.size;
         defaultOptions.forEach(option => {
             for (const checkbox of document.getElementsByClassName(`checkbox-${option}`)) {
+                console.log(checkbox);
                 (checkbox as HTMLInputElement).checked = select;
             }
             select ? options.add(option) : options.delete(option);
             updateOptions();
         });
     }
-    const buttonStyle = "border border-quaternary rounded hover:bg-tertiary m-1 p-1 text-sm";
+    const buttonStyle = `w-4 h-4 text-xs border border-quaternary rounded m-1 ${options.size === defaultOptions.size ? "bg-blue-500" : "bg-tertiary"}`;
 
-    return (
-        <div className="grid grid-cols-2 w-fit">
-            <button className={buttonStyle} onClick={clickHandler(true)}>All</button>
-            <button className={buttonStyle} onClick={clickHandler(false)}>None</button>
-        </div>
-    )
+    return <button className={buttonStyle} onClick={clickHandler}>{!options.size ? " " : options.size === defaultOptions.size ? "✓" :"━"}</button>
 }
 
 /**
