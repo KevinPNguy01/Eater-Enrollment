@@ -89,7 +89,7 @@ function createFinalEvents(offerings: CourseOffering[], colorRules: Map<string, 
     });
 }
 
-function getColor(offering: CourseOffering, colorRules: Map<string, RGBColor>) {
+export function getColor(offering: CourseOffering, colorRules: Map<string, RGBColor>) {
     const {course} = offering;
 
     // Calculate color and luminance for event.

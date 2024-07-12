@@ -19,7 +19,7 @@ export function BuildingLink(props: {location: string}) {
             {location}
             <div className="hidden group-hover:absolute group-hover:block bottom-full left-1/2 -translate-x-1/2 bg-tertiary border border-quaternary p-2 mb-2 rounded">
                 <p className="text-white whitespace-nowrap text-base">
-                    {building.name}
+                    {building?.name}
                 </p>
             </div>
         </a>
