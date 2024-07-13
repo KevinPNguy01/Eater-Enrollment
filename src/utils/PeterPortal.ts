@@ -1,6 +1,7 @@
 import { Course, CourseOffering, GradeDistribution, GradeDistributionCollection } from "../constants/Types";
 import { populateReviews } from "./RateMyProfessors";
 import coursesJson from "../../src/assets/allCourses.json";
+import { parseFinal, parseMeeting } from "./ParseMeeting";
 
 const courseMap = new Map<string, Course>((coursesJson as {data: {allCourses: Course[]}}).data.allCourses.map(course => [course.id, course]));
 
@@ -92,11 +93,19 @@ export async function requestSchedule(queries: Query[], callBack=()=>{}): Promis
         courseOfferings.get(id)!.push(offering);
     });
 
+    // Process each course here.
     const courses = Array.from(courseOfferings.entries()).map(([id, offerings]) => {
-        const course = Object.assign({}, courseMap.get(id)) as Course;
-        course.prerequisite_list = course.prerequisite_list.filter(course => course);   // Filter null.
-        offerings.forEach(offering => offering.course = course);
-        course.offerings = offerings;
+        const course = {...courseMap.get(id)} as Course;
+        course.offerings = offerings;                                                   // Attach offerings to course.
+        course.prerequisite_list = course.prerequisite_list.filter(course => course);   // Filter null prerequisites.
+
+        // Process each offering here.
+        offerings.forEach(offering => {
+            offering.course = course
+            offering.parsed_meetings = offering.meetings.map(meeting => parseMeeting(meeting));     // Parse each meeting.
+            offering.final = parseFinal(offering.final_exam);
+        });
+
         return course;
     });
 
