@@ -27,8 +27,12 @@ export function MapTab() {
     return  <div id="map" className="h-full mb-1 *:h-full">
         <MapContainer center={[33.64606888579674, -117.84275910500428]} zoom={17}>
             <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://d32w28pcyzk3qf.cloudfront.net/{z}/{x}/{y}{r}.png"
+                tileSize={512}
+                maxZoom={21}
+                minZoom={15}
+                zoomOffset={-1}
             />
             {[...buildingOfferings.entries()].map(([id, offerings]) => {
                 const building = buildings[id];
