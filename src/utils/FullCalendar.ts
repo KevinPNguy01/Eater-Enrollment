@@ -1,7 +1,6 @@
 import { CalendarApi } from "fullcalendar/index.js";
 import { CourseOffering } from "../constants/Types";
 import { RGBColor } from "react-color";
-import { parseTime } from "./Time";
 
 /**
  * Add the given CourseOfferings to the Calendar.
@@ -12,35 +11,25 @@ export function addOfferingsToCalendar(offerings: CourseOffering[], calendar: Ca
 }
 
 function createEvents(offerings: CourseOffering[], colorRules: Map<string, RGBColor>) {
-    return offerings.map(offering => {
-        if (offering.meetings[0].time === "TBA") return [];
-
-        // Get the days of the week for this course offering.
-        const days = offering.meetings[0].days;
-        const dayOffsets = [];
-        if (days.includes("M")) dayOffsets.push(0);
-        if (days.includes("Tu")) dayOffsets.push(1);
-        if (days.includes("W")) dayOffsets.push(2);
-        if (days.includes("Th")) dayOffsets.push(3);
-        if (days.includes("F")) dayOffsets.push(4);
-
-        // Get the start and end times for this course offering.
-        const [startTime, endTime] = parseTime(offering.meetings[0].time);
-
+    return offerings.filter(({parsed_meetings}) => parsed_meetings[0].time).map(offering => {
         // Add an event to the calendar for each meeting day.
-        return dayOffsets.map(days => {
-            const day = getDay(days);
-            const startDate = new Date(day);
-            startDate.setHours(0, startTime);
-            const endDate = new Date(day);
-            endDate.setHours(0, endTime);
-            return Object.assign({
+        const events = [];
+        for (let i = 4; i >= 0; --i) {
+            const day = offering.parsed_meetings[0].days & (1 << i) ? i : null;
+            if (day === null) continue;
+            const [startTime, endTime] = offering.parsed_meetings[0].time!;
+            const [startDate, endDate] = [getDay(day), getDay(day)];
+            startDate.setHours(startTime.getHours(), startTime.getMinutes());
+            endDate.setHours(endTime.getHours(), endTime.getMinutes());
+            events.push({
                 title: `${offering.course.department} ${offering.course.number} ${offering.section.type}`,
                 start: startDate.toISOString(),
                 end: endDate.toISOString(),
-                id: `${offering.section.code}-${days}`
-            }, getColor(offering, colorRules));
-        });
+                id: `${offering.section.code}-${day}`,
+                ...getColor(offering, colorRules)
+            });
+        }
+        return events;
     }).flat();
 }
 
@@ -58,34 +47,19 @@ export function removeOfferingsFromCalendar(offerings: CourseOffering[], calenda
 }
 
 function createFinalEvents(offerings: CourseOffering[], colorRules: Map<string, RGBColor>) {
-    const dayOffsets = new Map([
-        ["Mon", 0],
-        ["Tue", 1],
-        ["Wed", 2],
-        ["Thu", 3],
-        ["Fri", 4],
-        ["Sat", -2],
-        ["Sun", -1]
-    ]);
-
-    return offerings.filter(offering => (offering.final_exam && offering.final_exam !== "TBA")).map(offering => {
-
-        // Get the start and end times for this course offering.
-        const [dayString, , , timeString] = offering.final_exam.split(" ");
-        const [startTime, endTime] = parseTime(timeString);
-        const day = getDay(dayOffsets.get(dayString)!);
-
-        const startDate = new Date(day);
-        startDate.setHours(0, startTime);
-        const endDate = new Date(day);
-        endDate.setHours(0, endTime);
-        
-        return Object.assign({
-            title: `${offering.course.department} ${offering.course.number} Final`,
+    return offerings.filter(({final}) => final && final.time).map(offering => {
+        const final = offering.final!;
+        const [startDate, endDate] = [getDay(final.day), getDay(final.day)];
+        const [startTime, endTime] = final.time!;
+        startDate.setHours(startTime.getHours(), startTime.getMinutes());
+        endDate.setHours(endTime.getHours(), endTime.getMinutes());
+        return {
+            title: `${offering.course.department} ${offering.course.number} ${offering.section.type}`,
             start: startDate.toISOString(),
             end: endDate.toISOString(),
-            id: `${offering.section.code}-1`
-        }, getColor(offering, colorRules));
+            id: `${offering.section.code}-1`,
+            ...getColor(offering, colorRules)
+        };
     });
 }
 

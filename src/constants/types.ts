@@ -1,3 +1,5 @@
+import { Building } from "../features/map/constants/Buildings"
+
 export type SearchFields = {
     year: {value :string}
     term: {value: string}
@@ -23,6 +25,8 @@ export type CourseOffering = {
 
     // Additional fields
     grades: GradeDistributionCollection
+    parsed_meetings: ParsedMeeting[]
+    final: Final | null
 }
   
 export type Course = {
@@ -73,6 +77,18 @@ export type Meeting = {
     days: string
     time: string
 };
+
+export type ParsedMeeting = {
+    building: Building
+    room: string
+    days: number                // Bit string; Each bit set to 1 represents meeting that day.
+    time: [Date, Date] | null   // Two dates representing the start and end times of this meeting.
+}
+
+export type Final = {
+    day: number                 // Day of the week, with monday starting at 0.
+    time: [Date, Date] | null   //  Two dates representing the start and end times of this meeting.
+}
   
 export type SectionInfo = {
     code: string

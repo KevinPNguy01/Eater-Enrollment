@@ -1,6 +1,5 @@
 import { restrictionCodes } from "../../../constants/RestrictionCodes";
 import { Course, CourseOffering } from "../../../constants/Types";
-import { parseTime } from "../../../utils/Time";
 
 /**
  * @param sectionTypes A set of strings representing the valid sectionTypes types.
@@ -36,8 +35,9 @@ export function filterDays(dayTypes: Set<string>) {
  */
 export function filterTime(timeRange: [number, number]) {
     return (offering: CourseOffering) => {
-        if (offering.meetings[0].time === "TBA") return true;
-        const [start, end] = parseTime(offering.meetings[0].time);
+        if (!offering.parsed_meetings[0].time) return true;
+        const [startTime, endTime] = offering.parsed_meetings[0].time;
+        const [start, end] = [startTime.getHours() * 60 + startTime.getMinutes(), endTime.getHours() * 60 + endTime.getMinutes()]
         return timeRange[0] <= start && start <= timeRange[1] && timeRange[0] <= end && end <= timeRange[1];
     }
 }
