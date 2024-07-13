@@ -15,7 +15,7 @@ function createEvents(offerings: CourseOffering[], colorRules: Map<string, RGBCo
         // Add an event to the calendar for each meeting day.
         const events = [];
         for (let i = 4; i >= 0; --i) {
-            const day = offering.parsed_meetings[0].days & (1 << i) ? i : null;
+            const day = offering.parsed_meetings[0].days & (1 << i) ? 4 - i : null;
             if (day === null) continue;
             const [startTime, endTime] = offering.parsed_meetings[0].time!;
             const [startDate, endDate] = [getDay(day), getDay(day)];
