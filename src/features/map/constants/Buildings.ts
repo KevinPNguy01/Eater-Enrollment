@@ -1,8 +1,9 @@
-export interface Building {
+export type Building = {
     imageURLs: string[];
     lat: number;
     lng: number;
     name: string;
+    id?: number;
 }
 
 export const buildings: Record<string, Building> = {
