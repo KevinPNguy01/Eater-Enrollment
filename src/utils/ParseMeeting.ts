@@ -73,7 +73,6 @@ function parseDays(days: string): number {
     if (days.includes("W")) dayBits |= 0b00100;
     if (days.includes("Th")) dayBits |= 0b00010;
     if (days.includes("F")) dayBits |= 0b00001;
-    console.log(days, dayBits)
     return dayBits;
 }
 
