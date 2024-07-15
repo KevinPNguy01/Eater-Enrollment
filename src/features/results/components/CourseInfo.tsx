@@ -31,7 +31,7 @@ export function CourseInfo(props: {course: Course}) {
 }
 
 function PrerequisiteInfo(props: {course: Course}) {
-    const searchCourse = useContext(SearchContext);
+    const search = useContext(SearchContext);
     const {course} = props;
 
     // Combine course department and numbers into ids.
@@ -64,7 +64,7 @@ function PrerequisiteInfo(props: {course: Course}) {
                 {strings.map(string => {
                     if (courseIds.has(string)) {
                         const {department, number} = courseIds.get(string)!;
-                        return <a className="text-sky-500 hover:cursor-pointer" onClick={() => searchCourse({department, number})}>
+                        return <a className="text-sky-500 hover:cursor-pointer" onClick={() => search([{department, number}])}>
                             {`${department} ${number} `}
                         </a>
                     } else {
@@ -78,7 +78,7 @@ function PrerequisiteInfo(props: {course: Course}) {
 }
 
 function PrerequisiteFor(props: {course: Course}) {
-    const searchCourse = useContext(SearchContext);
+    const search = useContext(SearchContext);
     const {course} = props;
 
     const prerequisites = new Map<string, string[]>();
@@ -98,7 +98,7 @@ function PrerequisiteFor(props: {course: Course}) {
                     <fieldset className="border border-quaternary rounded px-4 py-2 my-2 w-full flex flex-wrap flex-1 gap-x-4">
                         <legend className="text-base">{department}</legend>
                         {numbers.map(number => (
-                            <a className="text-nowrap text-sky-500 hover:cursor-pointer" onClick={() => searchCourse({department, number})}>
+                            <a className="text-nowrap text-sky-500 hover:cursor-pointer" onClick={() => search([{department, number}])}>
                                 {`${department} ${number}`}
                                 <br/>
                             </a>

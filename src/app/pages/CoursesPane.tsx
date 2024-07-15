@@ -7,7 +7,15 @@ import { SearchForms } from "./SearchForms";
 import { SearchResults } from "./SearchResults";
 import { MapTab } from "./MapTab";
 
-const SearchContext = createContext((query: Partial<Query>) => {query});
+export type SearchFunctions = {
+    submitSearch: () => void
+    resetSearch: () => void
+    backSearch: () => void
+    forwardSearch: () => void
+    refreshSearch: () => void
+}
+
+const SearchContext = createContext((queries: Partial<Query>[]) => {queries});
 
 function CoursesPane() {
     const [activeTab, setActiveTab] = useState("search");
@@ -16,6 +24,7 @@ function CoursesPane() {
 
     // React State hooks used for storing search queries.
     const queriesState = useState([] as Query[])
+    const [lastQueries, setLastQueries] = useState([] as Query[]);
     const [queries, setQueries] = queriesState;
     const defaultQueryState = useState({quarter: "Fall", year: "2024"} as Query);
     const [defaultQuery] = defaultQueryState;
@@ -29,35 +38,51 @@ function CoursesPane() {
     const submitSearch = async (searchQueries = queries) => {
         // If there are queries, search for them.
         if (!searchQueries.length) return;
-        setShowResults(true);
-        setSearchResults([]);
-        setActiveTab("search");
+        setLastQueries(searchQueries);  // Store last search.
+        setActiveTab("search");         // Switch to search tab.
+        setSearchResults([]);           // Clear last results.
+        setShowResults(true);           // Show results component.
         const courses = await requestSchedule(searchQueries, () => setUpdateCounter(a => a+1));
-        setSearchResults(courses);
+        setSearchResults(courses);      // Update results.
     }
     const resetSearch = () => {
-        setShowResults(false);
-        setQueries([]);
-        setBackQueries([]);
-        setForwardQueries([]);
+        setShowResults(false);  // Hide results component.
+        setLastQueries([]);     // Clear last search.
+        setQueries([]);         // Clear current search.
+        setBackQueries([]);     // Clear back searches.
+        setForwardQueries([]);  // Clear forward searches
     }
-    const backSearch = async () => {
+    const backSearch = () => {
         if (!backQueries.length) return;
-        if (queries.length) setForwardQueries([...forwardQueries, queries]);
+        // Store last search if exists.
+        if (lastQueries.length)
+            setForwardQueries([...forwardQueries, lastQueries]);
+        // Search for most recent back query.
         const newQueries = backQueries.pop()!;
         setQueries(newQueries);
         submitSearch(newQueries);
     }
-    const forwardSearch = async () => {
+    const forwardSearch = () => {
         if (!forwardQueries.length) return;
-        if (queries.length) setBackQueries([...backQueries, queries]);
+        // Store last search if exists.
+        if (lastQueries.length)
+            setBackQueries([...backQueries, lastQueries]);
+        // Search for most recent forward query.
         const newQueries = forwardQueries.pop()!;
         setQueries(newQueries);
         submitSearch(newQueries);
     }
-    const searchCourse = (query: Partial<Query>) => {
-        if (queries.length) setBackQueries([...backQueries, queries]);
-        const newQueries = [{...defaultQuery, ...query}];
+    const refreshSearch = () => {
+        // Re-search the last search.
+        submitSearch(lastQueries);
+        setQueries(lastQueries);
+    }
+    const search = (searchQueries: Partial<Query>[]) => {
+        // Store last search if exists.
+        if (lastQueries.length) 
+            setBackQueries([...backQueries, lastQueries]);
+        // Search for new queries.
+        const newQueries = searchQueries.map(query => ({...defaultQuery, ...query}));
         setQueries(newQueries);
         submitSearch(newQueries);
     }
@@ -72,12 +97,17 @@ function CoursesPane() {
                     
                 ))}
             </nav>
-            <SearchContext.Provider value={searchCourse}>
+            <SearchContext.Provider value={search}>
                 {(function getActiveTab() {
                     // Return page components depending on the active tab.
                     switch(activeTab) {
                         case "search": return showResults ? (
-                            <SearchResults courses={searchResults} submitSearch={submitSearch} resetSearch={resetSearch} backSearch={backSearch} forwardSearch={forwardSearch}/>
+                            <SearchResults 
+                                courses={searchResults} 
+                                queriesState={queriesState} 
+                                defaultQuery={defaultQuery} 
+                                searchFunctions={{submitSearch, resetSearch, backSearch, forwardSearch, refreshSearch}}
+                            />
                         ) : (
                             <SearchForms queriesState={queriesState} defaultQueryState={defaultQueryState} submit={submitSearch}/>
                         );
