@@ -1,12 +1,11 @@
 import { Final, Meeting, ParsedMeeting } from "../constants/Types";
 import { buildingIds } from "../features/map/constants/BuildingIds";
-import { Building, buildings } from "../features/map/constants/Buildings";
 
 export function parseMeeting(meeting: Meeting): ParsedMeeting {
-    const [building, room] = parseBuilding(meeting.building);
+    const [buildingId, room] = parseBuilding(meeting.building);
     const days = parseDays(meeting.days);
     const time = parseTime(meeting.time);
-    return {building, room, days, time}
+    return {buildingId, room, days, time}
 }
 
 /**
@@ -55,13 +54,12 @@ function parseTime(time: string): [Date, Date] | null {
  * @param location The building and room number to parse as a string.
  * @returns A tuple of the building object and room number string represented by the given string.
  */
-function parseBuilding(location: string): [Building, string] {
+function parseBuilding(location: string): [number, string] {
     const tokens = location.split(" ");
     const code = tokens.slice(0, -1).join(" ");
     const number = tokens[tokens.length-1];
     const id = buildingIds[code];
-    const building = buildings[id];
-    return [building, number]
+    return [id, number]
 }
 
 /**

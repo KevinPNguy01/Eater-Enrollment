@@ -1,5 +1,3 @@
-import { Building } from "../features/map/constants/Buildings"
-
 export type SearchFields = {
     year: {value :string}
     term: {value: string}
@@ -79,7 +77,7 @@ export type Meeting = {
 };
 
 export type ParsedMeeting = {
-    building: Building
+    buildingId: number
     room: string
     days: number                // Bit string; Each bit set to 1 represents meeting that day.
     time: [Date, Date] | null   // Two dates representing the start and end times of this meeting.
