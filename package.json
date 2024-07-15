@@ -26,7 +26,8 @@
     "react-dom": "^18.3.1",
     "react-leaflet": "^4.2.1",
     "recharts": "^2.12.7",
-    "request": "^2.88.2"
+    "request": "^2.88.2",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "@types/jquery": "^3.5.29",

@@ -1,24 +1,67 @@
-const express = require('express');
-const request = require('request');
+import sqlite3 from 'sqlite3';
+
+// Open a database stored in the file 'mydb.sqlite3'
+const db = new sqlite3.Database('schedules.sqlite3', (err) => {
+    if (err) {
+      console.error('Error opening database:', err.message);
+    } else {
+      console.log('Connected to the SQLite database.');
+    }
+});
+
+// Create a table if it doesn't exist
+db.run(`CREATE TABLE IF NOT EXISTS key_value_store (
+    key TEXT PRIMARY KEY,
+    value TEXT
+)`);
+
+/* eslint-disable @typescript-eslint/no-var-requires */
+import express from 'express';
+import request from 'request';
 const app = express();
 
 app.use(express.json());
 
-app.get('/api/professors', (req, res) => {
-  const searchQuery = req.query.q;
-  const url = `https://www.ratemyprofessors.com/search/professors/1074?q=${searchQuery}`;
-  
-  request(url, (error, response, body) => {
-    if (!error && response.statusCode === 200) {
-      console.log(url);
-      res.send(body);
-    } else {
-      res.status(response.statusCode).send(error);
-    }
-  });
+app.post('/api/data', (req, res) => {
+    const { key, value } = req.body;
+    const stmt = db.prepare("INSERT OR REPLACE INTO key_value_store (key, value) VALUES (?, ?)");
+    stmt.run(key, value, (err) => {
+        if (err) {
+            console.log(err)
+            res.status(500).send('Error inserting data');
+        } else {
+            res.status(200).send('Data inserted successfully');
+        }
+    });
+    stmt.finalize();
 });
 
-const PORT = process.env.PORT || 5000;
+app.get('/api/data/:key', (req, res) => {
+    const key = req.params.key;
+    db.get("SELECT value FROM key_value_store WHERE key = ?", [key], (err, row) => {
+        if (err) {
+            res.status(500).send('Error retrieving data');
+        } else {
+            res.status(200).json({ value: row ? row.value : null });
+        }
+    });
+});
+
+app.get('/api/professors', (req, res) => {
+    const searchQuery = req.query.q;
+    const url = `https://www.ratemyprofessors.com/search/professors/1074?q=${searchQuery}`;
+
+    request(url, (error, response, body) => {
+    if (!error && response.statusCode === 200) {
+        console.log(url);
+        res.send(body);
+    } else {
+        res.status(response.statusCode).send(error);
+    }
+    });
+});
+
+const PORT = 5000;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });

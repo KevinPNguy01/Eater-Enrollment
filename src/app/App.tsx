@@ -33,6 +33,22 @@ export const ScheduleContext = createContext(
 	{} as ScheduleContextType
 );
 
+const insertData = async (key: string, value: string) => {
+    await fetch('/api/data', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({ key, value }),
+    });
+  };
+
+const getData = async (key: string) => {
+	const response = await fetch(`/api/data/${key}`);
+	const data = await response.json();
+	return data.value as string;
+};
+
 // Navigation bar with calendar on the left, and everything else on the right.
 export function App() {
 	const calendarRef = useRef(null as unknown as FullCalendar);
@@ -54,27 +70,29 @@ export function App() {
 	}
 
 	useEffect(() => {
-		if (updateCounter || !localStorage.getItem("schedule")) {
-			return;
-		}
-		setUpdateCounter(a => a+1)
-		addedCourses.length = 0;
-
-		localStorage.getItem("schedule")!.split("\n").forEach(
-			(scheduleString) => {
-				const [scheduleName] = scheduleString.split(":");
-				addedCourses.push({name: scheduleName, courses: []});
+		const run = async () => {
+			const schedulesString = await getData("schedule");
+			if (updateCounter || !schedulesString) {
+				return;
 			}
-		);
 
-		localStorage.getItem("colorRules")?.split("\n").forEach(rule => {
-			const [offering, color] = rule.split(":")
-			const [r, g, b] = color.split(" ");
-			colorRules.set(offering, {r: parseInt(r), g: parseInt(g), b: parseInt(b)} as RGBColor);
-		})
+			setUpdateCounter(a => a+1)
+			addedCourses.length = 0;
 
-		const loadSchedules = () => {
-			localStorage.getItem("schedule")!.split("\n").forEach(async (scheduleString, index) => {
+			schedulesString!.split("\n").forEach(
+				(scheduleString) => {
+					const [scheduleName] = scheduleString.split(":");
+					addedCourses.push({name: scheduleName, courses: []});
+				}
+			);
+
+			(await getData("colorRules"))?.split("\n").forEach(rule => {
+				const [offering, color] = rule.split(":")
+				const [r, g, b] = color.split(" ");
+				colorRules.set(offering, {r: parseInt(r), g: parseInt(g), b: parseInt(b)} as RGBColor);
+			})
+
+			schedulesString!.split("\n").forEach(async (scheduleString, index) => {
 				const quarterYearGroups = new Map<string, string[]>();
 				const [, offeringsString] = scheduleString.split(":");
 				if (offeringsString === "") return;
@@ -97,12 +115,12 @@ export function App() {
 				
 				}
 			});
-		}
-		loadSchedules();
+		};
+		run();
 	}, []);
 
 	const saveSchedule = () => {
-		localStorage.setItem("schedule", 
+		insertData("schedule", 
 			addedCourses.map(
 				({name, courses}) => (
 					name + ":" + courses.map(
@@ -114,7 +132,7 @@ export function App() {
 			).join("\n")
 		);
 
-		localStorage.setItem("colorRules",
+		insertData("colorRules",
 			Array.from(colorRules.entries()).map(([offering, rgb]) => `${offering}:${rgb.r} ${rgb.g} ${rgb.b}`).join("\n")
 		);
 	}
