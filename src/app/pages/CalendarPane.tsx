@@ -53,7 +53,7 @@ function CalendarNavBar(props: {showingFinals: boolean, setShowingFinals: (_: bo
     const { calendarReference, addedCourses, scheduleIndex, saveSchedule, colorRules, removeOffering } = useContext(ScheduleContext);
     const {showingFinals, setShowingFinals} = props
     
-    return(
+    return (
         <nav className="bg-tertiary grid grid-cols-4 my-1">
             <ScheduleSelect/>
             <button className={`${showingFinals ? "bg-primary" : "bg-secondary"} m-2 border border-quaternary rounded`} onClick={() => {
@@ -71,7 +71,7 @@ function CalendarNavBar(props: {showingFinals: boolean, setShowingFinals: (_: bo
             >
                 🗑️
             </button>
-            <button className="bg-secondary m-2 border border-quaternary rounded" onClick={() => saveSchedule()}>
+            <button className="bg-secondary m-2 border border-quaternary rounded" onClick={() => saveSchedule("schedule")}>
                 💾
             </button>
         </nav>
