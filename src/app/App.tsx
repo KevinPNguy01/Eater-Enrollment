@@ -19,7 +19,7 @@ type ScheduleContextType = {
 	containsOffering: (offering: CourseOffering) => boolean,
 	createSchedule: (scheduleName: string) => void,
 	loadSchedule: (scheduleIndex: number) => void,
-	saveSchedule: () => void,
+	saveSchedule: (username: string) => void,
 
 	renames: number,
 	renamed: () => void,
@@ -69,58 +69,8 @@ export function App() {
 		addOfferingsToCalendar(offerings, calendar, colorRules, showingFinals);
 	}
 
-	useEffect(() => {
-		const run = async () => {
-			const schedulesString = await getData("schedule");
-			if (updateCounter || !schedulesString) {
-				return;
-			}
-
-			setUpdateCounter(a => a+1)
-			addedCourses.length = 0;
-
-			schedulesString!.split("\n").forEach(
-				(scheduleString) => {
-					const [scheduleName] = scheduleString.split(":");
-					addedCourses.push({name: scheduleName, courses: []});
-				}
-			);
-
-			(await getData("colorRules"))?.split("\n").forEach(rule => {
-				const [offering, color] = rule.split(":")
-				const [r, g, b] = color.split(" ");
-				colorRules.set(offering, {r: parseInt(r), g: parseInt(g), b: parseInt(b)} as RGBColor);
-			})
-
-			schedulesString!.split("\n").forEach(async (scheduleString, index) => {
-				const quarterYearGroups = new Map<string, string[]>();
-				const [, offeringsString] = scheduleString.split(":");
-				if (offeringsString === "") return;
-				offeringsString.split(";").forEach((offeringString) => {
-					const values = offeringString.split(",");
-					const quarterYear = values[0] + " " + values[1];
-					const code = values[2];
-					if (!quarterYearGroups.has(quarterYear)) quarterYearGroups.set(quarterYear, []);
-					quarterYearGroups.get(quarterYear)!.push(code)
-				})
-
-				for (const [quarterYear, codes] of quarterYearGroups) {
-					const [quarter, year] = quarterYear.split(" ");
-					const courses = await requestSchedule([{
-						quarter: quarter, 
-						year: year, 
-						section_codes: codes.join(",")
-					}], () => setUpdateCounter(a => a+1));
-					courses.forEach(({offerings}) => offerings.forEach((offering) => {if (!containsOffering(offering, index)) addOffering(offering, index)}));
-				
-				}
-			});
-		};
-		run();
-	}, []);
-
-	const saveSchedule = () => {
-		insertData("schedule", 
+	const saveUser = (username: string) => {
+		insertData(username, 
 			addedCourses.map(
 				({name, courses}) => (
 					name + ":" + courses.map(
@@ -132,10 +82,65 @@ export function App() {
 			).join("\n")
 		);
 
-		insertData("colorRules",
+		insertData(username + "ColorRules",
 			Array.from(colorRules.entries()).map(([offering, rgb]) => `${offering}:${rgb.r} ${rgb.g} ${rgb.b}`).join("\n")
 		);
 	}
+
+	const loadUser = async (username: string) => {
+		const schedulesString = await getData(username);
+		if (!schedulesString) {
+			return;
+		}
+
+		const calendar = (calendarRef.current! as InstanceType<typeof FullCalendar>)?.getApi() as CalendarApi;
+		setScheduleIndex(0);
+		calendar.removeAllEvents();
+
+		setUpdateCounter(a => a+1)
+		addedCourses.length = 0;
+
+		schedulesString!.split("\n").forEach(
+			(scheduleString) => {
+				const [scheduleName] = scheduleString.split(":");
+				addedCourses.push({name: scheduleName, courses: []});
+			}
+		);
+
+		(await getData(username + "ColorRules"))?.split("\n").forEach(rule => {
+			const [offering, color] = rule.split(":")
+			const [r, g, b] = color.split(" ");
+			colorRules.set(offering, {r: parseInt(r), g: parseInt(g), b: parseInt(b)} as RGBColor);
+		})
+
+		schedulesString!.split("\n").forEach(async (scheduleString, index) => {
+			const quarterYearGroups = new Map<string, string[]>();
+			const [, offeringsString] = scheduleString.split(":");
+			if (offeringsString === "") return;
+			offeringsString.split(";").forEach((offeringString) => {
+				const values = offeringString.split(",");
+				const quarterYear = values[0] + " " + values[1];
+				const code = values[2];
+				if (!quarterYearGroups.has(quarterYear)) quarterYearGroups.set(quarterYear, []);
+				quarterYearGroups.get(quarterYear)!.push(code)
+			})
+
+			for (const [quarterYear, codes] of quarterYearGroups) {
+				const [quarter, year] = quarterYear.split(" ");
+				const courses = await requestSchedule([{
+					quarter: quarter, 
+					year: year, 
+					section_codes: codes.join(",")
+				}], () => setUpdateCounter(a => a+1));
+				courses.forEach(({offerings}) => offerings.forEach((offering) => {if (!containsOffering(offering, index)) addOffering(offering, index)}));
+			
+			}
+		});
+	};
+
+	useEffect(() => {
+		if(!updateCounter) loadUser("schedule");
+	}, []);
 
 	/**
      * Adds the given course offering to the calendar and data.
@@ -222,7 +227,7 @@ export function App() {
 				removeOffering: removeOffering,
 				createSchedule: createSchedule,
 				loadSchedule: loadSchedule,
-				saveSchedule: saveSchedule,
+				saveSchedule: saveUser,
 				containsOffering: containsOffering,
 
 				renames: renames,
@@ -232,8 +237,8 @@ export function App() {
 				setColorRules: setColorRules
 			}
 		}>
-			<div className="h-screen flex text-white flex-col overflow-y-clip">
-				<NavBar/>
+			<div className="relative h-screen flex text-white flex-col overflow-y-clip">
+				<NavBar save={saveUser} load={loadUser}/>
 				<div id="main" className={`h-1 grow bg-secondary grid grid-cols-2`}>
 					<CalendarPane showingFinals={showingFinals} setShowingFinals={setShowingFinals}/>
 					<CoursesPane/>
@@ -243,13 +248,53 @@ export function App() {
 	)
 }
 
-function NavBar() {
+function NavBar(props: {save: (_: string) => void, load: (_: string) => void}) {
+	const {save, load} = props;
+	const [saveMenuOpen, setSaveMenuOpen] = useState(false);
+	const [loadMenuOpen, setLoadMenuOpen] = useState(false);
+
 	return (
-		<nav className="bg-primary flex items-center">
-			<img src={anteater} alt="Anteater Logo" className="w-[96px] h-[48px"/>
-			<h1>
-			Eater Enrollment
-			</h1>
+		<nav className="bg-primary flex justify-between items-center">
+			<div className="flex items-center">
+				<img src={anteater} alt="Anteater Logo" className="w-[96px] h-[48px"/>
+				<h1>
+					Eater Enrollment
+				</h1>
+			</div>
+			<div className="flex gap-2 mr-8">
+				<button onClick={() => setSaveMenuOpen(!saveMenuOpen)}>
+					💾Save
+				</button>
+				<button onClick={() => setLoadMenuOpen(!loadMenuOpen)}>
+					☁️ Load
+				</button>
+			</div>
+
+			{saveMenuOpen ? <SaveLoadMenu name="Save" submit={save} cancel={() => setSaveMenuOpen(false)}/> : null}
+			{loadMenuOpen ? <SaveLoadMenu name="Load" submit={load} cancel={() => setLoadMenuOpen(false)}/> : null}
 		</nav>
+	)
+}
+
+function SaveLoadMenu(props: {name: string, submit: (_: string) => void, cancel: () => void}) {
+	const {name, submit, cancel} = props;
+	const inputRef = useRef<HTMLInputElement>(null);
+	return (
+		<div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 z-[100] bg-tertiary border border-quaternary p-4 flex flex-col gap-4">
+			<h1>
+				{name}
+			</h1>
+			<input ref={inputRef} placeholder='User ID'/>
+			<div className="flex gap-4">
+				<button onClick={cancel}>Cancel</button>
+				<button onClick={() => {
+					const input = inputRef.current?.value;
+					if (input) submit(input);
+					cancel();
+				}}>
+					{name}
+				</button>
+			</div>
+		</div>
 	)
 }
