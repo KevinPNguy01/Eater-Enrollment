@@ -17,7 +17,7 @@ export type SearchFunctions = {
 
 const SearchContext = createContext((queries: Partial<Query>[]) => {queries});
 
-function CoursesPane() {
+function CoursesPane(props: {calendarPane?: React.JSX.Element}) {
     const [activeTab, setActiveTab] = useState("search");
     const [showResults, setShowResults] = useState(false);
     const [searchResults, setSearchResults] = useState(new Array<Course>());
@@ -86,11 +86,15 @@ function CoursesPane() {
         setQueries(newQueries);
         submitSearch(newQueries);
     }
+
+    if (activeTab === "calendar" && !props.calendarPane) {
+        setActiveTab("search");
+    }
     
     return (
         <div className="relative m-1 flex flex-col h-full">
-            <nav className="bg-tertiary h-12 grid grid-cols-3 mb-2">
-                {navLinks.slice(1).map(({id, title}) => (
+            <nav className="bg-tertiary h-12 grid grid-flow-col mb-2">
+                {navLinks.slice(props.calendarPane ? 0 : 1).map(({id, title}) => (
                     <button key={id} className={`h-full ${id === activeTab ? "border-b-4 border-primary" : "text-neutral-300"}`} onClick={() => setActiveTab(id)}>
                         {title}
                     </button>
@@ -101,6 +105,7 @@ function CoursesPane() {
                 {(function getActiveTab() {
                     // Return page components depending on the active tab.
                     switch(activeTab) {
+                        case "calendar": return props.calendarPane;
                         case "search": return showResults ? (
                             <SearchResults 
                                 courses={searchResults} 

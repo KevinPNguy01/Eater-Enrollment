@@ -4,10 +4,10 @@ import { MutableRefObject, createContext, useRef, useState, useEffect } from "re
 import { RGBColor } from "react-color";
 import { anteater } from "../assets";
 import { Course, CourseOffering } from "../constants/Types";
-import { addOfferingsToCalendar, removeOfferingsFromCalendar } from "../utils/FullCalendar";
 import { requestSchedule } from "../utils/PeterPortal";
 import { CoursesPane } from "./pages/CoursesPane";
 import { CalendarPane } from "./pages/CalendarPane";
+import useWindowDimensions from "../utils/WindowDimensions";
 
 // Define the context type of schedule related functions and data.
 type ScheduleContextType = {
@@ -60,14 +60,11 @@ export function App() {
 	const [updateCounter, setUpdateCounter] = useState(0);
 	const [showingFinals, setShowingFinals] = useState(false);
 	const loadSchedule = (scheduleIndex: number) => {
-		const calendar = (calendarRef.current! as InstanceType<typeof FullCalendar>)?.getApi() as CalendarApi;
 		setScheduleIndex(scheduleIndex);
 		setAddedCourses(addedCourses.slice())
-		calendar.removeAllEvents();
-
-		const offerings = addedCourses[scheduleIndex].courses.map((course) => course.offerings).flat();
-		addOfferingsToCalendar(offerings, calendar, colorRules, showingFinals);
 	}
+	const {height, width} = useWindowDimensions();
+	const aspect = width/height;
 
 	const saveUser = (username: string) => {
 		insertData(username, 
@@ -147,8 +144,6 @@ export function App() {
      * @param offering The course offering to add.
      */
 	const addOffering = (offering: CourseOffering, index=scheduleIndex) => {
-		const calendar = (calendarRef.current! as InstanceType<typeof FullCalendar>)?.getApi() as CalendarApi;
-
 		// If the course was never added before, create a new course with empty offerings.
 		if (!addedCourses[index].courses.map((course) => course.id).includes(offering.course.id)) {
 			const newCourse = Object.assign({}, offering.course);
@@ -161,8 +156,6 @@ export function App() {
 		for (const checkbox of document.getElementsByClassName(`checkbox-${offering.course.id}-${offering.section.code}`)) {
 			(checkbox as HTMLInputElement).checked = true;
 		}
-
-		if (index === scheduleIndex) addOfferingsToCalendar([offering], calendar, colorRules, showingFinals);
 		
 		updateMap();
 	}
@@ -172,8 +165,6 @@ export function App() {
 	 * @param offering The course offering to remove.
 	 */
 	const removeOffering = (offering: CourseOffering) => {
-		const calendar = (calendarRef.current! as InstanceType<typeof FullCalendar>)?.getApi() as CalendarApi;
-
 		// Remove course offering from appropriate course.
 		const addedCourse = addedCourses[scheduleIndex].courses.find((course) => course.id === offering.course.id);
 		const offerings = addedCourse?.offerings;
@@ -191,8 +182,6 @@ export function App() {
 		for (const checkbox of document.getElementsByClassName(`checkbox-${offering.course.id}-${offering.section.code}`)) {
 			(checkbox as HTMLInputElement).checked = false;
 		}
-
-		removeOfferingsFromCalendar([offering], calendar);
 
 		updateMap();
 	}
@@ -217,6 +206,8 @@ export function App() {
 		loadSchedule(addedCourses.length - 1);
 	}
 
+	const calendarPane = <CalendarPane showingFinals={showingFinals} setShowingFinals={setShowingFinals}/>;
+
 	return (
 		<ScheduleContext.Provider value={
 			{ 
@@ -239,9 +230,9 @@ export function App() {
 		}>
 			<div className="relative h-screen flex text-white flex-col overflow-y-clip">
 				<NavBar save={saveUser} load={loadUser}/>
-				<div id="main" className={`h-1 grow bg-secondary grid grid-cols-2`}>
-					<CalendarPane showingFinals={showingFinals} setShowingFinals={setShowingFinals}/>
-					<CoursesPane/>
+				<div id="main" className={`h-1 grow bg-secondary grid ${aspect >= 1 ? "grid-cols-2" : "grid-cols-1"}`}>
+					{aspect >= 1 ? calendarPane : null}
+					<CoursesPane calendarPane={aspect < 1 ? calendarPane : undefined}/>
 				</div>
 			</div>
 		</ScheduleContext.Provider>
