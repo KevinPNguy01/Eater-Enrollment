@@ -1,16 +1,7 @@
-import { CalendarApi } from "fullcalendar/index.js";
 import { CourseOffering } from "../constants/Types";
 import { RGBColor } from "react-color";
 
-/**
- * Add the given CourseOfferings to the Calendar.
- */
-export function addOfferingsToCalendar(offerings: CourseOffering[], calendar: CalendarApi | undefined, colorRules: Map<string, RGBColor>, final: boolean) {
-    const events = (final ? createFinalEvents : createEvents)(offerings, colorRules);
-    events.forEach(event => calendar?.addEvent(event));
-}
-
-function createEvents(offerings: CourseOffering[], colorRules: Map<string, RGBColor>) {
+export function createEvents(offerings: CourseOffering[], colorRules: Map<string, RGBColor>) {
     return offerings.filter(({parsed_meetings}) => parsed_meetings[0].time).map(offering => {
         // Add an event to the calendar for each meeting day.
         const events = [];
@@ -33,20 +24,7 @@ function createEvents(offerings: CourseOffering[], colorRules: Map<string, RGBCo
     }).flat();
 }
 
-/**
- * Remove the given CourseOfferings to the Calendar.
- */
-export function removeOfferingsFromCalendar(offerings: CourseOffering[], calendar: CalendarApi | undefined) {
-    offerings.forEach((offering) => {
-        // Remove events with matching section codes from the calendar.
-		for (let i = 0; i < 5; ++i) {
-			const event = calendar?.getEventById(`${offering.section.code}-${i}`);
-			if (event) event.remove()
-		}
-    });
-}
-
-function createFinalEvents(offerings: CourseOffering[], colorRules: Map<string, RGBColor>) {
+export function createFinalEvents(offerings: CourseOffering[], colorRules: Map<string, RGBColor>) {
     return offerings.filter(({final}) => final && final.time).map(offering => {
         const final = offering.final!;
         const [startDate, endDate] = [getDay(final.day), getDay(final.day)];

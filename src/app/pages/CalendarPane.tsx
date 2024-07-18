@@ -5,16 +5,16 @@ import { CourseOffering } from '../../constants/Types';
 import { EventInfo } from '../../features/calendar/components/EventInfo';
 import { ScheduleSelect } from '../../features/calendar/components/ScheduleSelect';
 import { ScheduleContext } from '../App';
-import { addOfferingsToCalendar } from '../../utils/FullCalendar';
+import { createEvents, createFinalEvents } from '../../utils/FullCalendar';
 
 export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (_: boolean) => void}) {
 	const [offering, setOffering] = useState(null as unknown as CourseOffering);
 	const [pos, setPos] = useState({x: 0, y: 0});
 	const {showingFinals, setShowingFinals} = props;
 	
-	const { calendarReference, scheduleIndex, addedCourses} = useContext(ScheduleContext);
+	const { calendarReference, scheduleIndex, addedCourses, colorRules} = useContext(ScheduleContext);
 	return (
-		<div id="calendar" className={`flex flex-col`}>
+		<div id="calendar" className={`flex flex-col flex-grow`}>
 			<CalendarNavBar showingFinals={showingFinals} setShowingFinals={setShowingFinals}/>
 			<FullCalendar 
 				ref={calendarReference}
@@ -42,6 +42,7 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 						setOffering(clickedOffering);
 					}
 				}}
+				events={(showingFinals ? createFinalEvents : createEvents)(addedCourses[scheduleIndex].courses.map(({offerings}) => offerings).flat(), colorRules)}
 			/>
 			{offering ? <EventInfo offering={offering} setOffering={setOffering} pos={pos}/> : null}
 		</div>
@@ -50,18 +51,14 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 }
 
 function CalendarNavBar(props: {showingFinals: boolean, setShowingFinals: (_: boolean) => void}) {
-    const { calendarReference, addedCourses, scheduleIndex, saveSchedule, colorRules, removeOffering } = useContext(ScheduleContext);
+    const { addedCourses, scheduleIndex, saveSchedule, removeOffering } = useContext(ScheduleContext);
     const {showingFinals, setShowingFinals} = props
     
     return (
         <nav className="bg-tertiary grid grid-cols-4 my-1">
             <ScheduleSelect/>
             <button className={`${showingFinals ? "bg-primary" : "bg-secondary"} m-2 border border-quaternary rounded`} onClick={() => {
-                const offerings = addedCourses[scheduleIndex].courses.map(({offerings}) => offerings).flat();
-                const calendar = calendarReference.current.getApi()
-                calendar.removeAllEvents();
                 setShowingFinals(!showingFinals);
-                addOfferingsToCalendar(offerings, calendar, colorRules, !showingFinals);
             }}>
                 Finals
             </button>
