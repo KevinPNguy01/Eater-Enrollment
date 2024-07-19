@@ -79,14 +79,14 @@ function SearchResultsNavBar(props: {
     const clickSortMenu = () => setSortMenuVisible(!sortMenuVisible);
     const clickFilterMenu = () => setFilterMenuVisible(!filterMenuVisible);
 
-    const buttonStyle = "hover:bg-tertiary rounded-full w-fit aspect-square text-2xl";
+    const buttonStyle = "hover:bg-tertiary rounded-full w-fit aspect-square text-xl";
     return (
         <nav className="relative flex bg-secondary border border-quaternary p-1 mb-4 rounded whitespace-pre text-center items-center gap-1">
             <button className={buttonStyle} onClick={resetSearch}>{" 🏠︎ "}</button>
             <button className={buttonStyle} onClick={backSearch}>{" ← "}</button>
             <button className={buttonStyle} onClick={forwardSearch}>{" → "}</button>
             <button className={buttonStyle} onClick={refreshSearch}>{" ↻ "}</button>
-            <div className="relative flex-grow">
+            <div className="flex-grow w-0">
                 <SearchBox queriesState={queriesState} defaultQuery={defaultQuery} submit={submitSearch}/>
             </div>
             <div>

@@ -11,15 +11,15 @@ export function SearchForms(props: {queriesState: [Query[], (queries: Query[]) =
     const setTerm = (quarter: string, year: string) => setDefaultQuery({quarter, year});
     
     return (
-        <form autoComplete="off" id="searchForm" className={`flex flex-col h-1 grow`} onSubmit={e => e.preventDefault()}>
-            <div className="">
+        <form autoComplete="off" id="searchForm" className={`flex flex-col items-center`} onSubmit={e => e.preventDefault()}>
+            <div className="w-full">
                 <TermDropDown defaultTerm={{quarter, year}} setTerm={setTerm}/>
             </div>
             <br></br>
-            <div className="relative flex-grow">
+            <div className="w-5/6">
                 <SearchBox queriesState={[queries, setQueries]} defaultQuery={defaultQuery} submit={submit}/>
-                <SearchButton submit={submit}/>
             </div>
+            <SearchButton submit={submit}/>
         </form>
     )
 }
