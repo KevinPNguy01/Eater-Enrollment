@@ -228,7 +228,7 @@ export function App() {
 				setColorRules: setColorRules
 			}
 		}>
-			<div className="relative h-screen flex text-white flex-col overflow-y-clip">
+			<div className="relative h-screen flex text-white flex-col overflow-y-hidden overflow-x-hidden">
 				<NavBar save={saveUser} load={loadUser}/>
 				<div id="main" className={`h-1 grow bg-secondary grid ${aspect >= 1 ? "grid-cols-2" : "grid-cols-1"}`}>
 					{aspect >= 1 ? calendarPane : null}
