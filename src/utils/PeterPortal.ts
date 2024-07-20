@@ -32,6 +32,12 @@ export type Query = {
     // Optional:
     number?: string
 }
+
+export function queryToString(query: Query) {
+    if (!query) return "";
+    return query.ge ? query.ge : query.department + (query.number ? ` ${query.number}` : "")
+}
+
 /**
  * Requests a schedule from the Peter Portal API with the given arguments.
  * @returns A list of courses representing the schedule.

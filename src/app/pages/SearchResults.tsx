@@ -12,11 +12,13 @@ import { SearchBox } from "../../features/search/components/SearchBox"
 
 export function SearchResults(props: {
     courses: Course[], 
-    queriesState: [Query[], (queries: Query[]) => void], 
+    multiState: [boolean, (_: boolean) => void]
+    queriesState: [Query[], (_: Query[]) => void], 
     defaultQuery: Query, 
+    lastQueries: Query[],
     searchFunctions: SearchFunctions}
 ) {
-    const {courses, queriesState, defaultQuery, searchFunctions} = props;
+    const {courses, queriesState, defaultQuery, lastQueries, searchFunctions} = props;
     const [sortOptions, setSortOptions] = useState({
         sortBy: SortBy.Name,
         direction: SortDirection.Ascending,
@@ -55,7 +57,9 @@ export function SearchResults(props: {
                 defaultFilterOptions={defaultFilterOptions} 
                 searchFunctions={searchFunctions}
                 queriesState={queriesState}
+                multiState={props.multiState}
                 defaultQuery={defaultQuery}
+                lastQueries={lastQueries}
             />
             {filteredCourses.length ? <ScheduleResults courses={filteredCourses}/> : <LoadingSymbol/>}
         </div>
@@ -68,9 +72,11 @@ function SearchResultsNavBar(props: {
     defaultFilterOptions: FilterOptions, 
     searchFunctions: SearchFunctions,
     queriesState: [Query[], (_: Query[]) => void],
-    defaultQuery: Query},
+    defaultQuery: Query,
+    multiState: [boolean, (_: boolean) => void],
+    lastQueries: Query[]}
 ) {
-    const {queriesState, defaultQuery} = props;
+    const {queriesState, multiState, defaultQuery, lastQueries} = props;
     const {submitSearch, resetSearch, backSearch, forwardSearch, refreshSearch} = props.searchFunctions;
     const [sortMenuVisible, setSortMenuVisible] = useState(false);
     const [filterMenuVisible, setFilterMenuVisible] = useState(false);
@@ -81,13 +87,13 @@ function SearchResultsNavBar(props: {
 
     const buttonStyle = "hover:bg-tertiary rounded-full w-fit aspect-square text-xl";
     return (
-        <nav className="relative flex bg-secondary border border-quaternary p-1 mb-4 rounded whitespace-pre text-center items-center gap-1">
+        <nav className="relative flex bg-tertiary border border-quaternary p-1 mb-4 rounded whitespace-pre text-center items-center gap-1">
             <button className={buttonStyle} onClick={resetSearch}>{" 🏠︎ "}</button>
             <button className={buttonStyle} onClick={backSearch}>{" ← "}</button>
             <button className={buttonStyle} onClick={forwardSearch}>{" → "}</button>
             <button className={buttonStyle} onClick={refreshSearch}>{" ↻ "}</button>
             <div className="flex-grow w-0">
-                <SearchBox queriesState={queriesState} defaultQuery={defaultQuery} submit={submitSearch}/>
+                <SearchBox multiState={multiState} queriesState={queriesState} defaultQuery={defaultQuery} lastQueries={lastQueries} submitQueries={submitSearch}/>
             </div>
             <div>
                 <button className={buttonStyle} onClick={clickSortMenu}>{" ⇅ "}</button>

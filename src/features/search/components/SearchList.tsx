@@ -22,13 +22,12 @@ export function SearchList(props: {suggestions: SearchSuggestion[], appendFuncti
     const {suggestions, appendFunction} = props;
     const buttonStyle = "flex items-center gap-2 px-4 py-2 text-left border-quaternary hover:bg-tertiary last:rounded-b-[20px]";
 
-
     return (
         <div className="grid w-full max-h-[50vh] overflow-y-scroll hide-scroll">
             {suggestions.map(({text, value}) => {
                 const [name, description] = text.split(":")
                 return (
-                    <button key={text} className={buttonStyle} type="submit" onClick={() => appendFunction(value)}>
+                    <button key={text} className={buttonStyle} type="submit" onMouseDown={() => appendFunction(value)}>
                         <div className="ml-0.5 mr-2.5">
                             {(function getIcon() {
                                 if (value.ge) return geIcon;

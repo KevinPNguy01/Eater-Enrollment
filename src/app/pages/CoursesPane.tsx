@@ -8,7 +8,7 @@ import { SearchResults } from "./SearchResults";
 import { MapTab } from "./MapTab";
 
 export type SearchFunctions = {
-    submitSearch: () => void
+    submitSearch: (queries?: Query[]) => void
     resetSearch: () => void
     backSearch: () => void
     forwardSearch: () => void
@@ -38,6 +38,8 @@ function CoursesPane(props: {calendarPane?: React.JSX.Element}) {
     const submitSearch = async (searchQueries = queries) => {
         // If there are queries, search for them.
         if (!searchQueries.length) return;
+        // Store last search if exists.
+        setQueries(searchQueries);      // Store current search.
         setLastQueries(searchQueries);  // Store last search.
         setActiveTab("search");         // Switch to search tab.
         setSearchResults([]);           // Clear last results.
@@ -76,6 +78,7 @@ function CoursesPane(props: {calendarPane?: React.JSX.Element}) {
         // Re-search the last search.
         submitSearch(lastQueries);
         setQueries(lastQueries);
+        setLastQueries([...lastQueries]);
     }
     const search = (searchQueries: Partial<Query>[]) => {
         // Store last search if exists.
@@ -90,6 +93,8 @@ function CoursesPane(props: {calendarPane?: React.JSX.Element}) {
     if (activeTab === "calendar" && !props.calendarPane) {
         setActiveTab("search");
     }
+
+    const [multi, setMulti] = useState(false);
     
     return (
         <div className="relative m-1 flex flex-col h-full">
@@ -108,13 +113,15 @@ function CoursesPane(props: {calendarPane?: React.JSX.Element}) {
                         case "calendar": return props.calendarPane;
                         case "search": return showResults ? (
                             <SearchResults 
+                                multiState={[multi, setMulti]}
                                 courses={searchResults} 
                                 queriesState={queriesState} 
-                                defaultQuery={defaultQuery} 
+                                defaultQuery={defaultQuery}
+                                lastQueries={lastQueries}
                                 searchFunctions={{submitSearch, resetSearch, backSearch, forwardSearch, refreshSearch}}
                             />
                         ) : (
-                            <SearchForms queriesState={queriesState} defaultQueryState={defaultQueryState} submit={submitSearch}/>
+                            <SearchForms multiState={[multi, setMulti]} queriesState={queriesState} defaultQueryState={defaultQueryState} submit={submitSearch}/>
                         );
                         case "added": return <AddedTab/>;
                         case "map": return <MapTab/>;
