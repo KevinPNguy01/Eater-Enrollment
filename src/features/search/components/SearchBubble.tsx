@@ -72,9 +72,9 @@ export function SearchBubble(props: {
     }, [queries, multi]);
 
     return (
-        <div className={`flex w-full px-4 items-center border-quaternary ${suggestions.length && focus ? "border-b" : ""}`}>
+        <div className={`flex w-full px-2 items-center border-quaternary ${suggestions.length && focus ? "border-b" : ""}`}>
             {/** Magnifying glass icon to toggle mutli-search. */}
-            <div className="relative mr-2 group hover:cursor-pointer" onClick={toggleMultiSearch}>
+            <div className="relative group hover:cursor-pointer" onClick={toggleMultiSearch}>
                 {multi ? multiSearchIcon : searchIcon}
                 <Tooltip className="select-none left-1/2 -translate-x-1/2 text-nowrap text-xs mt-1 bg-tertiary border border-neutral-500 p-1.5 text-neutral-300 hidden group-hover:block" text="Toggle multi-search"/>
             </div>
