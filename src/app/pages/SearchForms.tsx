@@ -1,10 +1,9 @@
 import { SearchBox } from "../../features/search/components/SearchBox";
-import { SearchButton } from "../../features/search/components/SearchButton";
 import { TermDropDown } from "../../features/search/components/TermDropDown";
 import { Query } from "../../utils/PeterPortal";
 
-export function SearchForms(props: {queriesState: [Query[], (queries: Query[]) => void], defaultQueryState: [Query, (queries: Query) => void], submit: () => void}) {
-    const {submit} = props;
+export function SearchForms(props: {queriesState: [Query[], (queries: Query[]) => void], multiState: [boolean, (_: boolean) => void], defaultQueryState: [Query, (queries: Query) => void], submit: (queries?: Query[]) => void}) {
+    const {multiState, submit} = props;
     const [queries, setQueries] = props.queriesState;
     const [defaultQuery, setDefaultQuery] = props.defaultQueryState;
     const {quarter, year} = defaultQuery;
@@ -17,9 +16,8 @@ export function SearchForms(props: {queriesState: [Query[], (queries: Query[]) =
             </div>
             <br></br>
             <div className="w-5/6">
-                <SearchBox queriesState={[queries, setQueries]} defaultQuery={defaultQuery} submit={submit}/>
+                <SearchBox queriesState={[queries, setQueries]} multiState={multiState} defaultQuery={defaultQuery} lastQueries={[]} submitQueries={submit}/>
             </div>
-            <SearchButton submit={submit}/>
         </form>
     )
 }
