@@ -23,7 +23,7 @@ export function SearchList(props: {suggestions: SearchSuggestion[], appendFuncti
     const buttonStyle = "flex items-center gap-2 px-4 py-2 text-left border-quaternary hover:bg-tertiary last:rounded-b-[20px]";
 
     return (
-        <div className="grid w-full max-h-[50vh] overflow-y-scroll hide-scroll">
+        <div className="grid w-full max-h-[50vh] overflow-y-scroll hide-scroll rounded-b-[20px]">
             {suggestions.map(({text, value}) => {
                 const [name, description] = text.split(":")
                 return (
