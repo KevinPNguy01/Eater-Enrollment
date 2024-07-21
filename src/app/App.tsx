@@ -14,22 +14,25 @@ import { ThemeOptions, createTheme } from '@mui/material/styles';
 const theme = createTheme();
 const themeOptions: ThemeOptions = createTheme(theme, {
 	palette: {
-		mode: 'light',
-		primary: {
+	mode: 'light',
+	primary: {
 		main: '#008000',
-		},
-		secondary: {
+	},
+	secondary: {
 		main: '#f50057',
-		},
-		background: {
+	},
+	background: {
 		default: '#303030',
 		paper: '#404040',
-		},
-		text: {
+	},
+	text: {
 		primary: 'rgba(255,255,255,0.95)',
 		secondary: 'rgba(255,255,255,0.85)',
 		disabled: 'rgba(255,255,255,0.75)',
-		},
+	},
+	info: {
+		main: '#ffffff',
+	},
 	},
   });
 
