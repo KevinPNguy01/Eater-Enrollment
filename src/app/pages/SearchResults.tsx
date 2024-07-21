@@ -9,6 +9,7 @@ import { useState, useEffect } from "react"
 import { SearchFunctions } from "./CoursesPane"
 import { Query } from "../../utils/PeterPortal"
 import { SearchBox } from "../../features/search/components/SearchBox"
+import { IconButton } from "@mui/material"
 
 const homeIcon = <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 16 16">
     <path stroke="#ddd" stroke-width="0.5" fill="#ddd" d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4.5a.5.5 0 0 0 .5-.5v-4h2v4a.5.5 0 0 0 .5.5H14a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793zM2.5 14V7.707l5.5-5.5 5.5 5.5V14H10v-4a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5v4z"/>
@@ -110,22 +111,21 @@ function SearchResultsNavBar(props: {
     const clickSortMenu = () => setSortMenuVisible(!sortMenuVisible);
     const clickFilterMenu = () => setFilterMenuVisible(!filterMenuVisible);
 
-    const buttonStyle = "p-1.5 hover:bg-quaternary rounded-full w-fit aspect-square text-xl";
     return (
         <nav className="relative flex bg-tertiary border border-quaternary px-2 py-1 mb-4 rounded whitespace-pre text-center content-center items-center gap-1">
-            <button className={buttonStyle} onClick={backSearch}>{leftArrowIcon}</button>
-            <button className={buttonStyle} onClick={forwardSearch}>{rightArrowIcon}</button>
-            <button className={buttonStyle} onClick={refreshSearch}>{refreshIcon}</button>
-            <button className={buttonStyle} onClick={resetSearch}>{homeIcon}</button>
+            <IconButton color="info" onClick={backSearch}>{leftArrowIcon}</IconButton>
+            <IconButton color="info" onClick={forwardSearch}>{rightArrowIcon}</IconButton>
+            <IconButton color="info" onClick={refreshSearch}>{refreshIcon}</IconButton>
+            <IconButton color="info" onClick={resetSearch}>{homeIcon}</IconButton>
             <div className="flex-grow w-0">
                 <SearchBox multiState={multiState} queriesState={queriesState} defaultQuery={defaultQuery} lastQueries={lastQueries} submitQueries={submitSearch}/>
             </div>
             <div className="flex">
-                <button className={buttonStyle} onClick={clickSortMenu}>{sortIcon}</button>
+                <IconButton color="info" onClick={clickSortMenu}>{sortIcon}</IconButton>
                 {sortMenuVisible ? <SortingMenu optionsState={props.sortOptionsState}/> : null}
             </div>
             <div className="flex">
-                <button className={buttonStyle} onClick={clickFilterMenu}>{filterIcon}</button>
+                <IconButton color="info" onClick={clickFilterMenu}>{filterIcon}</IconButton>
                 {filterMenuVisible ? <FilterMenu optionsState={props.filterOptionsState} defaultOptions={props.defaultFilterOptions}/> : null}
             </div>
         </nav>
