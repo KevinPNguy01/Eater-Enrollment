@@ -8,6 +8,30 @@ import { requestSchedule } from "../utils/PeterPortal";
 import { CoursesPane } from "./pages/CoursesPane";
 import { CalendarPane } from "./pages/CalendarPane";
 import useWindowDimensions from "../utils/WindowDimensions";
+import { ThemeProvider } from "@emotion/react";
+import { ThemeOptions, createTheme } from '@mui/material/styles';
+
+const theme = createTheme();
+const themeOptions: ThemeOptions = createTheme(theme, {
+	palette: {
+		mode: 'light',
+		primary: {
+		main: '#008000',
+		},
+		secondary: {
+		main: '#f50057',
+		},
+		background: {
+		default: '#303030',
+		paper: '#404040',
+		},
+		text: {
+		primary: 'rgba(255,255,255,0.95)',
+		secondary: 'rgba(255,255,255,0.85)',
+		disabled: 'rgba(255,255,255,0.75)',
+		},
+	},
+  });
 
 // Define the context type of schedule related functions and data.
 type ScheduleContextType = {
@@ -209,33 +233,35 @@ export function App() {
 	const calendarPane = <CalendarPane showingFinals={showingFinals} setShowingFinals={setShowingFinals}/>;
 
 	return (
-		<ScheduleContext.Provider value={
-			{ 
-				calendarReference: calendarRef, 
-				addedCourses: addedCourses,
-				scheduleIndex: scheduleIndex,
-				addOffering: addOffering, 
-				removeOffering: removeOffering,
-				createSchedule: createSchedule,
-				loadSchedule: loadSchedule,
-				saveSchedule: saveUser,
-				containsOffering: containsOffering,
+		<ThemeProvider theme={themeOptions}>
+			<ScheduleContext.Provider value={
+				{ 
+					calendarReference: calendarRef, 
+					addedCourses: addedCourses,
+					scheduleIndex: scheduleIndex,
+					addOffering: addOffering, 
+					removeOffering: removeOffering,
+					createSchedule: createSchedule,
+					loadSchedule: loadSchedule,
+					saveSchedule: saveUser,
+					containsOffering: containsOffering,
 
-				renames: renames,
-				renamed: () => renamed(a => a+1),
+					renames: renames,
+					renamed: () => renamed(a => a+1),
 
-				colorRules: colorRules,
-				setColorRules: setColorRules
-			}
-		}>
-			<div className="relative h-screen flex text-white flex-col overflow-y-hidden overflow-x-hidden">
-				<NavBar save={saveUser} load={loadUser}/>
-				<div id="main" className={`h-1 grow bg-secondary grid ${aspect >= 1 ? "grid-cols-2" : "grid-cols-1"}`}>
-					{aspect >= 1 ? calendarPane : null}
-					<CoursesPane calendarPane={aspect < 1 ? calendarPane : undefined}/>
+					colorRules: colorRules,
+					setColorRules: setColorRules
+				}
+			}>
+				<div className="relative h-screen flex text-white flex-col overflow-y-hidden overflow-x-hidden">
+					<NavBar save={saveUser} load={loadUser}/>
+					<div id="main" className={`h-1 grow bg-secondary grid ${aspect >= 1 ? "grid-cols-2" : "grid-cols-1"}`}>
+						{aspect >= 1 ? calendarPane : null}
+						<CoursesPane calendarPane={aspect < 1 ? calendarPane : undefined}/>
+					</div>
 				</div>
-			</div>
-		</ScheduleContext.Provider>
+			</ScheduleContext.Provider>
+		</ThemeProvider>
 	)
 }
 

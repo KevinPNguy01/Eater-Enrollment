@@ -1,32 +1,57 @@
 import { useContext } from "react";
 import { SearchContext } from "../../../app/pages/CoursesPane";
 import { Course } from "../../../constants/Types";
+import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
+
+const downArrowIcon = <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
+    <path fill="#bbb" stroke="#bbb" stroke-width="0.5" transform="translate(0,-1.5)" d="M8 9.8l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 10.293L8 9.8z"/>
+</svg>
+
 
 export function CourseInfo(props: {course: Course}) {
     const {course} = props;
     return (
-        <div className="shadow-lg shadow-neutral-800 flex flex-col gap-4 text-left left-0 p-2 w-full top-full -translate-y-3 absolute bg-tertiary z-10 text-base font-normal rounded-b-xl rounded-tr-xl">
-            <p>
-                <span className="font-semibold">Course Description:</span>
-                <br/>
-                {course.description}
-                <br/>
-            </p>
-            {course.ge_list.length ? (
-                <p>
-                    <span className="font-semibold">General Education Categories:</span>
-                    <br/>
-                    <p className="whitespace-pre">{course.ge_list.join("\n")}</p>
-                </p>    
-            ) : null}
-            {course.prerequisite_text ? (
-                <PrerequisiteInfo course={course}/>
-            ) : null }
-            {course.prerequisite_for.length ? (
-                <PrerequisiteFor course={course}/>
-            ) : null}
-        </div>
-    )
+        <Accordion>
+            <AccordionSummary
+                expandIcon={downArrowIcon}
+                aria-controls="panel1-content"
+                id="panel1-header"
+                >
+                <span className="text-base font-semibold">{`${course.department} ${course.number}: ${course.title}`}</span>
+            </AccordionSummary>
+            <AccordionDetails className="text-left text-base">
+                <div className="flex flex-col gap-4">
+                    <CourseDescription course={course}/>
+                    {course.ge_list.length ? <GeInfo course={course}/> : null}
+                    {course.prerequisite_text ? <PrerequisiteInfo course={course}/> : null}
+                    {course.prerequisite_for.length ? <PrerequisiteFor course={course}/> : null}
+                </div>
+            </AccordionDetails>
+        </Accordion>
+    );
+}
+
+function CourseDescription(props: {course: Course}) {
+    const {course} = props;
+    return (
+        <p>
+            <span className="font-semibold">Course Description:</span>
+            <br/>
+            {course.description}
+            <br/>
+        </p>
+    );
+}
+
+function GeInfo(props: {course: Course}) {
+    const {course} = props;
+    return (
+        <p>
+            <span className="font-semibold">General Education Categories:</span>
+            <br/>
+            <p className="whitespace-pre">{course.ge_list.join("\n")}</p>
+        </p>  
+    );
 }
 
 function PrerequisiteInfo(props: {course: Course}) {
