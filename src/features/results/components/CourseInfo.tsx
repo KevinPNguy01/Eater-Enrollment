@@ -5,19 +5,18 @@ import { Course } from "../../../constants/Types";
 export function CourseInfo(props: {course: Course}) {
     const {course} = props;
     return (
-        <div className="text-left left-0 p-2 w-1/2 top-full absolute bg-tertiary z-10 text-base font-normal border border-quaternary rounded">
+        <div className="shadow-lg shadow-neutral-800 flex flex-col gap-4 text-left left-0 p-2 w-full top-full -translate-y-3 absolute bg-tertiary z-10 text-base font-normal rounded-b-xl rounded-tr-xl">
             <p>
-                <strong>Course Description:</strong>
+                <span className="font-semibold">Course Description:</span>
                 <br/>
                 {course.description}
-                <br/><br/>
+                <br/>
             </p>
             {course.ge_list.length ? (
                 <p>
-                    <strong>General Education Categories:</strong>
+                    <span className="font-semibold">General Education Categories:</span>
                     <br/>
                     <p className="whitespace-pre">{course.ge_list.join("\n")}</p>
-                    <br/>
                 </p>    
             ) : null}
             {course.prerequisite_text ? (
@@ -58,7 +57,7 @@ function PrerequisiteInfo(props: {course: Course}) {
 
     return (
         <div>
-            <strong>Prerequisites:</strong>
+            <span className="font-semibold">Prerequisites:</span>
             <br/>
             <div>
                 {strings.map(string => {
@@ -72,7 +71,6 @@ function PrerequisiteInfo(props: {course: Course}) {
                     }
                 })}
             </div>
-            <br/>
         </div>
     );
 }
@@ -91,7 +89,7 @@ function PrerequisiteFor(props: {course: Course}) {
 
     return (
         <div>
-            <strong>Prerequisite For:</strong>
+            <span className="font-semibold">Prerequisite For:</span>
             <br/>
             <div>
                 {[...prerequisites].sort(([,a], [,b]) => b.length - a.length).map(([department, numbers]) => (
@@ -106,7 +104,6 @@ function PrerequisiteFor(props: {course: Course}) {
                     </fieldset>
                 ))}
             </div>
-            <br/>
         </div>
     );
 }
