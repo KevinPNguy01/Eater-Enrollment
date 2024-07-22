@@ -13,7 +13,7 @@ export function CourseResult(props: {course: Course}) {
     return (
         <tbody className="text-xs">
             {/* Table row for displaying course information. */}
-            <tr className="relative">
+            <tr>
                 <td colSpan={99}>
                     <CourseInfo course={course}/>
                 </td>

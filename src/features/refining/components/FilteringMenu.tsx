@@ -3,8 +3,10 @@ import { ColoredText } from "../../../components/ColoredText";
 import { FilterOptions } from "../types/options";
 import MultiRangeSlider from "multi-range-slider-react";
 import { useState } from "react";
+import { Backdrop, Card, Checkbox, IconButton } from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
 
-export function FilterMenu(props: {optionsState: [FilterOptions, (options: FilterOptions) => void], defaultOptions: FilterOptions}) {
+export function FilterMenu(props: {optionsState: [FilterOptions, (options: FilterOptions) => void], defaultOptions: FilterOptions, close: () => void}) {
     const [options, setOptions] = props.optionsState;
     const {defaultOptions} = props;
     const updateOptions = () => setOptions({...options});
@@ -19,69 +21,80 @@ export function FilterMenu(props: {optionsState: [FilterOptions, (options: Filte
     const [minCaption, setMinCaption] = useState("");
     const [maxCaption, setMaxCaption] = useState("");
     return (
-        <div className="bg-secondary border top-full left-0 my-1 p-4 border-quaternary absolute z-10 text-base text-left max-w-full">
-            <p className="text-xl whitespace-pre border-b border-quaternary mb-2">{"Search Filters"}</p>
-            <div className="flex flex-wrap *:flex-grow gap-4">
-                <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
-                    <legend>
-                        <SelectDeselectAll options={sectionTypes} defaultOptions={defaultSections} updateOptions={updateOptions}/>
-                        Section Type
-                    </legend>
-                    <OptionList className="grid grid-cols-2" options={sectionTypes} defaultOptions={defaultSections} updateOptions={updateOptions} colorRules={typeColors}/>
-                </fieldset>
-                <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
-                    <legend>
-                        <SelectDeselectAll options={statusTypes} defaultOptions={defaultStatuses} updateOptions={updateOptions}/>
-                        Status
-                    </legend>
-                    <OptionList options={statusTypes} defaultOptions={defaultStatuses} updateOptions={updateOptions} colorRules={statusColors}/>
-                </fieldset>
-                <div className="grid">
+        <Backdrop className="!absolute z-20" open onClick={props.close}>
+            <Card 
+                onClick={e => e.stopPropagation()}
+                elevation={3} 
+                className="flex flex-col bg-secondary border top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 my-1 border-quaternary absolute z-10 text-base text-left w-3/4 max-h-[75%] hide-scroll"
+            >
+                <div className="flex items-center justify-between text-xl whitespace-pre border-b border-quaternary px-4 mt-2">
+                    {"Search Filters"}
+                    <IconButton color="info" onClick={props.close}>
+                        <CloseIcon/>
+                    </IconButton>
+                </div>
+                <div className="flex flex-wrap flex-grow *:flex-grow gap-4 p-4 !overflow-y-auto">
                     <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
                         <legend>
-                            <SelectDeselectAll options={dayTypes} defaultOptions={defaultDays} updateOptions={updateOptions}/>
-                            Days
+                            <SelectDeselectAll options={sectionTypes} defaultOptions={defaultSections} updateOptions={updateOptions}/>
+                            <span className="">Section Type</span>
                         </legend>
-                        <OptionList className="flex gap-4" options={dayTypes} defaultOptions={defaultDays} updateOptions={updateOptions}/>
+                        <OptionList className="grid grid-cols-2" options={sectionTypes} defaultOptions={defaultSections} updateOptions={updateOptions} colorRules={typeColors}/>
                     </fieldset>
                     <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
-                        <legend>Time</legend>
-                        <MultiRangeSlider
-                            className="!border-none !shadow-none"
-                            labels={["8","10","12","2","4","6","8","10"]}
-                            min={480} minValue={options.timeRange[0]} max={1320} maxValue={options.timeRange[1]} step={10} stepOnly={true}
-                            minCaption={minCaption}
-                            maxCaption={maxCaption}
-                            onInput={e => {
-                                const toTimeString = (totalMinutes: number) => {
-                                    const hours = Math.floor(totalMinutes/60);
-                                    const minutes = totalMinutes % 60;
-                                    return `${(hours%12) || 12}:${minutes.toString().padEnd(2, "0")} ${hours >= 12 ? "pm" : "am"}`;
-                                }
-                                setMinCaption(toTimeString(e.minValue));
-                                setMaxCaption(toTimeString(e.maxValue));
-                            }}
-                            onChange={e => setOptions({...options, timeRange: [e.minValue, e.maxValue]})}
-                        />
+                        <legend>
+                            <SelectDeselectAll options={statusTypes} defaultOptions={defaultStatuses} updateOptions={updateOptions}/>
+                            <span className="">Status</span>
+                        </legend>
+                        <OptionList options={statusTypes} defaultOptions={defaultStatuses} updateOptions={updateOptions} colorRules={statusColors}/>
+                    </fieldset>
+                    <div className="grid">
+                        <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
+                            <legend>
+                                <SelectDeselectAll options={dayTypes} defaultOptions={defaultDays} updateOptions={updateOptions}/>
+                                <span className="">Days</span>
+                            </legend>
+                            <OptionList className="flex flex-wrap gap-x-4" options={dayTypes} defaultOptions={defaultDays} updateOptions={updateOptions}/>
+                        </fieldset>
+                        <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
+                            <legend>Time</legend>
+                            <MultiRangeSlider
+                                className="!border-none !shadow-none"
+                                labels={["8","10","12","2","4","6","8","10"]}
+                                min={480} minValue={options.timeRange[0]} max={1320} maxValue={options.timeRange[1]} step={10} stepOnly={true}
+                                minCaption={minCaption}
+                                maxCaption={maxCaption}
+                                onInput={e => {
+                                    const toTimeString = (totalMinutes: number) => {
+                                        const hours = Math.floor(totalMinutes/60);
+                                        const minutes = totalMinutes % 60;
+                                        return `${(hours%12) || 12}:${minutes.toString().padEnd(2, "0")} ${hours >= 12 ? "pm" : "am"}`;
+                                    }
+                                    setMinCaption(toTimeString(e.minValue));
+                                    setMaxCaption(toTimeString(e.maxValue));
+                                }}
+                                onChange={e => setOptions({...options, timeRange: [e.minValue, e.maxValue]})}
+                            />
+                        </fieldset>
+                    </div>
+                    <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
+                        <legend>
+                            <SelectDeselectAll options={levelTypes} defaultOptions={defaultLevels} updateOptions={updateOptions}/>
+                            <span className="">Course Level</span>
+                        </legend>
+                        <OptionList options={levelTypes} defaultOptions={defaultLevels} updateOptions={updateOptions}/>
+                    </fieldset>
+                    <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
+                        <legend>
+                            <SelectDeselectAll options={restrictionTypes} defaultOptions={defaultRestrictions} updateOptions={updateOptions}/>
+                            <span className="">Restrictions</span>
+                        </legend>
+                        <OptionList options={restrictionTypes} defaultOptions={defaultRestrictions} updateOptions={updateOptions}/>
                     </fieldset>
                 </div>
-                <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
-                    <legend>
-                        <SelectDeselectAll options={levelTypes} defaultOptions={defaultLevels} updateOptions={updateOptions}/>
-                        Course Level
-                    </legend>
-                    <OptionList options={levelTypes} defaultOptions={defaultLevels} updateOptions={updateOptions}/>
-                </fieldset>
-                <fieldset className="border border-quaternary p-2 flex flex-col justify-between">
-                    <legend>
-                        <SelectDeselectAll options={restrictionTypes} defaultOptions={defaultRestrictions} updateOptions={updateOptions}/>
-                        Restrictions
-                    </legend>
-                    <OptionList options={restrictionTypes} defaultOptions={defaultRestrictions} updateOptions={updateOptions}/>
-                </fieldset>
-            </div>
-        </div>
-    )
+            </Card>
+        </Backdrop>
+    );
 }
 
 /**
@@ -97,17 +110,17 @@ function SelectDeselectAll(props: {options: Set<string>, defaultOptions: Set<str
     const clickHandler = () => {
         const select = !options.size;
         defaultOptions.forEach(option => {
-            for (const checkbox of document.getElementsByClassName(`checkbox-${option}`)) {
-                console.log(checkbox);
-                (checkbox as HTMLInputElement).checked = select;
-            }
             select ? options.add(option) : options.delete(option);
             updateOptions();
         });
     }
-    const buttonStyle = `w-4 h-4 text-xs border border-quaternary rounded m-1 ${options.size === defaultOptions.size ? "bg-blue-500" : "bg-tertiary"}`;
 
-    return <button className={buttonStyle} onClick={clickHandler}>{!options.size ? " " : options.size === defaultOptions.size ? "✓" :"━"}</button>
+    return <Checkbox 
+        color="secondary"
+        checked={options.size === defaultOptions.size}
+        indeterminate={options.size > 0 && options.size !== defaultOptions.size}
+        onChange={clickHandler}
+    />
 }
 
 /**
@@ -122,16 +135,19 @@ function OptionList(props: {className?: string, options: Set<string>, defaultOpt
     return (
         <div className={className}>
             {Array.from(defaultOptions).map(option => (
-                <div className="flex">
-                    <input type="checkbox" id={option} name={option}
-                        defaultChecked={options.has(option)} 
+                <div className="flex items-center">
+                    <Checkbox 
+                        size="small"
+                        color="secondary"
+                        name={option}
+                        checked={options.has(option)}
                         className={`text-left my-1 checkbox-${option}`} 
                         onChange={e => {
                             e.target.checked ? options.add(e.target.name) : options.delete(e.target.name);
                             updateOptions();
                         }}
                     />
-                    <ColoredText className="ml-1 font-bold" text={option} colorRules={colorRules}/>
+                    <ColoredText className="font-semibold text-wrap" text={option} colorRules={colorRules}/>
                 </div>
             ))}
         </div>

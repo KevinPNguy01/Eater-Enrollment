@@ -76,7 +76,7 @@ export function SearchResults(props: {
     sortCourses(filteredCourses, sortOptions);
 
     return (
-        <div className={`h-full flex flex-col`}>
+        <div className={`relative h-full flex flex-col`}>
             <SearchResultsNavBar 
                 sortOptionsState={[sortOptions, setSortOptions]} 
                 filterOptionsState={[filterOptions, setFilterOptions]} 
@@ -107,12 +107,8 @@ function SearchResultsNavBar(props: {
     const [sortMenuVisible, setSortMenuVisible] = useState(false);
     const [filterMenuVisible, setFilterMenuVisible] = useState(false);
 
-    // Click event handlers.
-    const clickSortMenu = () => setSortMenuVisible(!sortMenuVisible);
-    const clickFilterMenu = () => setFilterMenuVisible(!filterMenuVisible);
-
     return (
-        <nav className="relative flex bg-tertiary border border-quaternary px-2 py-1 mb-4 rounded whitespace-pre text-center content-center items-center gap-1">
+        <nav className="flex bg-tertiary border border-quaternary px-2 py-1 mb-4 rounded whitespace-pre text-center content-center items-center gap-1">
             <IconButton color="info" onClick={backSearch}>{leftArrowIcon}</IconButton>
             <IconButton color="info" onClick={forwardSearch}>{rightArrowIcon}</IconButton>
             <IconButton color="info" onClick={refreshSearch}>{refreshIcon}</IconButton>
@@ -121,12 +117,16 @@ function SearchResultsNavBar(props: {
                 <SearchBox multiState={multiState} queriesState={queriesState} defaultQuery={defaultQuery} lastQueries={lastQueries} submitQueries={submitSearch}/>
             </div>
             <div className="flex">
-                <IconButton color="info" onClick={clickSortMenu}>{sortIcon}</IconButton>
-                {sortMenuVisible ? <SortingMenu optionsState={props.sortOptionsState}/> : null}
+                <IconButton onClick={() => setSortMenuVisible(true)}>{sortIcon}</IconButton>
+                {sortMenuVisible ? (
+                    <SortingMenu optionsState={props.sortOptionsState} close={() => setSortMenuVisible(false)}/>
+                ) : null}
             </div>
             <div className="flex">
-                <IconButton color="info" onClick={clickFilterMenu}>{filterIcon}</IconButton>
-                {filterMenuVisible ? <FilterMenu optionsState={props.filterOptionsState} defaultOptions={props.defaultFilterOptions}/> : null}
+                <IconButton onClick={() => setFilterMenuVisible(true)}>{filterIcon}</IconButton>
+                {filterMenuVisible ? (
+                    <FilterMenu optionsState={props.filterOptionsState} defaultOptions={props.defaultFilterOptions} close={() => setFilterMenuVisible(false)}/>
+                ) : null}
             </div>
         </nav>
     )
