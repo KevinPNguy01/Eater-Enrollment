@@ -19,7 +19,7 @@ const themeOptions: ThemeOptions = createTheme(theme, {
 		main: '#008000',
 	},
 	secondary: {
-		main: '#f50057',
+		main: '#0080ff',
 	},
 	background: {
 		default: '#303030',
@@ -31,7 +31,7 @@ const themeOptions: ThemeOptions = createTheme(theme, {
 		disabled: 'rgba(255,255,255,0.75)',
 	},
 	info: {
-		main: '#ffffff',
+		main: '#808080',
 	},
 	},
   });
