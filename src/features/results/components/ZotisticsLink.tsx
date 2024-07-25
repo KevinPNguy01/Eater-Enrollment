@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ResponsiveContainer, BarChart, CartesianGrid, Bar, XAxis, YAxis } from "recharts";
 import { CourseOffering } from "../../../constants/Types";
+import { Card } from "@mui/material";
 
 /**
  * Zotistics link tag for the GradeDistributionCollectionAggregate.
@@ -62,7 +63,7 @@ function ZotisticsGraph(props: {offering: CourseOffering}) {
     const data = Array.from(letterGrades).map(([letter, count]) => ({"letter":letter, "count":count/totalGrades*100}));
 
     return (
-        <div className={`absolute left-full -translate-y-1/2 text-nowrap text-white text-left border border-quaternary bg-tertiary mx-4 p-4 z-20 w-fit`}>
+        <Card elevation={3} className={`absolute left-full -translate-y-1/2 text-nowrap text-white text-left border border-quaternary bg-tertiary mx-4 p-4 z-20 w-fit`}>
             <p className="whitespace-pre text-lg font-bold">{`${offering.course.department} ${offering.course.number} | ${aggregate.average_gpa.toFixed(2)} GPA Average          `}</p>
             <br/>
             <ResponsiveContainer aspect={2} width="100%">
@@ -76,6 +77,6 @@ function ZotisticsGraph(props: {offering: CourseOffering}) {
                     <YAxis stroke="#FFFFFF" dataKey="count" unit="%" width={40} ticks={[25, 50, 75, 100]} tickLine={false}/>
                 </BarChart>
             </ResponsiveContainer>
-        </div>
+        </Card>
     )
 }
