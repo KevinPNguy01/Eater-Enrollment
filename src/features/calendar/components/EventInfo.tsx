@@ -5,6 +5,7 @@ import { RGBColor, SketchPicker } from "react-color";
 import { ScheduleContext } from "../../../app/App";
 import { CourseOffering } from "../../../constants/Types";
 import { RateMyProfessorsLink } from "../../results/components/RateMyProfessorsLink";
+import { Card } from "@mui/material";
 
 export function EventInfo(props: {offering: CourseOffering, setOffering: (offering: CourseOffering) => void, pos: {x: number, y: number}}) {
     const [colorVisible, setColorVisible] = useState(false);
@@ -12,7 +13,7 @@ export function EventInfo(props: {offering: CourseOffering, setOffering: (offeri
     const {removeOffering, calendarReference, colorRules, setColorRules} = useContext(ScheduleContext);
     const {offering, setOffering, pos} = props;
     return (
-        <div className="absolute bg-tertiary p-2 border border-quaternary z-10 event-info" style={{top: `${pos.y}px`, left: `${pos.x}px`}}>
+        <Card elevation={3} className="!overflow-visible absolute bg-tertiary p-4 border border-quaternary !z-30 event-info" style={{top: `${pos.y}px`, left: `${pos.x}px`}}>
             <table className="relative">
                 <tbody>
                     <tr>
@@ -83,6 +84,6 @@ export function EventInfo(props: {offering: CourseOffering, setOffering: (offeri
                     </tr>
                 </tbody>
             </table>
-        </div>
+        </Card>
     );
 }

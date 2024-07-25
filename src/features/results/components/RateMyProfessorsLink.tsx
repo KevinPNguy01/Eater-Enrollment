@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Instructor, Review } from "../../../constants/Types";
+import { Card } from "@mui/material";
 
 /**
  * RateMyProfessors link tag for the given instructor, or a regular text tag if the instructor is STAFF.
@@ -51,7 +52,7 @@ function RateMyProfessorsReview(props: {review: Review}) {
 
     const {avgRating, numRatings, firstName, lastName, department, wouldTakeAgainPercent, avgDifficulty} = props.review;
     return (
-        <div className={`absolute left-full -translate-y-1/2 text-nowrap text-white text-left border border-quaternary bg-tertiary mx-4 p-4 z-20 w-fit`}>
+        <Card elevation={3} className={`absolute left-full -translate-y-1/2 text-nowrap text-white text-left border border-quaternary bg-tertiary mx-6 p-6 z-10 w-fit`}>
             <div className="flex">
                 <p className="text-4xl font-extrabold">{`${avgRating}`}</p>
                 <p className="whitespace-pre text-gray-300 text-base font-bold">{` / 5`}</p>
@@ -72,6 +73,6 @@ function RateMyProfessorsReview(props: {review: Review}) {
                     <p className="text-sm font-bold">Level of Difficulty</p>
                 </div>
             </div>
-        </div>
+        </Card>
     );
 }
