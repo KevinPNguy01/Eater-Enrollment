@@ -10,33 +10,51 @@ import { CalendarPane } from "./pages/CalendarPane";
 import useWindowDimensions from "../utils/WindowDimensions";
 import { ThemeProvider } from "@emotion/react";
 import { ThemeOptions, createTheme } from '@mui/material/styles';
-import { Backdrop, Card } from "@mui/material";
+import { Backdrop, Button, Card } from "@mui/material";
 import { SnackbarProvider, enqueueSnackbar } from "notistack";
+import SaveIcon from '@mui/icons-material/Save';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 
 const theme = createTheme();
 const themeOptions: ThemeOptions = createTheme(theme, {
 	palette: {
-	mode: 'light',
-	primary: {
-		main: '#008000',
+		mode: 'light',
+		primary: {
+			main: '#008000',
+		},
+		secondary: {
+			main: '#0080ff',
+		},
+		background: {
+			default: '#303030',
+			paper: '#404040',
+		},
+		text: {
+			primary: 'rgba(255,255,255,0.95)',
+			secondary: 'rgba(255,255,255,0.85)',
+			disabled: 'rgba(255,255,255,0.75)',
+		},
+		info: {
+			main: '#808080',
+		},
+		white: theme.palette.augmentColor({color: {main: "#fff"}})
 	},
-	secondary: {
-		main: '#0080ff',
-	},
-	background: {
-		default: '#303030',
-		paper: '#404040',
-	},
-	text: {
-		primary: 'rgba(255,255,255,0.95)',
-		secondary: 'rgba(255,255,255,0.85)',
-		disabled: 'rgba(255,255,255,0.75)',
-	},
-	info: {
-		main: '#808080',
-	},
-	},
-  });
+});
+
+declare module "@mui/material/styles" {
+	interface Palette {
+		white: string;
+	}
+	interface PaletteOptions {
+		white: string;
+	}
+}
+
+	declare module "@mui/material/Button" {
+	interface ButtonPropsColorOverrides {
+		white: true;
+	}
+}
 
 // Define the context type of schedule related functions and data.
 type ScheduleContextType = {
@@ -288,12 +306,12 @@ function NavBar(props: {save: (_: string) => void, load: (_: string) => void}) {
 				</h1>
 			</div>
 			<div className="flex gap-2 mr-8">
-				<button onClick={() => setSaveMenuOpen(!saveMenuOpen)}>
-					💾Save
-				</button>
-				<button onClick={() => setLoadMenuOpen(!loadMenuOpen)}>
-					☁️ Load
-				</button>
+				<Button variant="contained" color="primary" startIcon={<SaveIcon/>} onClick={() => setSaveMenuOpen(!saveMenuOpen)}>
+					Save
+				</Button>
+				<Button variant="contained" color="primary" startIcon={<CloudDownloadIcon/>} onClick={() => setLoadMenuOpen(!loadMenuOpen)}>
+					Load
+				</Button>
 			</div>
 
 			{saveMenuOpen ? <SaveLoadMenu name="Save" submit={save} cancel={() => setSaveMenuOpen(false)}/> : null}
