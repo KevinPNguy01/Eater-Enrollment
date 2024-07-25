@@ -13,7 +13,7 @@ export function EventInfo(props: {offering: CourseOffering, setOffering: (offeri
     const {removeOffering, calendarReference, colorRules, setColorRules} = useContext(ScheduleContext);
     const {offering, setOffering, pos} = props;
     return (
-        <Card elevation={3} className="!overflow-visible absolute bg-tertiary p-4 border border-quaternary !z-30 event-info" style={{top: `${pos.y}px`, left: `${pos.x}px`}}>
+        <Card elevation={3} className="!overflow-visible absolute bg-tertiary p-4 border border-quaternary !z-[1000] event-info" style={{top: `${pos.y}px`, left: `${pos.x}px`}}>
             <table className="relative">
                 <tbody>
                     <tr>
