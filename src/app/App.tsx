@@ -10,6 +10,8 @@ import { CalendarPane } from "./pages/CalendarPane";
 import useWindowDimensions from "../utils/WindowDimensions";
 import { ThemeProvider } from "@emotion/react";
 import { ThemeOptions, createTheme } from '@mui/material/styles';
+import { Backdrop, Card } from "@mui/material";
+import { SnackbarProvider, enqueueSnackbar } from "notistack";
 
 const theme = createTheme();
 const themeOptions: ThemeOptions = createTheme(theme, {
@@ -109,13 +111,16 @@ export function App() {
 		insertData(username + "ColorRules",
 			Array.from(colorRules.entries()).map(([offering, rgb]) => `${offering}:${rgb.r} ${rgb.g} ${rgb.b}`).join("\n")
 		);
+		enqueueSnackbar(`Scheduled saved under "${username}"`, {variant: "success"});
 	}
 
 	const loadUser = async (username: string) => {
 		const schedulesString = await getData(username);
 		if (!schedulesString) {
+			enqueueSnackbar(`No schedule found for "${username}"`, {variant: "error"});
 			return;
 		}
+		enqueueSnackbar(`Loaded schedule for "${username}"`, {variant: "success"});
 
 		const calendar = (calendarRef.current! as InstanceType<typeof FullCalendar>)?.getApi() as CalendarApi;
 		setScheduleIndex(0);
@@ -262,6 +267,7 @@ export function App() {
 						{aspect >= 1 ? calendarPane : null}
 						<CoursesPane calendarPane={aspect < 1 ? calendarPane : undefined}/>
 					</div>
+					<SnackbarProvider/>
 				</div>
 			</ScheduleContext.Provider>
 		</ThemeProvider>
@@ -299,22 +305,30 @@ function NavBar(props: {save: (_: string) => void, load: (_: string) => void}) {
 function SaveLoadMenu(props: {name: string, submit: (_: string) => void, cancel: () => void}) {
 	const {name, submit, cancel} = props;
 	const inputRef = useRef<HTMLInputElement>(null);
+
 	return (
-		<div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 z-[100] bg-tertiary border border-quaternary p-4 flex flex-col gap-4">
-			<h1>
-				{name}
-			</h1>
-			<input ref={inputRef} placeholder='User ID'/>
-			<div className="flex gap-4">
-				<button onClick={cancel}>Cancel</button>
-				<button onClick={() => {
-					const input = inputRef.current?.value;
-					if (input) submit(input);
-					cancel();
-				}}>
+		<Backdrop open className="z-[1000]" onClick={cancel}>
+			<Card 
+				className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 bg-tertiary border border-quaternary p-4 flex flex-col justify-between gap-4"
+				onClick={e => e.stopPropagation()}
+			>
+				<h1>
 					{name}
-				</button>
-			</div>
-		</div>
+				</h1>
+				<input ref={inputRef} placeholder='User ID'/>
+				<div className="flex justify-end gap-4">
+					<button onClick={cancel}>Cancel</button>
+					<button onClick={() => {
+						const input = inputRef.current?.value;
+						if (input) {
+							submit(input);
+						}
+						cancel();
+					}}>
+						{name}
+					</button>
+				</div>
+			</Card>
+		</Backdrop>
 	)
 }
