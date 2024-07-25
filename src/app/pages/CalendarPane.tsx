@@ -6,6 +6,8 @@ import { EventInfo } from '../../features/calendar/components/EventInfo';
 import { ScheduleSelect } from '../../features/calendar/components/ScheduleSelect';
 import { ScheduleContext } from '../App';
 import { createEvents, createFinalEvents } from '../../utils/FullCalendar';
+import { Button, IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (_: boolean) => void}) {
 	const [offering, setOffering] = useState(null as unknown as CourseOffering);
@@ -51,26 +53,33 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 }
 
 function CalendarNavBar(props: {showingFinals: boolean, setShowingFinals: (_: boolean) => void}) {
-    const { addedCourses, scheduleIndex, saveSchedule, removeOffering } = useContext(ScheduleContext);
+    const { addedCourses, scheduleIndex, removeOffering } = useContext(ScheduleContext);
     const {showingFinals, setShowingFinals} = props
     
     return (
-        <nav className="bg-tertiary grid grid-cols-4 my-1">
-            <ScheduleSelect/>
-            <button className={`${showingFinals ? "bg-primary" : "bg-secondary"} m-2 border border-quaternary rounded`} onClick={() => {
-                setShowingFinals(!showingFinals);
-            }}>
-                Finals
-            </button>
-            <button 
-                className="bg-secondary m-2 border border-quaternary rounded" 
-                onClick={() => addedCourses[scheduleIndex].courses.map(({offerings}) => offerings).flat().forEach(offering => removeOffering(offering))}
-            >
-                🗑️
-            </button>
-            <button className="bg-secondary m-2 border border-quaternary rounded" onClick={() => saveSchedule("schedule")}>
-                💾
-            </button>
+        <nav className="w-full bg-tertiary flex my-1 items-center justify-between">
+			<div className="flex w-1/2 items-center">
+				<ScheduleSelect/>
+				<Button 
+					className="w-fit h-fit !px-4 !py-0.5" 
+					sx={showingFinals ? {"&:hover": {backgroundColor: "#008000", border: "#bbb 1px solid"}} : null} 
+					variant={showingFinals ? "contained" : "outlined"} 
+					color={showingFinals ? "primary" : "white"} 
+					onClick={() => {
+						setShowingFinals(!showingFinals);
+					}}
+				>
+					Finals
+				</Button>
+			</div>
+            <div className="px-4">
+				<IconButton 
+					color="white"
+					onClick={() => addedCourses[scheduleIndex].courses.map(({offerings}) => offerings).flat().forEach(offering => removeOffering(offering))}
+				>
+					<DeleteIcon/>
+				</IconButton>
+			</div>
         </nav>
     )
 }
