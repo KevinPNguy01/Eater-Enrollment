@@ -86,20 +86,22 @@ export const ScheduleContext = createContext(
 	{} as ScheduleContextType
 );
 
-const insertData = async (key: string, value: string) => {
+const insertData = async (userID: string, schedules: string, colors: string) => {
     await fetch('/api/data', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
 		},
-		body: JSON.stringify({ key, value }),
+		body: JSON.stringify({ userID, schedules, colors }),
     });
   };
 
-const getData = async (key: string) => {
-	const response = await fetch(`/api/data/${key}`);
+const getData = async (userID: string) => {
+	const response = await fetch(`/api/data/${userID}`);
 	const data = await response.json();
-	return data.value as string;
+	const schedules = data.schedules as string;
+	const colors = data.colors as string;
+	return {schedules, colors};
 };
 
 // Navigation bar with calendar on the left, and everything else on the right.
@@ -120,27 +122,23 @@ export function App() {
 	const aspect = width/height;
 
 	const saveUser = (username: string) => {
-		insertData(username, 
-			addedCourses.map(
-				({name, courses}) => (
-					name + ":" + courses.map(
-						(course) => course.offerings.map(
-							(offering) => `${offering.quarter},${offering.year},${offering.section.code}`
-						)
-					).flat().join(";")
-				)
-			).join("\n")
-		);
-
-		insertData(username + "ColorRules",
-			Array.from(colorRules.entries()).map(([offering, rgb]) => `${offering}:${rgb.r} ${rgb.g} ${rgb.b}`).join("\n")
-		);
+		const schedules = addedCourses.map(
+			({name, courses}) => (
+				name + ":" + courses.map(
+					(course) => course.offerings.map(
+						(offering) => `${offering.quarter},${offering.year},${offering.section.code}`
+					)
+				).flat().join(";")
+			)
+		).join("\n");
+		const colors = Array.from(colorRules.entries()).map(([offering, rgb]) => `${offering}:${rgb.r} ${rgb.g} ${rgb.b}`).join("\n")
+		insertData(username, schedules, colors);
 		enqueueSnackbar(`Scheduled saved under "${username}"`, {variant: "success"});
 	}
 
 	const loadUser = async (username: string) => {
-		const schedulesString = await getData(username);
-		if (!schedulesString) {
+		const {schedules, colors} = await getData(username);
+		if (!schedules) {
 			enqueueSnackbar(`No schedule found for "${username}"`, {variant: "error"});
 			return;
 		}
@@ -153,22 +151,23 @@ export function App() {
 		setUpdateCounter(a => a+1)
 		addedCourses.length = 0;
 
-		schedulesString!.split("\n").forEach(
-			(scheduleString) => {
-				const [scheduleName] = scheduleString.split(":");
+		schedules!.split("\n").forEach(
+			(schedule) => {
+				const [scheduleName] = schedule.split(":");
 				addedCourses.push({name: scheduleName, courses: []});
 			}
 		);
 
-		(await getData(username + "ColorRules"))?.split("\n").forEach(rule => {
+		if (colors) colors.split("\n").forEach(rule => {
 			const [offering, color] = rule.split(":")
 			const [r, g, b] = color.split(" ");
 			colorRules.set(offering, {r: parseInt(r), g: parseInt(g), b: parseInt(b)} as RGBColor);
 		})
 
-		schedulesString!.split("\n").forEach(async (scheduleString, index) => {
+		schedules!.split("\n").forEach(async (schedule, index) => {
 			const quarterYearGroups = new Map<string, string[]>();
-			const [, offeringsString] = scheduleString.split(":");
+			const [, offeringsString] = schedule.split(":");
+			console.log(offeringsString)
 			if (offeringsString === "") return;
 			offeringsString.split(";").forEach((offeringString) => {
 				const values = offeringString.split(",");
