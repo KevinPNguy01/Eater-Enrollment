@@ -37,28 +37,33 @@ const themeOptions: ThemeOptions = createTheme(theme, {
 		info: {
 			main: '#808080',
 		},
-		white: theme.palette.augmentColor({color: {main: "#fff"}})
+		white: theme.palette.augmentColor({color: {main: "#fff"}}),
+		black: theme.palette.augmentColor({color: {main: "#000"}})
 	},
 });
 
 declare module "@mui/material/styles" {
 	interface Palette {
 		white: string;
+		black: string;
 	}
 	interface PaletteOptions {
 		white: string;
+		black: string;
 	}
 }
 
 declare module "@mui/material/Button" {
 	interface ButtonPropsColorOverrides {
 		white: true;
+		black: true;
 	}
 }
 
 declare module "@mui/material/IconButton" {
 	interface IconButtonPropsColorOverrides {
 		white: true;
+		black: true;
 	}
 }
 

@@ -3,6 +3,7 @@ import { buildings } from "../../map/constants/Buildings";
 
 export function BuildingLink(props: {location: string}) {
     const {location} = props;
+    if (location === "TBA") return <p>TBA</p>
     const tokens = location.split(" ");
     const code = tokens.slice(0, -1).join(" ");
     //const number = tokens[tokens.length-1];
