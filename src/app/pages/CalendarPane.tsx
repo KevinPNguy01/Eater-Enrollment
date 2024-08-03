@@ -1,22 +1,33 @@
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { EventInfo } from '../../features/calendar/components/EventInfo';
 import { ScheduleSelect } from '../../features/calendar/components/ScheduleSelect';
 import { ScheduleContext } from '../App';
 import { createEvents, createFinalEvents } from '../../utils/FullCalendar';
 import { Button, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { EventImpl } from '@fullcalendar/core/internal';
-
+import { EventClickArg } from 'fullcalendar/index.js';
 export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (_: boolean) => void}) {
 	const {showingFinals, setShowingFinals} = props;
 	
 	const { calendarReference, scheduleIndex, addedCourses, colorRules} = useContext(ScheduleContext);
-	const [event, setEvent] = useState(null as unknown as EventImpl);
-	const [pos, setPos] = useState({x:0, y:0});
+	const [eventClickArg, setEventClickArg] = useState(null as EventClickArg | null);
+	const ref = useRef(null as unknown as HTMLDivElement);
+	const [scrollPos, setScrollPos] = useState(0);
+
+	useEffect(() => {
+		setEventClickArg(null);
+	}, [scheduleIndex, showingFinals]);
+
+	useEffect(() => {
+		document.getElementsByClassName("fc-scroller-liquid-absolute").item(0)?.addEventListener(
+			"scroll", 
+			e => setScrollPos((e.target as HTMLDivElement).scrollTop));
+	}, []);
+
 	return (
-		<div id="calendar" className={`flex flex-col flex-grow`}>
+		<div id="calendar" ref={ref} className={`flex flex-col flex-grow relative`} onClick={() => setEventClickArg(null)}>
 			<CalendarNavBar showingFinals={showingFinals} setShowingFinals={setShowingFinals}/>
 			<FullCalendar 
 				ref={calendarReference}
@@ -36,8 +47,8 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 				dayHeaderFormat={{ weekday: 'short' }}
 				eventBorderColor="#00000080"
 				eventClick={(info) => {
-					event && info.event.id === event.id ? setEvent(null as unknown as EventImpl) : setEvent(info.event);
-					setPos({x: info.el.getBoundingClientRect().left + info.el.getBoundingClientRect().width + 5, y: info.el.getBoundingClientRect().top});
+					info.jsEvent.stopPropagation();
+					setEventClickArg(eventClickArg && info.event.id === eventClickArg.event.id ? null : info);
 				}}
 				events={(showingFinals ? createFinalEvents : createEvents)(addedCourses[scheduleIndex].courses.map(({offerings}) => offerings).flat(), colorRules)}
 				eventTimeFormat={{
@@ -46,7 +57,7 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 					meridiem: true
 				}}
 			/>
-			{event ? <EventInfo event={event} close={() => setEvent(null as unknown as EventImpl)} pos={pos}/> : null}
+			{eventClickArg ? <EventInfo eventClickArg={eventClickArg} scrollPos={scrollPos} close={() => setEventClickArg(null)} calendarPaneRect={ref.current.getBoundingClientRect()}/> : null}
 		</div>
 	)
 
