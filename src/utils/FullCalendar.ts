@@ -32,7 +32,7 @@ export function createFinalEvents(offerings: CourseOffering[], colorRules: Map<s
         startDate.setHours(startTime.getHours(), startTime.getMinutes());
         endDate.setHours(endTime.getHours(), endTime.getMinutes());
         return {
-            title: `${offering.course.department} ${offering.course.number} ${offering.section.type}`,
+            title: `${offering.course.department} ${offering.course.number} Final`,
             start: startDate.toISOString(),
             end: endDate.toISOString(),
             id: `${offering.section.code}-1`,

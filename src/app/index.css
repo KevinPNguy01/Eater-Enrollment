@@ -56,7 +56,6 @@
   background: #666;
 }
 
-
 input, select {
   color: white;
   background: none;
@@ -89,7 +88,7 @@ input:focus {
 
 @layer utilities {
   .bg-primary {
-    background: var(--color-primary);
+    background: var(--color-primary); 
   }
   .bg-secondary {
     background: var(--color-secondary);
