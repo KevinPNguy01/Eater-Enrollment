@@ -48,8 +48,9 @@ export function EventInfo(props: {eventClickArg: EventClickArg, close: () => voi
     }, [event]);
     if (!offering) return;
     const colorPicker = colorVisible ? 
+    <Card elevation={3} className="absolute bg-tertiary top-full left-1/2 -translate-x-1/2 translate-y-5">
         <SketchPicker 
-            className="absolute -top-2 left-[110%]"
+            className="!bg-tertiary [&_label]:!text-white"
             color={color}
             onChange={color => {
                 const {r, g, b} = color.rgb;
@@ -58,6 +59,7 @@ export function EventInfo(props: {eventClickArg: EventClickArg, close: () => voi
                 setColorRules(new Map([...colorRules, [`${offering.quarter} ${offering.year} ${offering.section.code}`, color.rgb]]));
             }}
         />
+    </Card>
     : null;
     const spacerRow = <tr><td colSpan={2} className="border-b border-quaternary"></td></tr>;
     return (
