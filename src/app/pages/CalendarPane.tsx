@@ -27,37 +27,39 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 	}, []);
 
 	return (
-		<div id="calendar" ref={ref} className={`flex flex-col flex-grow relative`} onClick={() => setEventClickArg(null)}>
+		<div className={`flex flex-col flex-grow`} onClick={() => setEventClickArg(null)}>
 			<CalendarNavBar showingFinals={showingFinals} setShowingFinals={setShowingFinals}/>
-			<FullCalendar 
-				ref={calendarReference}
-				plugins={[ timeGridPlugin ]}
-				initialView="timeGridWeek"
-				headerToolbar={false}
-				weekends={showingFinals}
-				allDaySlot={false}
-				height="100%"
-				expandRows={true}
-				slotMinTime="07:00:00"
-				slotMaxTime="23:00:00"
-				firstDay={6}
-				slotLabelFormat={{
-				hour: "numeric"
-				}}
-				dayHeaderFormat={{ weekday: 'short' }}
-				eventBorderColor="#00000080"
-				eventClick={(info) => {
-					info.jsEvent.stopPropagation();
-					setEventClickArg(eventClickArg && info.event.id === eventClickArg.event.id ? null : info);
-				}}
-				events={(showingFinals ? createFinalEvents : createEvents)(addedCourses[scheduleIndex].courses.map(({offerings}) => offerings).flat(), colorRules)}
-				eventTimeFormat={{
-					hour: "numeric",
-					minute: "2-digit",
-					meridiem: true
-				}}
-			/>
-			{eventClickArg ? <EventInfo eventClickArg={eventClickArg} scrollPos={scrollPos} close={() => setEventClickArg(null)} calendarPaneRect={ref.current.getBoundingClientRect()}/> : null}
+			<div ref={ref} id="calendar" className="flex flex-col flex-grow relative overflow-clip">
+				<FullCalendar 
+					ref={calendarReference}
+					plugins={[ timeGridPlugin ]}
+					initialView="timeGridWeek"
+					headerToolbar={false}
+					weekends={showingFinals}
+					allDaySlot={false}
+					height="100%"
+					expandRows={true}
+					slotMinTime="07:00:00"
+					slotMaxTime="23:00:00"
+					firstDay={6}
+					slotLabelFormat={{
+					hour: "numeric"
+					}}
+					dayHeaderFormat={{ weekday: 'short' }}
+					eventBorderColor="#00000080"
+					eventClick={(info) => {
+						info.jsEvent.stopPropagation();
+						setEventClickArg(eventClickArg && info.event.id === eventClickArg.event.id ? null : info);
+					}}
+					events={(showingFinals ? createFinalEvents : createEvents)(addedCourses[scheduleIndex].courses.map(({offerings}) => offerings).flat(), colorRules)}
+					eventTimeFormat={{
+						hour: "numeric",
+						minute: "2-digit",
+						meridiem: true
+					}}
+				/>
+				{eventClickArg ? <EventInfo eventClickArg={eventClickArg} scrollPos={scrollPos} close={() => setEventClickArg(null)} calendarPaneRect={ref.current.getBoundingClientRect()}/> : null}
+			</div>
 		</div>
 	)
 

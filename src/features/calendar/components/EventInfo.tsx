@@ -19,30 +19,27 @@ export function EventInfo(props: {eventClickArg: EventClickArg, close: () => voi
     const [luminance, setLuminance] = useState((0.299 * r + 0.587 * g + 0.114 * b)/255);
     const {removeOffering, colorRules, setColorRules, addedCourses, scheduleIndex} = useContext(ScheduleContext);
     const ref = useRef(null as unknown as HTMLDivElement);
-    const [posX, setPosX] = useState(0);
     const [pos, setPos] = useState({x:0, y:0});
     const {width} = useWindowDimensions();
-    const {left: eventLeft, width: eventWidth, top: eventTop} = eventClickArg.el.getBoundingClientRect();
+    const {left: eventLeft, width: eventWidth, top: eventTop, bottom: eventBottom, height: eventHeight} = eventClickArg.el.getBoundingClientRect();
     useEffect(() => {
-        setPos({
-            x: eventLeft + eventWidth + 5, 
-            y: eventTop - calendarPaneRect.top
-        });
-    }, [eventLeft, eventWidth, eventTop, calendarPaneRect, scrollPos])
-    useEffect(() => {
-        let x = pos.x;
-        if (pos.x + ref.current.clientWidth > maxX) {
+        let x = eventLeft + eventWidth + 5;
+        let y = eventTop - calendarPaneRect.top + eventHeight/2 - ref.current.clientHeight/2;
+        if (x + ref.current.clientWidth > maxX) {
             x = maxX - 5 - (ref.current.clientWidth);
             if (eventLeft <= x + ref.current.clientWidth && x <= eventLeft + eventWidth) {
                 x = eventLeft - ref.current.clientWidth - 5;
                 if (x < 0) {
-                    x = eventLeft + eventWidth/2 - ref.current.clientWidth/2;
-                    setPos({x:x, y: eventTop - calendarPaneRect.top - ref.current.clientHeight -5})
+                    x = Math.max(5, eventLeft + eventWidth/2 - ref.current.clientWidth/2);
+                    y = eventBottom - calendarPaneRect.top + 5;
+                    if (x + ref.current.clientWidth > maxX) {
+                        x = Math.max(5, maxX - ref.current.clientWidth - 5);
+                    }
                 }
             }
         }
-        setPosX(x);
-    }, [event, ref, maxX, pos.x, width, eventClickArg.el.clientWidth, eventClickArg.el.clientLeft, eventLeft, eventWidth, eventTop, calendarPaneRect.top]);
+        setPos({x, y})
+    }, [ref.current?.clientWidth, eventClickArg, event, ref, maxX, width, eventClickArg.el.clientWidth, eventClickArg.el.clientLeft, eventLeft, eventWidth, eventTop, calendarPaneRect.top, calendarPaneRect, scrollPos, eventBottom, eventHeight]);
     const offering = addedCourses[scheduleIndex].courses.map((course) => course.offerings).flat().find((offering) => offering.section.code === event.id.split("-")[0]);
     useEffect(() => {
         setColor(event.backgroundColor);
@@ -64,12 +61,12 @@ export function EventInfo(props: {eventClickArg: EventClickArg, close: () => voi
     : null;
     const spacerRow = <tr><td colSpan={2} className="border-b border-quaternary"></td></tr>;
     return (
-        <div className={`${!posX ? "opacity-0" : ""} !overflow-visible absolute !z-[1000]`} ref={ref} style={{top: `${pos.y}px`, left: `${posX}px`}}>
+        <div onClick={e => e.stopPropagation()} className={`${!pos.x ? "opacity-0" : ""} !overflow-visible absolute !z-10`} ref={ref} style={{top: `${pos.y}px`, left: `${pos.x}px`}}>
             <Card elevation={3} className="!overflow-visible !rounded-xl relative bg-tertiary">
                 <div className="flex justify-between items-center bg-secondary p-2 gap-8 rounded-t-xl" 
                     style={{backgroundColor: color, color: luminance > 0.5 ? "black" : "white"}}
                 >
-                    <p className="font-semibold px-2">{event.title}</p>
+                    <p className="font-semibold px-2 text-nowrap">{event.title}</p>
                     <div className="flex">
                         <IconButton color={luminance > 0.5 ? "black" : "white"} onClick={() => setColorVisible(!colorVisible)}>
                             <PaletteIcon/>

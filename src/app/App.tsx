@@ -311,7 +311,7 @@ function NavBar(props: {save: (_: string) => void, load: (_: string) => void}) {
 		<nav className="bg-primary flex justify-between items-center">
 			<div className="flex items-center">
 				<img src={anteater} alt="Anteater Logo" className="w-[96px] h-[48px"/>
-				<h1>
+				<h1 className="text-nowrap">
 					Eater Enrollment
 				</h1>
 			</div>
