@@ -8,6 +8,7 @@ import { createEvents, createFinalEvents } from '../../utils/FullCalendar';
 import { Button, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { EventClickArg } from 'fullcalendar/index.js';
+import useWindowDimensions from '../../utils/WindowDimensions';
 export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (_: boolean) => void}) {
 	const {showingFinals, setShowingFinals} = props;
 	
@@ -15,6 +16,11 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 	const [eventClickArg, setEventClickArg] = useState(null as EventClickArg | null);
 	const ref = useRef(null as unknown as HTMLDivElement);
 	const [scrollPos, setScrollPos] = useState(0);
+	const [calendarRect, setCalendarRect] = useState(null as unknown as DOMRect);
+	const screenSize = useWindowDimensions();
+	useEffect(() => {
+		setCalendarRect(ref.current.getBoundingClientRect())
+	}, [ref, screenSize]);
 
 	useEffect(() => {
 		setEventClickArg(null);
@@ -29,7 +35,7 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 	return (
 		<div className={`flex flex-col flex-grow`} onClick={() => setEventClickArg(null)}>
 			<CalendarNavBar showingFinals={showingFinals} setShowingFinals={setShowingFinals}/>
-			<div ref={ref} id="calendar" className="flex flex-col flex-grow relative overflow-clip">
+			<div ref={ref} id="calendar" className="flex flex-col flex-grow relative">
 				<FullCalendar 
 					ref={calendarReference}
 					plugins={[ timeGridPlugin ]}
@@ -58,7 +64,7 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 						meridiem: true
 					}}
 				/>
-				{eventClickArg ? <EventInfo eventClickArg={eventClickArg} scrollPos={scrollPos} close={() => setEventClickArg(null)} calendarRect={ref.current.getBoundingClientRect()}/> : null}
+				{eventClickArg ? <EventInfo eventClickArg={eventClickArg} scrollPos={scrollPos} close={() => setEventClickArg(null)} calendarRect={calendarRect}/> : null}
 			</div>
 		</div>
 	)
