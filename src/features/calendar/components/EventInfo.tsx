@@ -9,71 +9,83 @@ import PaletteIcon from '@mui/icons-material/Palette';
 import useWindowDimensions from "../../../utils/WindowDimensions";
 import { EventClickArg } from "fullcalendar/index.js";
 
-export function EventInfo(props: {eventClickArg: EventClickArg, close: () => void, scrollPos: number, calendarPaneRect: DOMRect}) {
-    const {eventClickArg, close, calendarPaneRect, scrollPos} = props;
-    const maxX = calendarPaneRect.width;
-    const {event} = eventClickArg;
-    const [colorVisible, setColorVisible] = useState(false);
-    const [color, setColor] = useState(event.backgroundColor);
-    const [r,g,b] = color.replace("rgb(", '').replace(')', '').split(',').map(num => parseInt(num));
-    const [luminance, setLuminance] = useState((0.299 * r + 0.587 * g + 0.114 * b)/255);
+export function EventInfo(
+    {eventClickArg, eventClickArg: {event}, close, calendarRect, scrollPos}: 
+    {eventClickArg: EventClickArg, close: () => void, scrollPos: number, calendarRect: DOMRect}
+) {
     const {removeOffering, colorRules, setColorRules, addedCourses, scheduleIndex} = useContext(ScheduleContext);
     const ref = useRef(null as unknown as HTMLDivElement);
+    const screenSize = useWindowDimensions();
+    
+    // Color of component, color picker, and event.
+    const [color, setColor] = useState(event.backgroundColor);
+    const [textColor, setTextColor] = useState(event.textColor as "white" | "black");
+    // Whether to show color picker.
+    const [colorVisible, setColorVisible] = useState(false);
+
+    // Where this component should be positioned.
     const [pos, setPos] = useState({x:0, y:0});
-    const {width} = useWindowDimensions();
-    const {left: eventLeft, width: eventWidth, top: eventTop, bottom: eventBottom, height: eventHeight} = eventClickArg.el.getBoundingClientRect();
+
+    /**
+     * Reposition the EventInfo card relative to the selected calendar event.
+     * Triggered whenever the selected event, component size, screen size, calendar size, or calendar scroll position changes.
+     */
     useEffect(() => {
-        let x = eventLeft + eventWidth + 5;
-        let y = eventTop - calendarPaneRect.top + eventHeight/2 - ref.current.clientHeight/2;
-        if (x + ref.current.clientWidth > maxX) {
-            x = maxX - 5 - (ref.current.clientWidth);
-            if (eventLeft <= x + ref.current.clientWidth && x <= eventLeft + eventWidth) {
-                x = eventLeft - ref.current.clientWidth - 5;
-                if (x < 0) {
-                    x = Math.max(5, eventLeft + eventWidth/2 - ref.current.clientWidth/2);
-                    y = eventBottom - calendarPaneRect.top + 5;
-                    if (x + ref.current.clientWidth > maxX) {
-                        x = Math.max(5, maxX - ref.current.clientWidth - 5);
-                    }
-                }
-            }
-        }
-        setPos({x, y})
-    }, [ref.current?.clientWidth, eventClickArg, event, ref, maxX, width, eventClickArg.el.clientWidth, eventClickArg.el.clientLeft, eventLeft, eventWidth, eventTop, calendarPaneRect.top, calendarPaneRect, scrollPos, eventBottom, eventHeight]);
-    const offering = addedCourses[scheduleIndex].courses.map((course) => course.offerings).flat().find((offering) => offering.section.code === event.id.split("-")[0]);
+        setPos(calculatePosition(calendarRect, eventClickArg.el.getBoundingClientRect(), ref.current))
+    }, 
+        [eventClickArg, ref.current?.clientWidth, ref.current?.clientHeight, screenSize, calendarRect, scrollPos]
+    );
+
+    // Get the color and text color everytime the selected event changes.
     useEffect(() => {
         setColor(event.backgroundColor);
-        const [r,g,b] = event.backgroundColor.replace("rgb(", '').replace(')', '').split(',').map(num => parseInt(num));
-        setLuminance((0.299 * r + 0.587 * g + 0.114 * b)/255);
+        setTextColor(event.textColor as "white" | "black");
     }, [event]);
+
+    // Get the offering this event corresponds to.
+    const offering = addedCourses[scheduleIndex].courses.map(
+        ({offerings}) => offerings
+    ).flat().find(
+        ({section: {code}}) => code === event.id.split("-")[0]
+    );
+    // If no offering was found, then do not render.
     if (!offering) return;
+
+    // Div containing the color picker.
     const colorPicker = colorVisible ? 
-    <Card elevation={3} className="absolute bg-tertiary top-full left-1/2 -translate-x-1/2 translate-y-5">
-        <SketchPicker 
-            className="!bg-tertiary [&_label]:!text-white"
-            color={color}
-            onChange={color => {
-                const {r, g, b} = color.rgb;
-                setColor(color.hex);
-                setLuminance((0.299 * r + 0.587 * g + 0.114 * b)/255);
-                setColorRules(new Map([...colorRules, [`${offering.quarter} ${offering.year} ${offering.section.code}`, color.rgb]]));
-            }}
-        />
-    </Card>
+        <Card elevation={3} className="absolute bg-tertiary top-full left-1/2 -translate-x-1/2 translate-y-5">
+            <SketchPicker 
+                className="!bg-tertiary [&_label]:!text-white"
+                color={color}
+                onChange={color => {
+                    const {r, g, b} = color.rgb;
+                    setColor(color.hex);
+                    setTextColor((0.299 * r + 0.587 * g + 0.114 * b)/255 < 0.5 ? "white" : "black");
+                    setColorRules(new Map([...colorRules, [`${offering.quarter} ${offering.year} ${offering.section.code}`, color.rgb]]));
+                }}
+            />
+        </Card>
     : null;
+    
     const spacerRow = <tr><td colSpan={2} className="border-b border-quaternary"></td></tr>;
     return (
-        <div onClick={e => e.stopPropagation()} className={`${!pos.x ? "opacity-0" : ""} !overflow-visible absolute !z-10`} ref={ref} style={{top: `${pos.y}px`, left: `${pos.x}px`}}>
+        <div 
+            className={`${!pos.x ? "opacity-0" : ""} !overflow-visible absolute !z-10`} 
+            style={{top: `${pos.y}px`, left: `${pos.x}px`}}
+            onClick={e => e.stopPropagation()} 
+            ref={ref} 
+        >
             <Card elevation={3} className="!overflow-visible !rounded-xl relative bg-tertiary">
-                <div className="flex justify-between items-center bg-secondary p-2 gap-8 rounded-t-xl" 
-                    style={{backgroundColor: color, color: luminance > 0.5 ? "black" : "white"}}
+                <div 
+                    className="flex justify-between items-center bg-secondary p-2 gap-8 rounded-t-xl" 
+                    style={{backgroundColor: color, color: textColor}}
                 >
                     <p className="font-semibold px-2 text-nowrap">{event.title}</p>
                     <div className="flex">
-                        <IconButton color={luminance > 0.5 ? "black" : "white"} onClick={() => setColorVisible(!colorVisible)}>
+                        <IconButton color={textColor} onClick={() => setColorVisible(!colorVisible)}>
                             <PaletteIcon/>
                         </IconButton>
-                        <IconButton color={luminance > 0.5 ? "black" : "white"} onClick={() => {
+                        <IconButton color={textColor} onClick={() => {
                             removeOffering(offering);
                             close();
                         }}>
@@ -81,7 +93,7 @@ export function EventInfo(props: {eventClickArg: EventClickArg, close: () => voi
                         </IconButton>
                     </div>
                 </div>
-                <table className="border-spacing-x-4 border-separate py-3">
+                <table className="border-spacing-x-4 border-separate py-3"><tbody>
                     <tr className="border border-quaternary">
                         <td className="align-top text-sm text-right">Instructors</td>
                         <td><div className="grid justify-items-start *:align-top overflow-clip">
@@ -97,9 +109,42 @@ export function EventInfo(props: {eventClickArg: EventClickArg, close: () => voi
                         <td className="text-sm text-right">Location</td>
                         <td className="*:float-left overflow-clip"><BuildingLink location={offering.meetings[0].building}/></td>
                     </tr>
-                </table>
+                </tbody></table>
                 {colorPicker}
             </Card>
         </div>
     );
+}
+
+const calculatePosition = (calendarRect: DOMRect, eventRect: DOMRect, componentSize: {clientHeight: number, clientWidth: number}) => {
+    const {
+        height: eventHeight,
+        width: eventWidth, 
+        top: eventTop, 
+        bottom: eventBottom, 
+        left: eventLeft
+    } = eventRect;
+    const {
+        width: calendarWidth, 
+        top: calendarTop
+    } = calendarRect;
+    const {clientHeight: componentHeight, clientWidth: componentWidth} = componentSize;
+
+    // Default position: To the right of the event, centered vertically.
+    let x = eventLeft + eventWidth + 5;
+    let y = eventTop - calendarTop + eventHeight/2 - componentHeight/2;
+    // If the component overflows to the right of the calendar, position it to the left of the event.
+    if (x + componentWidth > calendarWidth) {
+        x = eventLeft - componentWidth - 10;
+        // If the component overflows to the left of the calendar, position it below the event, centered horizontally.
+        if (x < 0) {
+            x = Math.max(5, eventLeft + eventWidth/2 - componentWidth/2);
+            y = eventBottom - calendarTop + 5;
+            // If the component overflows to the right, try sticking to right, then left.
+            if (x + componentWidth > calendarWidth) {
+                x = Math.max(5, calendarWidth - componentWidth - 5);
+            }
+        }
+    }
+    return {x, y};
 }
