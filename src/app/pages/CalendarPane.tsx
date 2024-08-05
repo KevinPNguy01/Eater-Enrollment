@@ -58,7 +58,7 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 						meridiem: true
 					}}
 				/>
-				{eventClickArg ? <EventInfo eventClickArg={eventClickArg} scrollPos={scrollPos} close={() => setEventClickArg(null)} calendarPaneRect={ref.current.getBoundingClientRect()}/> : null}
+				{eventClickArg ? <EventInfo eventClickArg={eventClickArg} scrollPos={scrollPos} close={() => setEventClickArg(null)} calendarRect={ref.current.getBoundingClientRect()}/> : null}
 			</div>
 		</div>
 	)
