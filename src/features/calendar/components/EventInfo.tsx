@@ -96,7 +96,7 @@ export function EventInfo(
                 <table className="border-spacing-x-4 border-separate py-3"><tbody>
                     <tr className="border border-quaternary">
                         <td className="align-top text-sm text-right">Instructors</td>
-                        <td><div className="grid justify-items-start *:align-top overflow-clip">
+                        <td><div className="grid justify-items-start *:align-top *:!overflow-clip">
                             {offering.instructors.map(
                                 (instructor) => {
                                     return <RateMyProfessorsLink instructor={instructor}/>
@@ -107,7 +107,7 @@ export function EventInfo(
                     {spacerRow}
                     <tr>
                         <td className="text-sm text-right">Location</td>
-                        <td className="*:float-left overflow-clip"><BuildingLink location={offering.meetings[0].building}/></td>
+                        <td className="*:float-left *:!overflow-clip"><BuildingLink location={offering.meetings[0].building}/></td>
                     </tr>
                 </tbody></table>
                 {colorPicker}
@@ -125,6 +125,7 @@ const calculatePosition = (calendarRect: DOMRect, eventRect: DOMRect, componentS
         left: eventLeft
     } = eventRect;
     const {
+        height: calendarHeight,
         width: calendarWidth, 
         top: calendarTop
     } = calendarRect;
@@ -143,6 +144,10 @@ const calculatePosition = (calendarRect: DOMRect, eventRect: DOMRect, componentS
             // If the component overflows to the right, try sticking to right, then left.
             if (x + componentWidth > calendarWidth) {
                 x = Math.max(5, calendarWidth - componentWidth - 5);
+            }
+            // If the component overflows to the bottom, position it above the event.
+            if (y + componentHeight > calendarHeight) {
+                y = Math.max(5, eventTop - calendarTop - componentHeight - 5);
             }
         }
     }
