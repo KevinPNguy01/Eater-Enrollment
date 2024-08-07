@@ -149,6 +149,7 @@ export function App() {
 		}
 		enqueueSnackbar(`Loaded schedule for "${username}"`, {variant: "success"});
 
+		localStorage.setItem("userID", username);
 		const calendar = (calendarRef.current! as InstanceType<typeof FullCalendar>)?.getApi() as CalendarApi;
 		setScheduleIndex(0);
 		calendar.removeAllEvents();
@@ -196,7 +197,10 @@ export function App() {
 	};
 
 	useEffect(() => {
-		if(!updateCounter) loadUser("schedule");
+		if(!updateCounter) {
+			const userID = localStorage.getItem("userID");
+			if (userID) loadUser(userID);
+		}
 	}, []);
 
 	/**
