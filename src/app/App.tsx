@@ -71,7 +71,9 @@ declare module "@mui/material/IconButton" {
 type ScheduleContextType = {
 	calendarReference: MutableRefObject<FullCalendar>,
 	addedCourses: {name: string, courses: Course[]}[],
+	setAddedCourses: (courses: {name: string, courses: Course[]}[]) => void,
 	scheduleIndex: number,
+	setScheduleIndex: (index: number) => void,
 	addOffering: (offering: CourseOffering) => void, 
 	removeOffering: (offering: CourseOffering) => void,
 	containsOffering: (offering: CourseOffering) => boolean,
@@ -278,7 +280,9 @@ export function App() {
 				{ 
 					calendarReference: calendarRef, 
 					addedCourses: addedCourses,
+					setAddedCourses: setAddedCourses,
 					scheduleIndex: scheduleIndex,
+					setScheduleIndex: setScheduleIndex,
 					addOffering: addOffering, 
 					removeOffering: removeOffering,
 					createSchedule: createSchedule,
