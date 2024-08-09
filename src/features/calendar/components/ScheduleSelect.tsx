@@ -15,6 +15,8 @@ export function ScheduleSelect() {
     const [dragged, setDragged] = useState<number | null>(null);
     const [dropZone, setDropZone] = useState(0);
 
+    const [menu, setMenu] = useState<React.JSX.Element | null>(null);
+
     // Get the mouse position.
     const [mouse, setMouse] = useState({x: 0, y: 0});
     const [relative, setRelative] = useState({dx: 0, dy: 0});
@@ -74,19 +76,20 @@ export function ScheduleSelect() {
 
     return (
         <div>
+            {menu}
             <div className="relative" style={{width: size.x, height: size.y}}>
                 <div className="left-0 top-0 absolute z-[10]">
                     <Accordion className="!bg-secondary !border !border-quaternary w-full" disableGutters={true}>
                         <AccordionSummary
-                            className='*:!m-0 !min-h-0 !py-1'
+                            className='*:!m-0 !min-h-0 !p-1 !pl-2'
                             color="white"
                             expandIcon={<ExpandMoreIcon style={{color: "white"}}/>}
                             ref={ref}
                         >
                             <span className="text-base font-semibold text-nowrap">{`${addedCourses[scheduleIndex].name}`}</span>
                         </AccordionSummary>
-                        <AccordionDetails className="text-left text-base !p-0">
-                            <div key={`drop-zone-${-1}`} className={`h-11 bg-tertiary schedule-option-drop-zone ${dragged === null || dropZone !== 0 ? "!h-0" : ""}`}/>
+                        <AccordionDetails className="text-left text-base !p-2 !pt-0">
+                            <div key={`drop-zone-${-1}`} className={`h-9 schedule-option-drop-zone ${dragged === null || dropZone !== 0 ? "!h-0" : ""}`}/>
                             {addedCourses.map(({name}, index) => (
                                 dragged != index && (
                                     <>
@@ -94,6 +97,7 @@ export function ScheduleSelect() {
                                             key={index} 
                                             name={name} 
                                             index={index} 
+                                            setMenu={setMenu}
                                             onMouseDown={(e) => {
                                                 e.preventDefault();
                                                 setDragged(index);
@@ -106,7 +110,7 @@ export function ScheduleSelect() {
                                                 setDraggedWidth(width);
                                             }}
                                         />
-                                        <div key={`drop-zone-${index}`} className={`h-11 bg-tertiary schedule-option-drop-zone ${dragged === null || dropZone !== index+1 ? "!h-0" : ""}`}/>
+                                        <div key={`drop-zone-${index}`} className={`h-9 schedule-option-drop-zone ${dragged === null || dropZone !== index+1 ? "!h-0" : ""}`}/>
                                     </>
                                 )
                             ))}
@@ -119,7 +123,7 @@ export function ScheduleSelect() {
                     left: `${mouse.x - relative.dx}px`,
                     top: `${mouse.y - relative.dy}px`,
                     width: `${draggedWidth}px`
-                }} className="absolute z-[1000]" name={addedCourses[dragged].name} index={dragged}/>
+                }} className="absolute z-[1000]" name={addedCourses[dragged].name} index={dragged} setMenu={setMenu}/>
             )}
         </div>  
     );
