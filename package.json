@@ -18,6 +18,7 @@
     "@fullcalendar/timegrid": "^6.1.10",
     "@mui/icons-material": "^5.16.4",
     "@mui/material": "^5.16.4",
+    "bootstrap-icons": "^1.11.3",
     "core-js": "^3.37.1",
     "express": "^4.19.2",
     "fullcalendar": "^6.1.10",

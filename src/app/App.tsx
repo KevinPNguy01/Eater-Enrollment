@@ -40,6 +40,12 @@ const themeOptions: ThemeOptions = createTheme(theme, {
 		white: theme.palette.augmentColor({color: {main: "#fff"}}),
 		black: theme.palette.augmentColor({color: {main: "#000"}})
 	},
+
+	typography: {
+		button: {
+			textTransform: 'none'
+		}
+	}
 });
 
 declare module "@mui/material/styles" {
@@ -238,6 +244,7 @@ export function App() {
 		if (offerings && index! > -1) {
 			offerings.splice(index!, 1);
 		}
+		console.log(addedCourses)
 
 		// If the course has no offerings now, remove it.
 		if (offerings && offerings.length == 0) {
@@ -248,7 +255,6 @@ export function App() {
 		for (const checkbox of document.getElementsByClassName(`checkbox-${offering.course.id}-${offering.section.code}`)) {
 			(checkbox as HTMLInputElement).checked = false;
 		}
-
 		updateMap();
 	}
 
