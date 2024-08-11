@@ -12,7 +12,7 @@ export function MapTab() {
     const offeringsToday = offerings.filter(({parsed_meetings}) => parsed_meetings[0].days & daysMask);     // Filter offerings for the day selected.
 
     return  (
-        <div id="map" className="h-full mb-1">
+        <div id="map" className="h-full mb-1 relative">
             <MapNavBar activeDayState={[daysMask, setDaysMask]}/>
             <MapBody offerings={offeringsToday} colorRules={colorRules}/>
         </div>
