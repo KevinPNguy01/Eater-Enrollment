@@ -160,7 +160,7 @@ export function App() {
 		localStorage.setItem("userID", username);
 		const calendar = (calendarRef.current! as InstanceType<typeof FullCalendar>)?.getApi() as CalendarApi;
 		setScheduleIndex(0);
-		calendar.removeAllEvents();
+		calendar?.removeAllEvents();
 
 		setUpdateCounter(a => a+1)
 		addedCourses.length = 0;
@@ -181,7 +181,6 @@ export function App() {
 		schedules!.split("\n").forEach(async (schedule, index) => {
 			const quarterYearGroups = new Map<string, string[]>();
 			const [, offeringsString] = schedule.split(":");
-			console.log(offeringsString)
 			if (offeringsString === "") return;
 			offeringsString.split(";").forEach((offeringString) => {
 				const values = offeringString.split(",");
@@ -244,7 +243,6 @@ export function App() {
 		if (offerings && index! > -1) {
 			offerings.splice(index!, 1);
 		}
-		console.log(addedCourses)
 
 		// If the course has no offerings now, remove it.
 		if (offerings && offerings.length == 0) {
