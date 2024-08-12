@@ -4,9 +4,10 @@ import { ScheduleOption } from "./ScheduleOption";
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import React from "react";
+import useWindowDimensions from "../../../utils/WindowDimensions";
 
 export function ScheduleSelect() {
-    const {addedCourses, setAddedCourses, scheduleIndex, setScheduleIndex} = useContext(ScheduleContext);
+    const {addedCourses, setAddedCourses, scheduleIndex, setScheduleIndex,} = useContext(ScheduleContext);
 
     // Get the size of the dropdown.
     const ref = useRef(null as unknown as HTMLDivElement);
@@ -21,6 +22,8 @@ export function ScheduleSelect() {
     // Get the mouse position.
     const [mouse, setMouse] = useState({x: 0, y: 0});
     const [relative, setRelative] = useState({dx: 0, dy: 0});
+
+    const {height, width} = useWindowDimensions();
 
     useEffect(() => {
         // Track mouse movement.
@@ -37,10 +40,11 @@ export function ScheduleSelect() {
         };
     }, []);
 
-	useEffect(() => {
+    useEffect(() => {
         // Resize the div containing the dropdown to match its size.
-		setSize({x: ref.current.clientWidth, y: ref.current.clientHeight});
+    }, [ref.current?.clientWidth])
 
+	useEffect(() => {
         // Detect mouse up.
         const mouseUpHandler = (e: MouseEvent) => {
             if (dragged !== -1) {
@@ -107,10 +111,33 @@ export function ScheduleSelect() {
         }
     }, [dragged, mouse, dropZone]);
 
+    const dropDownPlaceHolder = (
+        <Accordion className="invisible w-full" disableGutters={true}>
+            <AccordionSummary
+                className='*:!m-0 !min-h-0 !p-1 !pl-2'
+                expandIcon={<ExpandMoreIcon style={{color: "white"}}/>}
+            >
+                <span className={`text-nowrap ${width < height ? "text-sm" : "text-base"}`}>{`${addedCourses[scheduleIndex].name}`}</span>
+            </AccordionSummary>
+            <AccordionDetails className="text-left text-base !p-2 !pt-0">
+                {addedCourses.map(({name}, index) => (
+                    <ScheduleOption 
+                        className={`${width < height ? "text-sm" : "text-base"} ${dragged === index ? "hidden" : ""}`}
+                        key={`schedule-option-${index}`} 
+                        name={name} 
+                        index={index} 
+                        setMenu={setMenu}
+                    />
+                ))}
+            </AccordionDetails>
+        </Accordion>
+    );
+
     return (
         <div>
             {menu}
-            <div className="relative touch-none" style={{width: size.x, height: size.y}}>
+            <div className="relative touch-none">
+                {dropDownPlaceHolder}
                 <div className="left-0 top-0 absolute z-[10]">
                     <Accordion className="!bg-secondary !border !border-quaternary w-full" disableGutters={true}>
                         <AccordionSummary
@@ -119,14 +146,14 @@ export function ScheduleSelect() {
                             expandIcon={<ExpandMoreIcon style={{color: "white"}}/>}
                             ref={ref}
                         >
-                            <span className="text-base font-semibold text-nowrap">{`${addedCourses[scheduleIndex].name}`}</span>
+                            <span className={`font-semibold text-nowrap ${width < height ? "text-sm" : "text-base"}`}>{`${addedCourses[scheduleIndex].name}`}</span>
                         </AccordionSummary>
                         <AccordionDetails className="text-left text-base !p-2 !pt-0">
                             {dragged !== -1 && <div key={`drop-zone-${-1}`} className={`${dragged !== -1 ? "transition-[height]" : ""} transition-linear transition-200 rounded-lg bg-[#ffffff08] h-9 schedule-option-drop-zone ${dragged === -1 || dropZone !== 0 ? "!h-0" : ""}`}/>}
                             {addedCourses.map(({name}, index) => (
                                 <React.Fragment key={index}>
                                     <ScheduleOption 
-                                        className={`transition-[height] transition-linear transition-200 ${dragged === index ? "hidden" : ""}`}
+                                        className={`${width < height ? "text-sm" : "text-base"} transition-[height] transition-linear transition-200 ${dragged === index ? "hidden" : ""}`}
                                         key={`schedule-option-${index}`} 
                                         name={name} 
                                         index={index} 
