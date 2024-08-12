@@ -3,6 +3,7 @@ import { ScheduleContext } from "../../../app/App";
 import { ScheduleOption } from "./ScheduleOption";
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import React from "react";
 
 export function ScheduleSelect() {
     const {addedCourses, setAddedCourses, scheduleIndex, setScheduleIndex} = useContext(ScheduleContext);
@@ -49,7 +50,6 @@ export function ScheduleSelect() {
                 if (scheduleIndex === dragged) {
                     setScheduleIndex(dropZone <= dragged ? dropZone : dropZone -1);
                 } else if (Math.min(dragged, dropZone) <= scheduleIndex && scheduleIndex <= Math.max(dragged, dropZone)) {
-                    console.log(dropZone - dragged)
                     if (dropZone - dragged > 0) {
                         setScheduleIndex(scheduleIndex - 1);
                     } else {
@@ -122,12 +122,12 @@ export function ScheduleSelect() {
                             <span className="text-base font-semibold text-nowrap">{`${addedCourses[scheduleIndex].name}`}</span>
                         </AccordionSummary>
                         <AccordionDetails className="text-left text-base !p-2 !pt-0">
-                            <div key={`drop-zone-${-1}`} className={`rounded-lg bg-[#ffffff08] h-9 schedule-option-drop-zone ${dragged === -1 || dropZone !== 0 ? "!h-0" : ""}`}/>
+                            {dragged !== -1 && <div key={`drop-zone-${-1}`} className={`${dragged !== -1 ? "transition-[height]" : ""} transition-linear transition-200 rounded-lg bg-[#ffffff08] h-9 schedule-option-drop-zone ${dragged === -1 || dropZone !== 0 ? "!h-0" : ""}`}/>}
                             {addedCourses.map(({name}, index) => (
-                                <>
+                                <React.Fragment key={index}>
                                     <ScheduleOption 
-                                        className={`${dragged === index ? "h-0 overflow-hidden" : ""}`}
-                                        key={index} 
+                                        className={`transition-[height] transition-linear transition-200 ${dragged === index ? "hidden" : ""}`}
+                                        key={`schedule-option-${index}`} 
                                         name={name} 
                                         index={index} 
                                         setMenu={setMenu}
@@ -157,8 +157,8 @@ export function ScheduleSelect() {
                                             setDraggedWidth(width);
                                         }}
                                     />
-                                    {dragged !== index && <div key={`drop-zone-${index}`} className={`rounded-lg bg-[#ffffff08] h-9 schedule-option-drop-zone ${dragged === -1 || dropZone !== index+1 ? "!h-0" : ""}`}/>}
-                                </>
+                                    {dragged !== index && dragged !== -1 && <div key={`drop-zone-${index}`} className={`${dragged !== -1 ? "transition-[height]" : ""} transition-linear transition-200 rounded-lg bg-[#ffffff08] h-9 schedule-option-drop-zone ${dragged === -1 || dropZone !== index+1 ? "!h-0" : ""}`}/>}
+                                </React.Fragment>
                             ))}
                         </AccordionDetails>
                     </Accordion>

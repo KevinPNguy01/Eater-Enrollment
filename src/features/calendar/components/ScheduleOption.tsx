@@ -12,10 +12,10 @@ export function ScheduleOption(props: {name: string, index: number, setMenu: (me
         <div 
             onClick={() => {loadSchedule(props.index)}}
             style={props.style}
-            className={`flex items-center px-2 py-0 gap-2 rounded-lg ${menuOpen && "!bg-tertiary"} font-semibold ${scheduleIndex === props.index ? "!bg-quaternary text-white" : "text-neutral-300"} hover:bg-tertiary hover:cursor-pointer ${props.className}`}
+            className={`flex items-center px-1 py-0 gap-2 rounded-lg ${menuOpen && "!bg-tertiary"} font-semibold ${scheduleIndex === props.index ? "!bg-quaternary text-white" : "text-neutral-300"} hover:bg-tertiary hover:cursor-pointer ${props.className}`}
         > 
             <div className="cursor-move touch-none" onMouseDown={props.onMouseDown} onTouchStart={props.onTouchStart}>
-                <DragIndicatorIcon fontSize="small" style={{color: "rgb(255, 255, 255, 0.25)"}}/>
+                <DragIndicatorIcon fontSize="medium" style={{color: "rgb(255, 255, 255, 0.25)"}}/>
             </div>
             {renaming ? (
                 <input 
