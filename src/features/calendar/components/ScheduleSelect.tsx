@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, useRef } from "react";
+import { useState, useContext, useEffect } from "react";
 import { ScheduleContext } from "../../../app/App";
 import { ScheduleOption } from "./ScheduleOption";
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
@@ -8,125 +8,90 @@ import useWindowDimensions from "../../../utils/WindowDimensions";
 
 export function ScheduleSelect() {
     const {addedCourses, setAddedCourses, scheduleIndex, setScheduleIndex,} = useContext(ScheduleContext);
+    const [draggedWidth, setDraggedWidth] = useState(0);                // Size of the dragged schedule option.
+    const [dragged, setDragged] = useState<number | null>(null);        // Index of dragged schedule option.
+    const [dropZone, setDropZone] = useState(0);                        // Index of nearest drop zone.
+    const [actionMenu, setActionMenu] = useState<React.JSX.Element | null>(null);   // Action menu for schedule option.
 
-    // Get the size of the dropdown.
-    const ref = useRef(null as unknown as HTMLDivElement);
-	const [size, setSize] = useState({x: 0, y: 0});
-
-    const [draggedWidth, setDraggedWidth] = useState(0);
-    const [dragged, setDragged] = useState<number>(-1);
-    const [dropZone, setDropZone] = useState(0);
-
-    const [menu, setMenu] = useState<React.JSX.Element | null>(null);
-
-    // Get the mouse position.
-    const [mouse, setMouse] = useState({x: 0, y: 0});
-    const [relative, setRelative] = useState({dx: 0, dy: 0});
+    const [mouse, setMouse] = useState({x: 0, y: 0});           // Mouse/touch position.
+    const [relative, setRelative] = useState({dx: 0, dy: 0});   // Mouse/touch distance from drag handle.
 
     const {height, width} = useWindowDimensions();
 
+    // Add event listener for when mouse/touch moves.
     useEffect(() => {
-        // Track mouse movement.
-        const mouseMoveHandler = (e: MouseEvent) => setMouse(e);
-        document.addEventListener("mousemove", mouseMoveHandler);
-
-        // Track touch movement.
-        const touchMoveHandler = (e: TouchEvent) => setMouse({x: e.touches.item(0)!.clientX, y: e.touches.item(0)!.clientY});
-        document.addEventListener("touchmove", touchMoveHandler);
-
+        const mouseTouchMoveHandler = (e: MouseEvent | TouchEvent) => {
+            setMouse(e instanceof MouseEvent ? e : {x: e.touches.item(0)!.clientX, y: e.touches.item(0)!.clientY})
+        }
+        document.addEventListener("mousemove", mouseTouchMoveHandler);
+        document.addEventListener("touchmove", mouseTouchMoveHandler);
         return () => {
-            document.removeEventListener("mousemove", mouseMoveHandler);
-            document.removeEventListener("touchmove", touchMoveHandler);
+            document.removeEventListener("mousemove", mouseTouchMoveHandler);
+            document.removeEventListener("touchmove", mouseTouchMoveHandler);
         };
-    }, []);
+    }, [dragged]);
 
-    useEffect(() => {
-        // Resize the div containing the dropdown to match its size.
-    }, [ref.current?.clientWidth])
 
+    // Add event listener to rearrange list of schedule options and adjust schedule index if needed.
 	useEffect(() => {
-        // Detect mouse up.
-        const mouseUpHandler = (e: MouseEvent) => {
-            if (dragged !== -1) {
-                e.preventDefault();
-                setDragged(-1);
-                setAddedCourses(reorderList(addedCourses, dragged, dropZone));
-                if (scheduleIndex === dragged) {
-                    setScheduleIndex(dropZone <= dragged ? dropZone : dropZone -1);
-                } else if (Math.min(dragged, dropZone) <= scheduleIndex && scheduleIndex <= Math.max(dragged, dropZone)) {
-                    if (dropZone - dragged > 0) {
-                        setScheduleIndex(scheduleIndex - 1);
-                    } else {
-                        setScheduleIndex(scheduleIndex + 1);
-                    }
-                }
+        const mouseTouchUpHandler = () => {
+            if (dragged === null) return;
+            setDragged(null);
+            setAddedCourses(reorderList(addedCourses, dragged, dropZone));
+            if (scheduleIndex === dragged) {
+                setScheduleIndex(dropZone <= dragged ? dropZone : dropZone - 1);
+            } 
+            else if (Math.min(dragged, dropZone) <= scheduleIndex && scheduleIndex <= Math.max(dragged, dropZone)) {
+                setScheduleIndex(scheduleIndex + (dropZone <= dragged ? 1 : -1));
             }
-        };
-        document.addEventListener("mouseup", mouseUpHandler);
-
-        // Detect mouse up.
-        const touchEndHandler = (e: TouchEvent) => {
-            if (dragged !== -1) {
-                e.preventDefault();
-                e.stopPropagation();
-                setDragged(-1);
-                setAddedCourses(reorderList(addedCourses, dragged, dropZone));
-                if (scheduleIndex === dragged) {
-                    setScheduleIndex(dropZone <= dragged ? dropZone : dropZone -1);
-                } else if (Math.min(dragged, dropZone) <= scheduleIndex && scheduleIndex <= Math.max(dragged, dropZone)) {
-                    if (dropZone - dragged > 0) {
-                        setScheduleIndex(scheduleIndex - 1);
-                    } else {
-                        setScheduleIndex(scheduleIndex + 1);
-                    }
-                }
-            }
-        };
-        document.addEventListener("touchend", touchEndHandler);
-
+        }
+        document.addEventListener("mouseup", mouseTouchUpHandler);
+        document.addEventListener("touchend", mouseTouchUpHandler);
         return () => {
-            document.removeEventListener("mouseup", mouseUpHandler);
-            document.removeEventListener("touchend", touchEndHandler);
+            document.removeEventListener("mouseup", mouseTouchUpHandler);
+            document.removeEventListener("touchend", mouseTouchUpHandler);
         };
 	}, [addedCourses, dragged, dropZone, scheduleIndex, setAddedCourses, setScheduleIndex]);
 
-    // Get closest drop zone
+    // Event handler to start dragging a schedule option.
+    const mouseTouchDownHandler = (index: number) => (e: React.MouseEvent | React.TouchEvent) => {
+        const pos = e.type == "mousedown" ? (e as React.MouseEvent) : (e as React.TouchEvent).touches.item(0)!;
+        setDragged(index);
+        setDropZone(index);
+        const {left, top, width} = e.currentTarget!.parentElement!.getBoundingClientRect();
+        setRelative({dx: pos.clientX - left, dy: pos.clientY - top});
+        setMouse({x: pos.clientX, y: pos.clientY});
+        setDraggedWidth(width);
+    }
+
+    // Find the closest drop zone.
     useEffect(() => {
-        if (dragged !== -1) {
-            // get all drop-zones
-            const elements = Array.from(document.getElementsByClassName("schedule-option-drop-zone"));
-            // get all drop-zones' y-axis position
-            // if we were using a horizontally-scrolling list, we would get the .left property
-            const positions = elements.map((e) => e.getBoundingClientRect().top);
-            // get the difference with the mouse's y position
-            const absDifferences = positions.map((v) => Math.abs(v - mouse.y));
+        if (dragged !== null) {
+            // Get all drop zones and calculate each of their distances.
+            const dropZones = Array.from(document.getElementsByClassName("schedule-option-drop-zone"));
+            const distances = dropZones.map(e => Math.abs(e.getBoundingClientRect().top - mouse.y));
 
-            // get the item closest to the mouse
-            let result = absDifferences.indexOf(Math.min(...absDifferences));
-
-            // if the item is below the dragged item, add 1 to the index
+            // Set the nearest drop zone to the mouse as active.
+            let result = distances.indexOf(Math.min(...distances));
             if (result > dragged) result += 1;
-            
             if (result !== dropZone) setDropZone(result);
         }
     }, [dragged, mouse, dropZone]);
 
+    // Invisible placeholder component so the absolute positioned dropdown appears to fit.
     const dropDownPlaceHolder = (
-        <Accordion className="invisible w-full" disableGutters={true}>
-            <AccordionSummary
-                className='*:!m-0 !min-h-0 !p-1 !pl-2'
-                expandIcon={<ExpandMoreIcon style={{color: "white"}}/>}
-            >
+        <Accordion className="invisible !border !border-quaternary !rounded w-full" disableGutters={true}>
+            <AccordionSummary className='*:!m-0 !min-h-0 !p-1 !pl-2' expandIcon={<ExpandMoreIcon style={{color: "white"}}/>}>
                 <span className={`text-nowrap ${width < height ? "text-sm" : "text-base"}`}>{`${addedCourses[scheduleIndex].name}`}</span>
             </AccordionSummary>
             <AccordionDetails className="text-left text-base !p-2 !pt-0">
                 {addedCourses.map(({name}, index) => (
                     <ScheduleOption 
-                        className={`${width < height ? "text-sm" : "text-base"} ${dragged === index ? "hidden" : ""}`}
+                        className={width < height ? "text-sm" : "text-base"}
                         key={`schedule-option-${index}`} 
                         name={name} 
                         index={index} 
-                        setMenu={setMenu}
+                        setMenu={setActionMenu}
                     />
                 ))}
             </AccordionDetails>
@@ -134,100 +99,78 @@ export function ScheduleSelect() {
     );
 
     return (
-        <div>
-            {menu}
+        <>
+            {/** The actual drop down displaying the list of schedules. */}
             <div className="relative touch-none">
                 {dropDownPlaceHolder}
-                <div className="left-0 top-0 absolute z-[10]">
-                    <Accordion className="!bg-secondary !border !border-quaternary w-full" disableGutters={true}>
-                        <AccordionSummary
-                            className='*:!m-0 !min-h-0 !p-1 !pl-2'
-                            color="white"
-                            expandIcon={<ExpandMoreIcon style={{color: "white"}}/>}
-                            ref={ref}
-                        >
-                            <span className={`font-semibold text-nowrap ${width < height ? "text-sm" : "text-base"}`}>{`${addedCourses[scheduleIndex].name}`}</span>
-                        </AccordionSummary>
-                        <AccordionDetails className="text-left text-base !p-2 !pt-0">
-                            {dragged !== -1 && <div key={`drop-zone-${-1}`} className={`${dragged !== -1 ? "transition-[height]" : ""} transition-linear transition-200 rounded-lg bg-[#ffffff08] h-9 schedule-option-drop-zone ${dragged === -1 || dropZone !== 0 ? "!h-0" : ""}`}/>}
-                            {addedCourses.map(({name}, index) => (
-                                <React.Fragment key={index}>
-                                    <ScheduleOption 
-                                        className={`${width < height ? "text-sm" : "text-base"} transition-[height] transition-linear transition-200 ${dragged === index ? "hidden" : ""}`}
-                                        key={`schedule-option-${index}`} 
-                                        name={name} 
-                                        index={index} 
-                                        setMenu={setMenu}
-                                        onMouseDown={(e) => {
-                                            e.preventDefault();
-                                            setDragged(index);
-                                            setDropZone(index);
-                                            const {left, top, width} = e.currentTarget.parentElement!.getBoundingClientRect();
-                                            setRelative({
-                                                dx: e.clientX - left,
-                                                dy: e.clientY - top
-                                            });
-                                            setDraggedWidth(width);
-                                        }}
-                                        onTouchStart={(e) => {
-                                            setDragged(index);
-                                            setDropZone(index);
-                                            const {left, top, width} = e.currentTarget.parentElement!.getBoundingClientRect();
-                                            setRelative({
-                                                dx: e.touches.item(0)!.clientX - left,
-                                                dy: e.touches.item(0)!.clientY - top
-                                            });
-                                            setMouse({
-                                                x: e.touches.item(0)!.clientX,
-                                                y: e.touches.item(0)!.clientY
-                                            });
-                                            setDraggedWidth(width);
-                                        }}
-                                    />
-                                    {dragged !== index && dragged !== -1 && <div key={`drop-zone-${index}`} className={`${dragged !== -1 ? "transition-[height]" : ""} transition-linear transition-200 rounded-lg bg-[#ffffff08] h-9 schedule-option-drop-zone ${dragged === -1 || dropZone !== index+1 ? "!h-0" : ""}`}/>}
-                                </React.Fragment>
-                            ))}
-                        </AccordionDetails>
-                    </Accordion>
-                </div>
+                <Accordion className="!bg-secondary !border !border-quaternary !rounded w-full left-0 top-0 !absolute z-10" disableGutters={true}>
+                    <AccordionSummary
+                        className='*:!m-0 !min-h-0 !p-1 !pl-2'
+                        expandIcon={<ExpandMoreIcon style={{color: "white"}}/>}
+                    >
+                        <span className={`font-semibold text-nowrap ${width < height ? "text-sm" : "text-base"}`}>{`${addedCourses[scheduleIndex].name}`}</span>
+                    </AccordionSummary>
+                    <AccordionDetails className="text-left text-base !p-2 !pt-0">
+                        {dragged !== null && <DropZone index={-1} dropZone={dropZone}/>}
+                        {addedCourses.map(({name}, index) => (
+                            <React.Fragment key={index}>
+                                <ScheduleOption 
+                                    className={`${width < height ? "text-sm" : "text-base"} transition-[height] transition-linear transition-200 ${dragged === index ? "hidden" : ""}`}
+                                    key={`schedule-option-${index}`} 
+                                    name={name} 
+                                    index={index} 
+                                    setMenu={setActionMenu}
+                                    onMouseDown={mouseTouchDownHandler(index)}
+                                    onTouchStart={mouseTouchDownHandler(index)}
+                                />
+                                {dragged !== index && dragged !== null && <DropZone key={`drop-zone-${index}`} index={index} dropZone={dropZone}/>}
+                            </React.Fragment>
+                        ))}
+                    </AccordionDetails>
+                </Accordion>
             </div>
-            {dragged !== -1 && (
-                <ScheduleOption style={{
-                    left: `${mouse.x - relative.dx}px`,
-                    top: `${mouse.y - relative.dy}px`,
-                    width: `${draggedWidth}px`
-                }} className="bg-tertiary absolute z-[1000]" name={addedCourses[dragged].name} index={dragged} setMenu={setMenu}/>
+            {/** The schedule option being dragged. */}
+            {dragged !== null && (
+                <ScheduleOption 
+                    style={{
+                        left: `${mouse.x - relative.dx}px`,
+                        top: `${mouse.y - relative.dy}px`,
+                        width: `${draggedWidth}px`
+                    }} 
+                    className={`${width < height ? "text-sm" : "text-base"} bg-tertiary absolute z-[1000]`} 
+                    name={addedCourses[dragged].name} 
+                    index={dragged} setMenu={setActionMenu}
+                />
             )}
-        </div>  
+            {/** The menu to edit a schedule option. */}
+            {actionMenu}
+        </>  
     );
 }
 
+const DropZone = ({index, dropZone}: {index: number, dropZone: number}) => {
+    return <div className={`transition-[height] rounded-lg bg-[#ffffff08] schedule-option-drop-zone ${dropZone === index+1 ? "h-9" : "h-0"}`}/>;
+}
+
+// Functions for reordering schedules when a schedule option is drag and dropped to a new index.
 const reorderList = <T,>(l: T[], start: number, end: number) => {
     if (start < end) return _reorderListForward([...l], start, end);
     else if (start > end) return _reorderListBackward([...l], start, end);
-  
-    return l; // if start == end
+    return l;
 };
-
 const _reorderListForward = <T,>(l: T[], start: number, end: number) => {
     const temp = l[start];
-  
     for (let i=start; i<end; i++) {
         l[i] = l[i+1];
     }
     l[end - 1] = temp;
-  
     return l;
 };
-
 const _reorderListBackward = <T,>(l: T[], start: number, end: number) => {
     const temp = l[start];
-  
     for (let i = start; i > end; i--) {
         l[i] = l[i - 1];
     }
-  
     l[end] = temp;
-  
     return l;
 };

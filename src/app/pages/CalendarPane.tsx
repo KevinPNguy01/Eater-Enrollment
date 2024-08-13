@@ -77,7 +77,7 @@ function CalendarNavBar(props: {showingFinals: boolean, setShowingFinals: (_: bo
     
     return (
         <nav className="w-full bg-tertiary flex my-1 items-center justify-between px-0.5">
-			<div className="flex w-1/2 items-center gap-4">
+			<div className="flex w-1/2 items-center gap-4 h-fit">
 				<ScheduleSelect/>
 				<Button 
 					className="w-fit h-fit !px-4 !py-0.5" 
