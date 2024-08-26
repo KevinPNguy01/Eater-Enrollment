@@ -25,7 +25,7 @@ export function ScheduleOption(props: {name: string, index: number, setMenu: (me
             <Card className="absolute translate-x-4 -translate-y-1/2 flex flex-col w-fit" style={props.menuPos}>
                 {/** Duplicate schedule. */}
                 <Button 
-                    className="!px-4 !justify-start" 
+                    className="!px-4 !justify-start !align-center" 
                     color="white" 
                     startIcon={<i className="bi bi-copy"></i>}
                     onClick={() => {
@@ -43,7 +43,7 @@ export function ScheduleOption(props: {name: string, index: number, setMenu: (me
                 </Button>
                 {/** Rename schedule. */}
                 <Button 
-                    className="!px-4 !justify-start" 
+                    className="!px-4 !justify-start !align-center" 
                     color="white" 
                     startIcon={<i className="bi bi-pencil-square"></i>}
                     onClick={() => {
@@ -54,7 +54,7 @@ export function ScheduleOption(props: {name: string, index: number, setMenu: (me
                 </Button>
                 {/** Delete schedule. */}
                 <Button 
-                    className="!px-4 !justify-start" 
+                    className="!px-4 !justify-start !align-center" 
                     color="white" 
                     startIcon={<i className="bi bi-trash"></i>}
                     onClick={() => {

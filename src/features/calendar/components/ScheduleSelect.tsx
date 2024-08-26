@@ -1,10 +1,11 @@
 import { useState, useContext, useEffect } from "react";
 import { ScheduleContext } from "../../../app/App";
 import { ScheduleOption } from "./ScheduleOption";
-import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
+import { Accordion, AccordionSummary, AccordionDetails, Button } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import React from "react";
 import useWindowDimensions from "../../../utils/WindowDimensions";
+import AddIcon from '@mui/icons-material/Add';
 
 export function ScheduleSelect() {
     const {addedCourses, setAddedCourses, scheduleIndex, setScheduleIndex,} = useContext(ScheduleContext);
@@ -126,6 +127,15 @@ export function ScheduleSelect() {
                                 {dragged !== index && dragged !== null && <DropZone key={`drop-zone-${index}`} index={index} dropZone={dropZone}/>}
                             </React.Fragment>
                         ))}
+                        {/** Add new schedule button. */}
+                        <Button 
+                            color="white"
+                            className={`${width < height ? "!text-sm" : "!text-base"} w-full !rounded-lg !justify-start !font-semibold`}
+                            startIcon={<AddIcon/>}
+                            onClick={() => setAddedCourses([...addedCourses, {name: "New Schedule", courses: []}])}
+                        >
+                            Add Schedule
+                        </Button>
                     </AccordionDetails>
                 </Accordion>
             </div>
