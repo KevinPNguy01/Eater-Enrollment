@@ -120,6 +120,19 @@ input:focus {
   .border-quaternary {
     border-color: var(--color-quaternary);
   }
+
+  .text-primary {
+    color: var(--color-primary);
+  }
+  .text-secondary {
+    color: var(--color-secondary);
+  }
+  .text-tertiary {
+    color: var(--color-tertiary);
+  }
+  .text-quaternary {
+    color: var(--color-quaternary);
+  }
 }
 
 h1 {

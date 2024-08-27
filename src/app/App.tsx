@@ -14,6 +14,8 @@ import { Backdrop, Button, Card } from "@mui/material";
 import { SnackbarProvider, enqueueSnackbar } from "notistack";
 import SaveIcon from '@mui/icons-material/Save';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
 
 const theme = createTheme();
 const themeOptions: ThemeOptions = createTheme(theme, {
@@ -278,39 +280,41 @@ export function App() {
 
 	const calendarPane = <CalendarPane showingFinals={showingFinals} setShowingFinals={setShowingFinals}/>;
 
-	return (
-		<ThemeProvider theme={themeOptions}>
-			<ScheduleContext.Provider value={
-				{ 
-					calendarReference: calendarRef, 
-					addedCourses: addedCourses,
-					setAddedCourses: setAddedCourses,
-					scheduleIndex: scheduleIndex,
-					setScheduleIndex: setScheduleIndex,
-					addOffering: addOffering, 
-					removeOffering: removeOffering,
-					createSchedule: createSchedule,
-					loadSchedule: loadSchedule,
-					saveSchedule: saveUser,
-					containsOffering: containsOffering,
+	return (    
+		<LocalizationProvider dateAdapter={AdapterMoment}>
+			<ThemeProvider theme={themeOptions}>
+				<ScheduleContext.Provider value={
+					{ 
+						calendarReference: calendarRef, 
+						addedCourses: addedCourses,
+						setAddedCourses: setAddedCourses,
+						scheduleIndex: scheduleIndex,
+						setScheduleIndex: setScheduleIndex,
+						addOffering: addOffering, 
+						removeOffering: removeOffering,
+						createSchedule: createSchedule,
+						loadSchedule: loadSchedule,
+						saveSchedule: saveUser,
+						containsOffering: containsOffering,
 
-					renames: renames,
-					renamed: () => renamed(a => a+1),
+						renames: renames,
+						renamed: () => renamed(a => a+1),
 
-					colorRules: colorRules,
-					setColorRules: setColorRules
-				}
-			}>
-				<div className="relative h-[100dvh] flex text-white flex-col overflow-y-hidden overflow-x-hidden">
-					<NavBar save={saveUser} load={loadUser}/>
-					<div id="main" className={`h-1 grow bg-secondary grid ${aspect >= 1 ? "grid-cols-2" : "grid-cols-1"}`}>
-						{aspect >= 1 ? calendarPane : null}
-						<CoursesPane calendarPane={aspect < 1 ? calendarPane : undefined}/>
+						colorRules: colorRules,
+						setColorRules: setColorRules
+					}
+				}>
+					<div className="relative h-[100dvh] flex text-white flex-col overflow-y-hidden overflow-x-hidden">
+						<NavBar save={saveUser} load={loadUser}/>
+						<div id="main" className={`h-1 grow bg-secondary grid ${aspect >= 1 ? "grid-cols-2" : "grid-cols-1"}`}>
+							{aspect >= 1 ? calendarPane : null}
+							<CoursesPane calendarPane={aspect < 1 ? calendarPane : undefined}/>
+						</div>
+						<SnackbarProvider/>
 					</div>
-					<SnackbarProvider/>
-				</div>
-			</ScheduleContext.Provider>
-		</ThemeProvider>
+				</ScheduleContext.Provider>
+			</ThemeProvider>
+		</LocalizationProvider>
 	)
 }
 
