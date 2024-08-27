@@ -5,10 +5,13 @@ import { EventInfo } from '../../features/calendar/components/EventInfo';
 import { ScheduleSelect } from '../../features/calendar/components/ScheduleSelect';
 import { ScheduleContext } from '../App';
 import { createEvents, createFinalEvents } from '../../utils/FullCalendar';
-import { Button, IconButton } from '@mui/material';
+import { Backdrop, Button, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { EventClickArg } from 'fullcalendar/index.js';
 import useWindowDimensions from '../../utils/WindowDimensions';
+import AddIcon from '@mui/icons-material/Add';
+import { CustomEventMenu } from '../../features/calendar/components/CustomEventMenu';
+
 export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (_: boolean) => void}) {
 	const {showingFinals, setShowingFinals} = props;
 	
@@ -18,6 +21,8 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 	const [scrollPos, setScrollPos] = useState(0);
 	const [calendarRect, setCalendarRect] = useState(null as unknown as DOMRect);
 	const screenSize = useWindowDimensions();
+	const [menuState, setMenuState] = useState(false);
+
 	useEffect(() => {
 		setCalendarRect(ref.current.getBoundingClientRect())
 	}, [ref, screenSize]);
@@ -33,9 +38,15 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 	}, []);
 
 	return (
-		<div className={`flex flex-col flex-grow`} onClick={() => setEventClickArg(null)}>
-			<CalendarNavBar showingFinals={showingFinals} setShowingFinals={setShowingFinals}/>
-			<div ref={ref} id="calendar" className="flex flex-col flex-grow relative">
+		<div 
+			className={`flex flex-col flex-grow`} 
+			onClick={() => {
+				setEventClickArg(null);
+				setMenuState(false);
+			}}
+		>
+			<CalendarNavBar showingFinals={showingFinals} setShowingFinals={setShowingFinals} menuState={menuState} setMenuState={setMenuState}/>
+			<div ref={ref} id="calendar" className="relative flex flex-col flex-grow relative">
 				<FullCalendar 
 					ref={calendarReference}
 					plugins={[ timeGridPlugin ]}
@@ -65,15 +76,18 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 					}}
 				/>
 				{eventClickArg ? <EventInfo eventClickArg={eventClickArg} scrollPos={scrollPos} close={() => setEventClickArg(null)} calendarRect={calendarRect}/> : null}
+				<Backdrop className="!absolute z-20" open={menuState} onClick={() => setMenuState(false)}>
+					<CustomEventMenu closeMenu={() => setMenuState(false)}/>
+				</Backdrop>
 			</div>
 		</div>
 	)
 
 }
 
-function CalendarNavBar(props: {showingFinals: boolean, setShowingFinals: (_: boolean) => void}) {
+function CalendarNavBar(props: {showingFinals: boolean, setShowingFinals: (_: boolean) => void, menuState: boolean, setMenuState: (_: boolean) => void}) {
     const { addedCourses, scheduleIndex, removeOffering } = useContext(ScheduleContext);
-    const {showingFinals, setShowingFinals} = props
+    const {showingFinals, setShowingFinals, menuState, setMenuState} = props
     
     return (
         <nav className="w-full bg-tertiary flex my-1 items-center justify-between px-0.5">
@@ -92,6 +106,15 @@ function CalendarNavBar(props: {showingFinals: boolean, setShowingFinals: (_: bo
 				</Button>
 			</div>
             <div className="px-4">
+				<IconButton
+					color="white"
+					onClick={e => {
+						e.stopPropagation();
+						setMenuState(!menuState);
+					}}
+				>
+					<AddIcon/>
+				</IconButton>
 				<IconButton 
 					color="white"
 					onClick={() => addedCourses[scheduleIndex].courses.map(({offerings}) => offerings).flat().forEach(offering => removeOffering(offering))}
