@@ -11,7 +11,7 @@ export function createCustomEvents(customEvents: CustomEvent[], colorRules: Map<
                     title: customEvent.title,
                     start: customEvent.start.weekday(i).toISOString(),
                     end: customEvent.end.weekday(i).toISOString(),
-                    id: `custom-${customEvent.title}-${i}`,
+                    id: `custom${customEvent.id}-${i}`,
                     ...getColorCustomEvent(customEvent, colorRules)
                 })
             }
@@ -81,7 +81,7 @@ export function getColorCustomEvent(customEvent: CustomEvent, colorRules: Map<st
     const hue = hashString(customEvent.title) % 360;
     const saturation = 75;
     const lightness = 50;
-    const rgb = hslToRgb(hue/360, saturation/100, lightness/100);
+    const rgb = colorRules.get(`custom${customEvent.id}`) || hslToRgb(hue/360, saturation/100, lightness/100);
     const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b)/255;
 
     return {

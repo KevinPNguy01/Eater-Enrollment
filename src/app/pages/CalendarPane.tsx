@@ -37,11 +37,6 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 			e => setScrollPos((e.target as HTMLDivElement).scrollTop));
 	}, []);
 
-	console.log((
-		showingFinals ? createFinalEvents(addedCourses[scheduleIndex].courses.map(({offerings}) => offerings).flat(), colorRules) : 
-		createEvents(addedCourses[scheduleIndex].courses.map(({offerings}) => offerings).flat(), colorRules).concat(createCustomEvents(addedCourses[scheduleIndex].customEvents, colorRules))
-))
-
 	return (
 		<div 
 			className={`flex flex-col flex-grow`} 
