@@ -1,18 +1,22 @@
 import { Button, Card } from "@mui/material";
 import { TimePicker } from "@mui/x-date-pickers";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import moment from "moment";
+import { ScheduleContext } from "../../../app/App";
+import { CustomEvent } from "../../../constants/Types";
 
 export function CustomEventMenu(props: {closeMenu: () => void}) {
+    const {scheduleIndex, addedCourses, setAddedCourses} = useContext(ScheduleContext);
     const [days, setDays] = useState([false,false,false,false,false,false,false]);
-    const [start, setStart] = useState(0);
-    const [end, setEnd] = useState(0);
+    const [start, setStart] = useState(moment('10:10 AM', 'hh:mm A'));
+    const [end, setEnd] = useState(moment('2:50 PM', 'hh:mm A'));
+    const [title, setTitle] = useState("");
 
     return (
         <Card className="w-3/4 h-3/4 p-4 flex flex-col content-center" elevation={3} onClick={e => e.stopPropagation()}>
             <h1>Add Custom Event</h1>
             <div className="flex flex-col p-2 gap-4">
-                <input className="" placeholder="Event Title"/>
+                <input className="" placeholder="Event Title" onChange={e => setTitle(e.currentTarget.value)}/>
                 <div className="flex justify-around">
                     {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
                         <Button 
@@ -31,11 +35,21 @@ export function CustomEventMenu(props: {closeMenu: () => void}) {
                 <div className="flex justify-evenly">
                     <TimePicker
                         label="Start Time"
-                        defaultValue={moment('10:10 AM', 'hh:mm A')}
+                        defaultValue={start}
+                        onChange={val => {
+                            if (val) {
+                                setStart(val);
+                            }
+                        }}
                     />
                     <TimePicker
                         label="End Time"
-                        defaultValue={moment('2:50 PM', 'hh:mm A')}
+                        defaultValue={end}
+                        onChange={val => {
+                            if (val) {
+                                setEnd(val);
+                            }
+                        }}
                     />
                 </div>
                 <div className="w-full flex justify-end gap-4">
@@ -44,6 +58,9 @@ export function CustomEventMenu(props: {closeMenu: () => void}) {
                     </Button>
                     <Button variant="contained" onClick={() => {
                         props.closeMenu();
+                        const customEvent = {title, start: start.clone(), end: end.clone(), days: [...days]} as CustomEvent;
+                        addedCourses[scheduleIndex].customEvents.push(customEvent);
+                        setAddedCourses([...addedCourses]);
                     }}>
                         Add Event
                     </Button>

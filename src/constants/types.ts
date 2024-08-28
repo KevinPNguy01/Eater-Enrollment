@@ -1,3 +1,5 @@
+import { Moment } from "moment"
+
 export type SearchFields = {
     year: {value :string}
     term: {value: string}
@@ -136,4 +138,11 @@ export type Review = {
     wouldTakeAgainPercent: number,
     avgDifficulty: number,
     url: string
+}
+
+export type CustomEvent = {
+    title: string,
+    start: Moment,
+    end: Moment,
+    days: boolean[]
 }
