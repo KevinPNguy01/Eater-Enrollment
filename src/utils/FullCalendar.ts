@@ -11,7 +11,7 @@ export function createCustomEvents(customEvents: CustomEvent[], colorRules: Map<
                     title: customEvent.title,
                     start: customEvent.start.weekday(i).toISOString(),
                     end: customEvent.end.weekday(i).toISOString(),
-                    id: `${customEvent.title}-${i}`,
+                    id: `custom-${customEvent.title}-${i}`,
                     ...getColorCustomEvent(customEvent, colorRules)
                 })
             }
