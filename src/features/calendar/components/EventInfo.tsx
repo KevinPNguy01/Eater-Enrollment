@@ -13,10 +13,13 @@ export function EventInfo(
     {eventClickArg, eventClickArg: {event}, close, calendarRect, scrollPos}: 
     {eventClickArg: EventClickArg, close: () => void, scrollPos: number, calendarRect: DOMRect}
 ) {
-    const {removeOffering, colorRules, setColorRules, addedCourses, scheduleIndex} = useContext(ScheduleContext);
+    const {removeOffering, colorRules, setColorRules, addedCourses, setAddedCourses, scheduleIndex} = useContext(ScheduleContext);
     const ref = useRef(null as unknown as HTMLDivElement);
     const colorPickerRef = useRef(null as unknown as HTMLDivElement);
     const screenSize = useWindowDimensions();
+
+    // Whether the event is a custom event.
+    const isCustom = event.id.startsWith("custom");
 
     // Previous scroll position.
     const [lastScroll, setLastScroll] = useState(scrollPos);
@@ -64,8 +67,9 @@ export function EventInfo(
     ).flat().find(
         ({section: {code}}) => code === event.id.split("-")[0]
     );
-    // If no offering was found, then do not render.
-    if (!offering) return;
+    if (!isCustom && !offering) {
+        return;
+    }
 
     // Div containing the color picker.
     const colorPicker = (
@@ -82,7 +86,7 @@ export function EventInfo(
                     const {r, g, b} = color.rgb;
                     setColor(color.hex);
                     setTextColor((0.299 * r + 0.587 * g + 0.114 * b)/255 < 0.5 ? "white" : "black");
-                    setColorRules(new Map([...colorRules, [`${offering.quarter} ${offering.year} ${offering.section.code}`, color.rgb]]));
+                    setColorRules(new Map([...colorRules, [isCustom ? event.id.split("-")[0] : `${offering!.quarter} ${offering!.year} ${offering!.section.code}`, color.rgb]]));
                 }}
             />
         </Card>
@@ -112,7 +116,14 @@ export function EventInfo(
                             <PaletteIcon/>
                         </IconButton>
                         <IconButton color={textColor} onClick={() => {
-                            removeOffering(offering);
+                            if (isCustom) {
+                                const id = parseInt(event.id.split("-")[0].slice(6));
+                                const schedule = addedCourses[scheduleIndex];
+                                schedule.customEvents = schedule.customEvents.filter(event => event.id !== id);
+                                setAddedCourses([...addedCourses]);
+                            } else {
+                                removeOffering(offering!);
+                            }
                             close();
                         }}>
                             <DeleteIcon/>
@@ -120,20 +131,22 @@ export function EventInfo(
                     </div>
                 </div>
                 <table className="border-spacing-x-4 border-separate py-3"><tbody>
-                    <tr className="border border-quaternary">
+                    {isCustom ? <></> : <tr className="border border-quaternary">
                         <td className="align-top text-sm text-right">Instructors</td>
                         <td><div className="grid justify-items-start *:align-top *:!overflow-clip">
-                            {offering.instructors.map(
+                            {offering!.instructors.map(
                                 (instructor) => {
                                     return <RateMyProfessorsLink instructor={instructor}/>
                                 }
                             )}
                         </div></td>
-                    </tr>
+                    </tr>}
                     {spacerRow}
                     <tr>
                         <td className="text-sm text-right">Location</td>
-                        <td className="*:float-left *:!overflow-clip"><BuildingLink location={offering.meetings[0].building}/></td>
+                        <td className="*:float-left *:!overflow-clip">
+                            {isCustom ? "Nowhere" : <BuildingLink location={offering!.meetings[0].building}/>}
+                        </td>
                     </tr>
                 </tbody></table>
                 {colorPicker}

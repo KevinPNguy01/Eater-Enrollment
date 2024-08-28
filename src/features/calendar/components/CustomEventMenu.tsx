@@ -58,7 +58,10 @@ export function CustomEventMenu(props: {closeMenu: () => void}) {
                     </Button>
                     <Button variant="contained" onClick={() => {
                         props.closeMenu();
-                        const customEvent = {title, start: start.clone(), end: end.clone(), days: [...days]} as CustomEvent;
+                        const ids = new Set(addedCourses[scheduleIndex].customEvents.map(({id}) => id));
+                        let id;
+                        for (id = 0; ids.has(id); ++id);
+                        const customEvent = {id, title, start: start.clone(), end: end.clone(), days: [...days]} as CustomEvent;
                         addedCourses[scheduleIndex].customEvents.push(customEvent);
                         setAddedCourses([...addedCourses]);
                     }}>

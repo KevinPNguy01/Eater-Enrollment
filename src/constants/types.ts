@@ -141,6 +141,7 @@ export type Review = {
 }
 
 export type CustomEvent = {
+    id: number,
     title: string,
     start: Moment,
     end: Moment,
