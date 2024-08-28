@@ -132,7 +132,7 @@ export function ScheduleSelect() {
                             color="white"
                             className={`${width < height ? "!text-sm" : "!text-base"} w-full !rounded-lg !justify-start !font-semibold`}
                             startIcon={<AddIcon/>}
-                            onClick={() => setAddedCourses([...addedCourses, {name: "New Schedule", courses: []}])}
+                            onClick={() => setAddedCourses([...addedCourses, {name: "New Schedule", courses: [], customEvents: []}])}
                         >
                             Add Schedule
                         </Button>

@@ -4,7 +4,7 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { EventInfo } from '../../features/calendar/components/EventInfo';
 import { ScheduleSelect } from '../../features/calendar/components/ScheduleSelect';
 import { ScheduleContext } from '../App';
-import { createEvents, createFinalEvents } from '../../utils/FullCalendar';
+import { createCustomEvents, createEvents, createFinalEvents } from '../../utils/FullCalendar';
 import { Backdrop, Button, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { EventClickArg } from 'fullcalendar/index.js';
@@ -37,6 +37,11 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 			e => setScrollPos((e.target as HTMLDivElement).scrollTop));
 	}, []);
 
+	console.log((
+		showingFinals ? createFinalEvents(addedCourses[scheduleIndex].courses.map(({offerings}) => offerings).flat(), colorRules) : 
+		createEvents(addedCourses[scheduleIndex].courses.map(({offerings}) => offerings).flat(), colorRules).concat(createCustomEvents(addedCourses[scheduleIndex].customEvents, colorRules))
+))
+
 	return (
 		<div 
 			className={`flex flex-col flex-grow`} 
@@ -68,7 +73,12 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 						info.jsEvent.stopPropagation();
 						setEventClickArg(eventClickArg && info.event.id === eventClickArg.event.id ? null : info);
 					}}
-					events={(showingFinals ? createFinalEvents : createEvents)(addedCourses[scheduleIndex].courses.map(({offerings}) => offerings).flat(), colorRules)}
+					events={
+						(
+							showingFinals ? createFinalEvents(addedCourses[scheduleIndex].courses.map(({offerings}) => offerings).flat(), colorRules) : 
+							createEvents(addedCourses[scheduleIndex].courses.map(({offerings}) => offerings).flat(), colorRules).concat(createCustomEvents(addedCourses[scheduleIndex].customEvents, colorRules))
+					)
+					}
 					eventTimeFormat={{
 						hour: "numeric",
 						minute: "2-digit",
@@ -77,7 +87,7 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 				/>
 				{eventClickArg ? <EventInfo eventClickArg={eventClickArg} scrollPos={scrollPos} close={() => setEventClickArg(null)} calendarRect={calendarRect}/> : null}
 				<Backdrop className="!absolute z-20" open={menuState} onClick={() => setMenuState(false)}>
-					<CustomEventMenu closeMenu={() => setMenuState(false)}/>
+					{menuState && <CustomEventMenu closeMenu={() => setMenuState(false)}/>}
 				</Backdrop>
 			</div>
 		</div>

@@ -16,6 +16,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
+import { CustomEvent } from "../constants/Types";
 
 const theme = createTheme();
 const themeOptions: ThemeOptions = createTheme(theme, {
@@ -78,8 +79,8 @@ declare module "@mui/material/IconButton" {
 // Define the context type of schedule related functions and data.
 type ScheduleContextType = {
 	calendarReference: MutableRefObject<FullCalendar>,
-	addedCourses: {name: string, courses: Course[]}[],
-	setAddedCourses: (courses: {name: string, courses: Course[]}[]) => void,
+	addedCourses: {name: string, courses: Course[], customEvents: CustomEvent[]}[],
+	setAddedCourses: (courses: {name: string, courses: Course[], customEvents: CustomEvent[]}[]) => void,
 	scheduleIndex: number,
 	setScheduleIndex: (index: number) => void,
 	addOffering: (offering: CourseOffering) => void, 
@@ -122,7 +123,7 @@ const getData = async (userID: string) => {
 // Navigation bar with calendar on the left, and everything else on the right.
 export function App() {
 	const calendarRef = useRef(null as unknown as FullCalendar);
-	const [addedCourses, setAddedCourses] = useState([{name: "Schedule 1", courses: [] as Course[]}])
+	const [addedCourses, setAddedCourses] = useState([{name: "Schedule 1", courses: [] as Course[], customEvents: [] as CustomEvent[]}])
 	const [colorRules, setColorRules] = useState(new Map<string, RGBColor>());
 	const [scheduleIndex, setScheduleIndex] = useState(0);
 	const [renames, renamed] = useState(0);
@@ -170,7 +171,7 @@ export function App() {
 		schedules!.split("\n").forEach(
 			(schedule) => {
 				const [scheduleName] = schedule.split(":");
-				addedCourses.push({name: scheduleName, courses: []});
+				addedCourses.push({name: scheduleName, courses: [], customEvents: []});
 			}
 		);
 
@@ -274,7 +275,7 @@ export function App() {
 	}
 
 	const createSchedule = (scheduleName: string) => {
-		addedCourses.push({name: scheduleName, courses: []})
+		addedCourses.push({name: scheduleName, courses: [], customEvents: []})
 		loadSchedule(addedCourses.length - 1);
 	}
 

@@ -1,5 +1,24 @@
 import { CourseOffering } from "../constants/Types";
 import { RGBColor } from "react-color";
+import { CustomEvent } from "../constants/Types";
+
+export function createCustomEvents(customEvents: CustomEvent[], colorRules: Map<string, RGBColor>) {
+    return customEvents.map(customEvent => {
+        const events: { backgroundColor: string; textColor: string; title: string; start: string; end: string; id: string; }[] = [];
+        for (let i = 0; i < 7; ++i) {
+            if (customEvent.days[i]) {
+                events.push({
+                    title: customEvent.title,
+                    start: customEvent.start.weekday(i).toISOString(),
+                    end: customEvent.end.weekday(i).toISOString(),
+                    id: `${customEvent.title}-${i}`,
+                    ...getColorCustomEvent(customEvent, colorRules)
+                })
+            }
+        }
+        return events;
+    }).flat();
+}
 
 export function createEvents(offerings: CourseOffering[], colorRules: Map<string, RGBColor>) {
     return offerings.filter(({parsed_meetings}) => parsed_meetings[0].time).map(offering => {
@@ -49,6 +68,20 @@ export function getColor(offering: CourseOffering, colorRules: Map<string, RGBCo
     const saturation = 75;
     const lightness = 50;
     const rgb = colorRules.get(`${offering.quarter} ${offering.year} ${offering.section.code}`) || hslToRgb(hue/360, saturation/100, lightness/100);
+    const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b)/255;
+
+    return {
+        backgroundColor: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`,
+        textColor: luminance > 0.5 ? "black" : "white"
+    }
+}
+
+export function getColorCustomEvent(customEvent: CustomEvent, colorRules: Map<string, RGBColor>) {
+    // Calculate color and luminance for event.
+    const hue = hashString(customEvent.title) % 360;
+    const saturation = 75;
+    const lightness = 50;
+    const rgb = hslToRgb(hue/360, saturation/100, lightness/100);
     const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b)/255;
 
     return {
