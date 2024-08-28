@@ -57,13 +57,13 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 					plugins={[ timeGridPlugin ]}
 					initialView="timeGridWeek"
 					headerToolbar={false}
-					weekends={showingFinals}
+					weekends={showingFinals || addedCourses[scheduleIndex].customEvents.map(({days}) => days[0] || days[6]).some(val => val)}
 					allDaySlot={false}
 					height="100%"
 					expandRows={true}
 					slotMinTime="07:00:00"
 					slotMaxTime="23:00:00"
-					firstDay={6}
+					firstDay={showingFinals ? 6 : 7}
 					slotLabelFormat={{
 					hour: "numeric"
 					}}
