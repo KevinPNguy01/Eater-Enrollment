@@ -3,20 +3,23 @@ import { CalendarApi } from "fullcalendar/index.js";
 import { MutableRefObject, createContext, useRef, useState, useEffect } from "react";
 import { RGBColor } from "react-color";
 import { anteater } from "../assets";
-import { Course, CourseOffering } from "../constants/Types";
 import { requestSchedule } from "../utils/PeterPortal";
 import { CoursesPane } from "./pages/CoursesPane";
 import { CalendarPane } from "./pages/CalendarPane";
 import useWindowDimensions from "../utils/WindowDimensions";
 import { ThemeProvider } from "@emotion/react";
 import { ThemeOptions, createTheme } from '@mui/material/styles';
-import { Backdrop, Button, Card } from "@mui/material";
 import { SnackbarProvider, enqueueSnackbar } from "notistack";
 import SaveIcon from '@mui/icons-material/Save';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
-import { CustomEvent } from "../constants/Types";
+import Button from "@mui/material/Button";
+import Backdrop from "@mui/material/Backdrop";
+import Card from "@mui/material/Card";
+import { useDispatch, useSelector } from "react-redux";
+import { setCurrentScheduleIndex, addOffering, addSchedule, clearScheduleSet } from "../features/schedules/slices/ScheduleSetSlice";
+import { selectScheduleSet } from "../features/schedules/selectors/ScheduleSetSelectors";
 
 const theme = createTheme();
 const themeOptions: ThemeOptions = createTheme(theme, {
@@ -79,20 +82,6 @@ declare module "@mui/material/IconButton" {
 // Define the context type of schedule related functions and data.
 type ScheduleContextType = {
 	calendarReference: MutableRefObject<FullCalendar>,
-	addedCourses: {name: string, courses: Course[], customEvents: CustomEvent[]}[],
-	setAddedCourses: (courses: {name: string, courses: Course[], customEvents: CustomEvent[]}[]) => void,
-	scheduleIndex: number,
-	setScheduleIndex: (index: number) => void,
-	addOffering: (offering: CourseOffering) => void, 
-	removeOffering: (offering: CourseOffering) => void,
-	containsOffering: (offering: CourseOffering) => boolean,
-	createSchedule: (scheduleName: string) => void,
-	loadSchedule: (scheduleIndex: number) => void,
-	saveSchedule: (username: string) => void,
-
-	renames: number,
-	renamed: () => void,
-
 	colorRules: Map<string, RGBColor>,
 	setColorRules: (rules: Map<string, RGBColor>) => void
 }
@@ -122,23 +111,19 @@ const getData = async (userID: string) => {
 
 // Navigation bar with calendar on the left, and everything else on the right.
 export function App() {
+	const scheduleSet = useSelector(selectScheduleSet);
+	const dispatch = useDispatch();
+
 	const calendarRef = useRef(null as unknown as FullCalendar);
-	const [addedCourses, setAddedCourses] = useState([{name: "Schedule 1", courses: [] as Course[], customEvents: [] as CustomEvent[]}])
 	const [colorRules, setColorRules] = useState(new Map<string, RGBColor>());
-	const [scheduleIndex, setScheduleIndex] = useState(0);
-	const [renames, renamed] = useState(0);
-	const updateMap = () => setAddedCourses(addedCourses.slice());
 	const [updateCounter, setUpdateCounter] = useState(0);
 	const [showingFinals, setShowingFinals] = useState(false);
-	const loadSchedule = (scheduleIndex: number) => {
-		setScheduleIndex(scheduleIndex);
-		setAddedCourses(addedCourses.slice())
-	}
 	const {height, width} = useWindowDimensions();
 	const aspect = width/height;
 
+
 	const saveUser = (username: string) => {
-		const schedules = addedCourses.map(
+		const schedules = scheduleSet.map(
 			({name, courses}) => (
 				name + ":" + courses.map(
 					(course) => course.offerings.map(
@@ -153,8 +138,8 @@ export function App() {
 	}
 
 	const loadUser = async (username: string) => {
-		const {schedules, colors} = await getData(username);
-		if (!schedules) {
+		const {schedules: schedulesString, colors} = await getData(username);
+		if (!schedulesString) {
 			enqueueSnackbar(`No schedule found for "${username}"`, {variant: "error"});
 			return;
 		}
@@ -162,16 +147,16 @@ export function App() {
 
 		localStorage.setItem("userID", username);
 		const calendar = (calendarRef.current! as InstanceType<typeof FullCalendar>)?.getApi() as CalendarApi;
-		setScheduleIndex(0);
+		dispatch(setCurrentScheduleIndex(0));
 		calendar?.removeAllEvents();
 
 		setUpdateCounter(a => a+1)
-		addedCourses.length = 0;
 
-		schedules!.split("\n").forEach(
+		dispatch(clearScheduleSet());
+		schedulesString!.split("\n").forEach(
 			(schedule) => {
-				const [scheduleName] = schedule.split(":");
-				addedCourses.push({name: scheduleName, courses: [], customEvents: []});
+				const [name] = schedule.split(":");
+				dispatch(addSchedule({id: -1, name, courses: [], customEvents: []}));
 			}
 		);
 
@@ -181,7 +166,7 @@ export function App() {
 			colorRules.set(offering, {r: parseInt(r), g: parseInt(g), b: parseInt(b)} as RGBColor);
 		})
 
-		schedules!.split("\n").forEach(async (schedule, index) => {
+		schedulesString!.split("\n").forEach(async (schedule, index) => {
 			const quarterYearGroups = new Map<string, string[]>();
 			const [, offeringsString] = schedule.split(":");
 			if (offeringsString === "") return;
@@ -200,7 +185,7 @@ export function App() {
 					year: year, 
 					section_codes: codes.join(",")
 				}], () => setUpdateCounter(a => a+1));
-				courses.forEach(({offerings}) => offerings.forEach((offering) => {if (!containsOffering(offering, index)) addOffering(offering, index)}));
+				courses.forEach(({offerings}) => offerings.forEach((offering) => dispatch(addOffering({offering, index}))));
 			
 			}
 		});
@@ -213,71 +198,6 @@ export function App() {
 		}
 	}, []);
 
-	/**
-     * Adds the given course offering to the calendar and data.
-     * @param offering The course offering to add.
-     */
-	const addOffering = (offering: CourseOffering, index=scheduleIndex) => {
-		// If the course was never added before, create a new course with empty offerings.
-		if (!addedCourses[index].courses.map((course) => course.id).includes(offering.course.id)) {
-			const newCourse = Object.assign({}, offering.course);
-			newCourse.offerings = [];
-			addedCourses[index].courses!.push(newCourse);
-		}
-		addedCourses[index].courses.find((course) => course.id === offering.course.id)?.offerings.push(offering);
-
-		// Check all the boxes.
-		for (const checkbox of document.getElementsByClassName(`checkbox-${offering.course.id}-${offering.section.code}`)) {
-			(checkbox as HTMLInputElement).checked = true;
-		}
-		
-		updateMap();
-	}
-
-	/**
-	 * Removes the given course offering from the calendar and data.
-	 * @param offering The course offering to remove.
-	 */
-	const removeOffering = (offering: CourseOffering) => {
-		// Remove course offering from appropriate course.
-		const addedCourse = addedCourses[scheduleIndex].courses.find((course) => course.id === offering.course.id);
-		const offerings = addedCourse?.offerings;
-		const index = offerings?.findIndex((other_offering) => other_offering.section.code === offering.section.code);
-		if (offerings && index! > -1) {
-			offerings.splice(index!, 1);
-		}
-
-		// If the course has no offerings now, remove it.
-		if (offerings && offerings.length == 0) {
-			addedCourses[scheduleIndex].courses.splice(addedCourses[scheduleIndex].courses.findIndex((course) => course.id == addedCourse.id), 1);
-		}
-
-		// Uncheck all the boxes.
-		for (const checkbox of document.getElementsByClassName(`checkbox-${offering.course.id}-${offering.section.code}`)) {
-			(checkbox as HTMLInputElement).checked = false;
-		}
-		updateMap();
-	}
-
-	/**
-	 * 
-	 * @param offering The offering to check for.
-	 * @returns Whether the offering is already in the current schedule.
-	 */
-	const containsOffering = (offering: CourseOffering, index=scheduleIndex) => {
-		return addedCourses[index].courses.filter(
-			(course) => course.id === offering.course.id
-		).map(
-			(course) => course.offerings.map(
-				(offering) => offering.section.code
-			)
-		).flat().includes(offering.section.code);
-	}
-
-	const createSchedule = (scheduleName: string) => {
-		addedCourses.push({name: scheduleName, courses: [], customEvents: []})
-		loadSchedule(addedCourses.length - 1);
-	}
 
 	const calendarPane = <CalendarPane showingFinals={showingFinals} setShowingFinals={setShowingFinals}/>;
 
@@ -286,21 +206,7 @@ export function App() {
 			<ThemeProvider theme={themeOptions}>
 				<ScheduleContext.Provider value={
 					{ 
-						calendarReference: calendarRef, 
-						addedCourses: addedCourses,
-						setAddedCourses: setAddedCourses,
-						scheduleIndex: scheduleIndex,
-						setScheduleIndex: setScheduleIndex,
-						addOffering: addOffering, 
-						removeOffering: removeOffering,
-						createSchedule: createSchedule,
-						loadSchedule: loadSchedule,
-						saveSchedule: saveUser,
-						containsOffering: containsOffering,
-
-						renames: renames,
-						renamed: () => renamed(a => a+1),
-
+						calendarReference: calendarRef,
 						colorRules: colorRules,
 						setColorRules: setColorRules
 					}

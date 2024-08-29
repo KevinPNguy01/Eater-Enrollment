@@ -1,14 +1,23 @@
-import { useState, useContext, useEffect } from "react";
-import { ScheduleContext } from "../../../app/App";
+import { useState, useEffect } from "react";
 import { ScheduleOption } from "./ScheduleOption";
-import { Accordion, AccordionSummary, AccordionDetails, Button } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import React from "react";
 import useWindowDimensions from "../../../utils/WindowDimensions";
 import AddIcon from '@mui/icons-material/Add';
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import { useDispatch, useSelector } from "react-redux";
+import { addSchedule, reorderScheduleSet, setCurrentScheduleIndex } from "../../schedules/slices/ScheduleSetSlice";
+import { selectCurrentSchedule, selectCurrentScheduleIndex, selectScheduleSet } from "../../schedules/selectors/ScheduleSetSelectors";
+import Button from "@mui/material/Button";
 
 export function ScheduleSelect() {
-    const {addedCourses, setAddedCourses, scheduleIndex, setScheduleIndex,} = useContext(ScheduleContext);
+    const scheduleSet = useSelector(selectScheduleSet);
+    const currentSchedule = useSelector(selectCurrentSchedule);
+    const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
+    const dispatch = useDispatch();
+
     const [draggedWidth, setDraggedWidth] = useState(0);                // Size of the dragged schedule option.
     const [dragged, setDragged] = useState<number | null>(null);        // Index of dragged schedule option.
     const [dropZone, setDropZone] = useState(0);                        // Index of nearest drop zone.
@@ -38,12 +47,12 @@ export function ScheduleSelect() {
         const mouseTouchUpHandler = () => {
             if (dragged === null) return;
             setDragged(null);
-            setAddedCourses(reorderList(addedCourses, dragged, dropZone));
-            if (scheduleIndex === dragged) {
-                setScheduleIndex(dropZone <= dragged ? dropZone : dropZone - 1);
+            dispatch(reorderScheduleSet({start: dragged, end: dropZone}));
+            if (currentScheduleIndex === dragged) {
+                dispatch(setCurrentScheduleIndex(dropZone <= dragged ? dropZone : dropZone - 1));
             } 
-            else if (Math.min(dragged, dropZone) <= scheduleIndex && scheduleIndex <= Math.max(dragged, dropZone)) {
-                setScheduleIndex(scheduleIndex + (dropZone <= dragged ? 1 : -1));
+            else if (Math.min(dragged, dropZone) <= currentScheduleIndex && currentScheduleIndex <= Math.max(dragged, dropZone)) {
+                dispatch(setCurrentScheduleIndex(currentScheduleIndex + (dropZone <= dragged ? 1 : -1)));
             }
         }
         document.addEventListener("mouseup", mouseTouchUpHandler);
@@ -52,7 +61,7 @@ export function ScheduleSelect() {
             document.removeEventListener("mouseup", mouseTouchUpHandler);
             document.removeEventListener("touchend", mouseTouchUpHandler);
         };
-	}, [addedCourses, dragged, dropZone, scheduleIndex, setAddedCourses, setScheduleIndex]);
+	}, [dispatch, dragged, dropZone, currentScheduleIndex]);
 
     // Event handler to start dragging a schedule option.
     const mouseTouchDownHandler = (index: number) => (e: React.MouseEvent | React.TouchEvent) => {
@@ -83,10 +92,10 @@ export function ScheduleSelect() {
     const dropDownPlaceHolder = (
         <Accordion className="invisible !border !border-quaternary !rounded w-full" disableGutters={true}>
             <AccordionSummary className='*:!m-0 !min-h-0 !p-1 !pl-2' expandIcon={<ExpandMoreIcon style={{color: "white"}}/>}>
-                <span className={`text-nowrap ${width < height ? "text-sm" : "text-base"}`}>{`${addedCourses[scheduleIndex].name}`}</span>
+                <span className={`text-nowrap ${width < height ? "text-sm" : "text-base"}`}>{`${currentSchedule.name}`}</span>
             </AccordionSummary>
             <AccordionDetails className="text-left text-base !p-2 !pt-0">
-                {addedCourses.map(({name}, index) => (
+                {scheduleSet.map(({name}, index) => (
                     <ScheduleOption 
                         className={width < height ? "text-sm" : "text-base"}
                         key={`schedule-option-${index}`} 
@@ -109,11 +118,11 @@ export function ScheduleSelect() {
                         className='*:!m-0 !min-h-0 !p-1 !pl-2'
                         expandIcon={<ExpandMoreIcon style={{color: "white"}}/>}
                     >
-                        <span className={`font-semibold text-nowrap ${width < height ? "text-sm" : "text-base"}`}>{`${addedCourses[scheduleIndex].name}`}</span>
+                        <span className={`font-semibold text-nowrap ${width < height ? "text-sm" : "text-base"}`}>{`${currentSchedule.name}`}</span>
                     </AccordionSummary>
                     <AccordionDetails className="text-left text-base !p-2 !pt-0">
                         {dragged !== null && <DropZone index={-1} dropZone={dropZone}/>}
-                        {addedCourses.map(({name}, index) => (
+                        {scheduleSet.map(({name}, index) => (
                             <React.Fragment key={index}>
                                 <ScheduleOption 
                                     className={`${width < height ? "text-sm" : "text-base"} transition-[height] transition-linear transition-200 ${dragged === index ? "hidden" : ""}`}
@@ -132,7 +141,7 @@ export function ScheduleSelect() {
                             color="white"
                             className={`${width < height ? "!text-sm" : "!text-base"} w-full !rounded-lg !justify-start !font-semibold`}
                             startIcon={<AddIcon/>}
-                            onClick={() => setAddedCourses([...addedCourses, {name: "New Schedule", courses: [], customEvents: []}])}
+                            onClick={() => dispatch(addSchedule({id: -1, name: "New Schedule", courses: [], customEvents: []}))}
                         >
                             Add Schedule
                         </Button>
@@ -148,7 +157,7 @@ export function ScheduleSelect() {
                         width: `${draggedWidth}px`
                     }} 
                     className={`${width < height ? "text-sm" : "text-base"} bg-tertiary absolute z-[1000]`} 
-                    name={addedCourses[dragged].name} 
+                    name={scheduleSet[dragged].name} 
                     index={dragged} setMenu={setActionMenu}
                 />
             )}
@@ -161,26 +170,3 @@ export function ScheduleSelect() {
 const DropZone = ({index, dropZone}: {index: number, dropZone: number}) => {
     return <div className={`transition-[height] rounded-lg bg-[#ffffff08] schedule-option-drop-zone ${dropZone === index+1 ? "h-9" : "h-0"}`}/>;
 }
-
-// Functions for reordering schedules when a schedule option is drag and dropped to a new index.
-const reorderList = <T,>(l: T[], start: number, end: number) => {
-    if (start < end) return _reorderListForward([...l], start, end);
-    else if (start > end) return _reorderListBackward([...l], start, end);
-    return l;
-};
-const _reorderListForward = <T,>(l: T[], start: number, end: number) => {
-    const temp = l[start];
-    for (let i=start; i<end; i++) {
-        l[i] = l[i+1];
-    }
-    l[end - 1] = temp;
-    return l;
-};
-const _reorderListBackward = <T,>(l: T[], start: number, end: number) => {
-    const temp = l[start];
-    for (let i = start; i > end; i--) {
-        l[i] = l[i - 1];
-    }
-    l[end] = temp;
-    return l;
-};

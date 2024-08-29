@@ -42,7 +42,7 @@ export function queryToString(query: Query) {
  * Requests a schedule from the Peter Portal API with the given arguments.
  * @returns A list of courses representing the schedule.
  */
-export async function requestSchedule(queries: Query[], callBack=()=>{}): Promise<Course[]> {
+export async function requestSchedule(queries: Query[]): Promise<Course[]> {
     let numQueries = 0;
 
     const query =  `
@@ -107,7 +107,8 @@ export async function requestSchedule(queries: Query[], callBack=()=>{}): Promis
 
         // Process each offering here.
         offerings.forEach(offering => {
-            offering.course = course
+            offering.course = {...course};
+            offering.course.offerings = [];
             offering.parsed_meetings = offering.meetings.map(meeting => parseMeeting(meeting));     // Parse each meeting.
             offering.final = parseFinal(offering.final_exam);
         });
@@ -117,8 +118,7 @@ export async function requestSchedule(queries: Query[], callBack=()=>{}): Promis
 
     (async () => {
         await populateGrades(courses);
-        callBack();
-        populateReviews(courses, callBack);
+        populateReviews(courses);
     })();
 
     return courses;

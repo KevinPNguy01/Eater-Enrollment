@@ -36,7 +36,7 @@ export function filterDays(dayTypes: Set<string>) {
 export function filterTime(timeRange: [number, number]) {
     return (offering: CourseOffering) => {
         if (!offering.parsed_meetings[0].time) return true;
-        const [startTime, endTime] = offering.parsed_meetings[0].time;
+        const [startTime, endTime] = offering.parsed_meetings[0].time.map(s => new Date(s));
         const [start, end] = [startTime.getHours() * 60 + startTime.getMinutes(), endTime.getHours() * 60 + endTime.getMinutes()]
         return timeRange[0] <= start && start <= timeRange[1] && timeRange[0] <= end && end <= timeRange[1];
     }
@@ -68,9 +68,12 @@ export function filterRestrictions(restrictionTypes: Set<string>) {
         }
     
         // If the offering specifies either of two codes can be met, OR the codes, else AND them.
-        const [code1, code2] = [restrictions[0], restrictions[restrictions.length-1]];
-        const [restriction1, restriction2] = [`${code1}: ${restrictionCodes.get(code1)}`, `${code2}: ${restrictionCodes.get(code2)}`]
-        const [hasCode1, hasCode2] = [restrictionTypes.has(restriction1), restrictionTypes.has(restriction2)];
+        const code1 = restrictions[0];
+        const code2 = restrictions[restrictions.length - 1];
+        const restriction1 = `${code1}: ${restrictionCodes.get(code1)}`;
+        const restriction2 = `${code2}: ${restrictionCodes.get(code2)}`;
+        const hasCode1 = restrictionTypes.has(restriction1);
+        const hasCode2 = restrictionTypes.has(restriction2);
         return restrictions.includes("or") ? hasCode1 || hasCode2 : hasCode1 && hasCode2;
     }
 }

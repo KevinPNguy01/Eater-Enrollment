@@ -1,11 +1,13 @@
-import { useContext } from "react";
-import { ScheduleContext } from "../../../app/App";
 import { ColoredText } from "../../../components/ColoredText";
 import { typeColors, statusColors } from "../../../constants/TextColors";
 import { CourseOffering } from "../../../constants/Types";
 import { RateMyProfessorsLink } from "./RateMyProfessorsLink";
 import { ZotisticsLink } from "./ZotisticsLink";
 import { BuildingLink } from "./BuildingLink";
+import { useDispatch, useSelector } from "react-redux";
+import { addOffering, removeOffering } from "../../schedules/slices/ScheduleSetSlice";
+import { selectCurrentSchedule, selectCurrentScheduleIndex } from "../../schedules/selectors/ScheduleSetSelectors";
+import { scheduleContainsOffering } from "../../../utils/Schedule";
 
 /**
  * Component for displaying a course result as a tr, to be used in CourseResult.
@@ -60,12 +62,14 @@ export function OfferingResult(props: {offering: CourseOffering}) {
  * Checkbox for adding and removing a CourseOffering, to be used in OfferingResult.
  */
 function CourseCheckBox(props: {offering: CourseOffering}) {
-    const { addOffering, removeOffering, containsOffering } = useContext(ScheduleContext);
+    const currentSchedule = useSelector(selectCurrentSchedule);
+    const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
+    const dispatch = useDispatch();
     const {offering} = props;
 
     // Add or remove offering depending on the box was checked or unchecked.
     const handleCheckBoxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        (event.target.checked ? addOffering : removeOffering)(offering);
+        dispatch(event.target.checked ? addOffering({offering, index: currentScheduleIndex}) : removeOffering(offering));
     };
 
     return (
@@ -73,7 +77,7 @@ function CourseCheckBox(props: {offering: CourseOffering}) {
             type="checkbox"
             onChange={handleCheckBoxChange}
             className={`checkbox-${offering.course.id}-${offering.section.code}`}
-            defaultChecked={containsOffering(offering)}
+            defaultChecked={scheduleContainsOffering(currentSchedule, offering)}
         />
     );
 }

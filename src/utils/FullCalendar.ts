@@ -1,6 +1,7 @@
 import { CourseOffering } from "../constants/Types";
 import { RGBColor } from "react-color";
 import { CustomEvent } from "../constants/Types";
+import moment from "moment";
 
 export function createCustomEvents(customEvents: CustomEvent[], colorRules: Map<string, RGBColor>) {
     return customEvents.map(customEvent => {
@@ -9,8 +10,8 @@ export function createCustomEvents(customEvents: CustomEvent[], colorRules: Map<
             if (customEvent.days[i]) {
                 events.push({
                     title: customEvent.title,
-                    start: customEvent.start.weekday(i).toISOString(),
-                    end: customEvent.end.weekday(i).toISOString(),
+                    start: moment(customEvent.startTime).weekday(i).toISOString(),
+                    end: moment(customEvent.endTime).weekday(i).toISOString(),
                     id: `custom${customEvent.id}-${i}`,
                     ...getColorCustomEvent(customEvent, colorRules)
                 })
@@ -27,7 +28,7 @@ export function createEvents(offerings: CourseOffering[], colorRules: Map<string
         for (let i = 4; i >= 0; --i) {
             const day = offering.parsed_meetings[0].days & (1 << i) ? 4 - i : null;
             if (day === null) continue;
-            const [startTime, endTime] = offering.parsed_meetings[0].time!;
+            const [startTime, endTime] = offering.parsed_meetings[0].time!.map(s => new Date(s));
             const [startDate, endDate] = [getDay(day), getDay(day)];
             startDate.setHours(startTime.getHours(), startTime.getMinutes());
             endDate.setHours(endTime.getHours(), endTime.getMinutes());
@@ -47,7 +48,7 @@ export function createFinalEvents(offerings: CourseOffering[], colorRules: Map<s
     return offerings.filter(({final}) => final && final.time).map(offering => {
         const final = offering.final!;
         const [startDate, endDate] = [getDay(final.day), getDay(final.day)];
-        const [startTime, endTime] = final.time!;
+        const [startTime, endTime] = final.time!.map(s => new Date(s));
         startDate.setHours(startTime.getHours(), startTime.getMinutes());
         endDate.setHours(endTime.getHours(), endTime.getMinutes());
         return {

@@ -1,5 +1,3 @@
-import { Moment } from "moment"
-
 export type SearchFields = {
     year: {value :string}
     term: {value: string}
@@ -81,13 +79,13 @@ export type Meeting = {
 export type ParsedMeeting = {
     buildingId: number
     room: string
-    days: number                // Bit string; Each bit set to 1 represents meeting that day.
-    time: [Date, Date] | null   // Two dates representing the start and end times of this meeting.
+    days: number                    // Bit string; Each bit set to 1 represents meeting that day.
+    time: [string, string] | null   // Two date strings representing the start and end times of this meeting.
 }
 
 export type Final = {
-    day: number                 // Day of the week, with monday starting at 0.
-    time: [Date, Date] | null   //  Two dates representing the start and end times of this meeting.
+    day: number                     // Day of the week, with monday starting at 0.
+    time: [string, string] | null   //  Two date strings representing the start and end times of this meeting.
 }
   
 export type SectionInfo = {
@@ -143,7 +141,14 @@ export type Review = {
 export type CustomEvent = {
     id: number,
     title: string,
-    start: Moment,
-    end: Moment,
+    startTime: string,
+    endTime: string,
     days: boolean[]
+}
+
+export type Schedule = {
+    id: number;
+    name: string;
+    courses: Course[];
+    customEvents: CustomEvent[];
 }

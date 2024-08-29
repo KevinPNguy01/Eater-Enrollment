@@ -3,8 +3,11 @@ import { ColoredText } from "../../../components/ColoredText";
 import { FilterOptions } from "../types/options";
 import MultiRangeSlider from "multi-range-slider-react";
 import { useState } from "react";
-import { Backdrop, Card, Checkbox, IconButton } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
+import Backdrop from "@mui/material/Backdrop";
+import Card from "@mui/material/Card";
+import IconButton from "@mui/material/IconButton";
+import Checkbox from "@mui/material/Checkbox";
 
 export function FilterMenu(props: {optionsState: [FilterOptions, (options: FilterOptions) => void], defaultOptions: FilterOptions, close: () => void}) {
     const [options, setOptions] = props.optionsState;

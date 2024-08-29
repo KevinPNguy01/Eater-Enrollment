@@ -1,6 +1,6 @@
 import { Course, CourseOffering, Review } from "../constants/Types";
 
-export async function populateReviews(courses: Course[], callBack=()=>{}) {
+export async function populateReviews(courses: Course[]) {
     // Map of instructor names to offerings they teach.
     const instructorOfferings = new Map<string, CourseOffering[]>();
     for (const course of courses) {
@@ -21,7 +21,6 @@ export async function populateReviews(courses: Course[], callBack=()=>{}) {
             const review = await searchProfessor(instructor);
             if (review) {
                 offerings.forEach(offering => offering.instructors.filter(({shortened_name}) => shortened_name === instructor).forEach(instructor => instructor.review = review));
-                callBack();
             }
         })();
         await new Promise(r => setTimeout(r, 500));

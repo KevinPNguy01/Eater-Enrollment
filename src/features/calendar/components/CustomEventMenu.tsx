@@ -1,12 +1,14 @@
-import { Button, Card } from "@mui/material";
 import { TimePicker } from "@mui/x-date-pickers";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import moment from "moment";
-import { ScheduleContext } from "../../../app/App";
 import { CustomEvent } from "../../../constants/Types";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import { useDispatch } from "react-redux";
+import { addCustomEvent } from "../../schedules/slices/ScheduleSetSlice";
 
 export function CustomEventMenu(props: {closeMenu: () => void}) {
-    const {scheduleIndex, addedCourses, setAddedCourses} = useContext(ScheduleContext);
+    const dispatch = useDispatch();
     const [days, setDays] = useState([false,false,false,false,false,false,false]);
     const [start, setStart] = useState(moment('10:10 AM', 'hh:mm A'));
     const [end, setEnd] = useState(moment('2:50 PM', 'hh:mm A'));
@@ -23,6 +25,7 @@ export function CustomEventMenu(props: {closeMenu: () => void}) {
                             color="white"
                             className={`${days[index] == true ? "!border-solid !border-blue-500 !text-blue-500" : ""} !font-semibold !rounded-full !min-w-fit !min-h-fit !w-8 !h-8 !aspect-square`}
                             style={{border: "1px"}}
+                            key={index}
                             onClick={() => {
                                 days[index] = !days[index];
                                 setDays([...days]);
@@ -58,12 +61,8 @@ export function CustomEventMenu(props: {closeMenu: () => void}) {
                     </Button>
                     <Button variant="contained" onClick={() => {
                         props.closeMenu();
-                        const ids = new Set(addedCourses[scheduleIndex].customEvents.map(({id}) => id));
-                        let id;
-                        for (id = 0; ids.has(id); ++id);
-                        const customEvent = {id, title, start: start.clone(), end: end.clone(), days: [...days]} as CustomEvent;
-                        addedCourses[scheduleIndex].customEvents.push(customEvent);
-                        setAddedCourses([...addedCourses]);
+                        const customEvent = {id: -1, title, startTime: start.clone().toISOString(), endTime: end.clone().toISOString(), days: [...days]} as CustomEvent;
+                        dispatch(addCustomEvent(customEvent));
                     }}>
                         Add Event
                     </Button>

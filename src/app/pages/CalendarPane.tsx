@@ -5,17 +5,24 @@ import { EventInfo } from '../../features/calendar/components/EventInfo';
 import { ScheduleSelect } from '../../features/calendar/components/ScheduleSelect';
 import { ScheduleContext } from '../App';
 import { createCustomEvents, createEvents, createFinalEvents } from '../../utils/FullCalendar';
-import { Backdrop, Button, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { EventClickArg } from 'fullcalendar/index.js';
 import useWindowDimensions from '../../utils/WindowDimensions';
 import AddIcon from '@mui/icons-material/Add';
 import { CustomEventMenu } from '../../features/calendar/components/CustomEventMenu';
+import { useDispatch, useSelector } from 'react-redux';
+import Backdrop from '@mui/material/Backdrop';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import { selectCurrentSchedule, selectCurrentScheduleIndex } from '../../features/schedules/selectors/ScheduleSetSelectors';
+import { removeOffering } from '../../features/schedules/slices/ScheduleSetSlice';
 
 export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (_: boolean) => void}) {
+	const currentSchedule = useSelector(selectCurrentSchedule);
+	const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
 	const {showingFinals, setShowingFinals} = props;
 	
-	const { calendarReference, scheduleIndex, addedCourses, colorRules} = useContext(ScheduleContext);
+	const { calendarReference, colorRules} = useContext(ScheduleContext);
 	const [eventClickArg, setEventClickArg] = useState(null as EventClickArg | null);
 	const ref = useRef(null as unknown as HTMLDivElement);
 	const [scrollPos, setScrollPos] = useState(0);
@@ -29,7 +36,7 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 
 	useEffect(() => {
 		setEventClickArg(null);
-	}, [scheduleIndex, showingFinals]);
+	}, [currentScheduleIndex, showingFinals]);
 
 	useEffect(() => {
 		document.getElementsByClassName("fc-scroller-liquid-absolute").item(0)?.addEventListener(
@@ -52,7 +59,7 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 					plugins={[ timeGridPlugin ]}
 					initialView="timeGridWeek"
 					headerToolbar={false}
-					weekends={showingFinals || addedCourses[scheduleIndex].customEvents.map(({days}) => days[0] || days[6]).some(val => val)}
+					weekends={showingFinals || currentSchedule.customEvents.map(({days}) => days[0] || days[6]).some(val => val)}
 					allDaySlot={false}
 					height="100%"
 					expandRows={true}
@@ -70,8 +77,8 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 					}}
 					events={
 						(
-							showingFinals ? createFinalEvents(addedCourses[scheduleIndex].courses.map(({offerings}) => offerings).flat(), colorRules) : 
-							createEvents(addedCourses[scheduleIndex].courses.map(({offerings}) => offerings).flat(), colorRules).concat(createCustomEvents(addedCourses[scheduleIndex].customEvents, colorRules))
+							showingFinals ? createFinalEvents(currentSchedule.courses.map(({offerings}) => offerings).flat(), colorRules) : 
+							createEvents(currentSchedule.courses.map(({offerings}) => offerings).flat(), colorRules).concat(createCustomEvents(currentSchedule.customEvents, colorRules))
 					)
 					}
 					eventTimeFormat={{
@@ -91,7 +98,8 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 }
 
 function CalendarNavBar(props: {showingFinals: boolean, setShowingFinals: (_: boolean) => void, menuState: boolean, setMenuState: (_: boolean) => void}) {
-    const { addedCourses, scheduleIndex, removeOffering } = useContext(ScheduleContext);
+	const currentSchedule = useSelector(selectCurrentSchedule);
+	const dispatch = useDispatch();
     const {showingFinals, setShowingFinals, menuState, setMenuState} = props
     
     return (
@@ -122,7 +130,7 @@ function CalendarNavBar(props: {showingFinals: boolean, setShowingFinals: (_: bo
 				</IconButton>
 				<IconButton 
 					color="white"
-					onClick={() => addedCourses[scheduleIndex].courses.map(({offerings}) => offerings).flat().forEach(offering => removeOffering(offering))}
+					onClick={() => currentSchedule.courses.map(({offerings}) => offerings).flat().forEach(offering => dispatch(removeOffering(offering)))}
 				>
 					<DeleteIcon/>
 				</IconButton>
