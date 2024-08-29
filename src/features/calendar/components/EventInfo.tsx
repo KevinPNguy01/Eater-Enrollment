@@ -2,18 +2,24 @@ import { useState, useContext, useEffect, useRef } from "react";
 import { SketchPicker } from "react-color";
 import { ScheduleContext } from "../../../app/App";
 import { RateMyProfessorsLink } from "../../results/components/RateMyProfessorsLink";
-import { Card, IconButton } from "@mui/material";
 import { BuildingLink } from "../../results/components/BuildingLink";
 import DeleteIcon from '@mui/icons-material/Delete';
 import PaletteIcon from '@mui/icons-material/Palette';
 import useWindowDimensions from "../../../utils/WindowDimensions";
 import { EventClickArg } from "fullcalendar/index.js";
+import Card from "@mui/material/Card";
+import IconButton from "@mui/material/IconButton";
+import { useDispatch, useSelector } from "react-redux";
+import { selectCurrentSchedule } from "../../schedules/selectors/ScheduleSetSelectors";
+import { removeCustomEvent, removeOffering } from "../../schedules/slices/ScheduleSetSlice";
 
 export function EventInfo(
     {eventClickArg, eventClickArg: {event}, close, calendarRect, scrollPos}: 
     {eventClickArg: EventClickArg, close: () => void, scrollPos: number, calendarRect: DOMRect}
 ) {
-    const {removeOffering, colorRules, setColorRules, addedCourses, setAddedCourses, scheduleIndex} = useContext(ScheduleContext);
+    const currentSchedule = useSelector(selectCurrentSchedule);
+    const dispatch = useDispatch();
+    const {colorRules, setColorRules} = useContext(ScheduleContext);
     const ref = useRef(null as unknown as HTMLDivElement);
     const colorPickerRef = useRef(null as unknown as HTMLDivElement);
     const screenSize = useWindowDimensions();
@@ -62,7 +68,7 @@ export function EventInfo(
     }, [event]);
 
     // Get the offering this event corresponds to.
-    const offering = addedCourses[scheduleIndex].courses.map(
+    const offering = currentSchedule.courses.map(
         ({offerings}) => offerings
     ).flat().find(
         ({section: {code}}) => code === event.id.split("-")[0]
@@ -118,11 +124,9 @@ export function EventInfo(
                         <IconButton color={textColor} onClick={() => {
                             if (isCustom) {
                                 const id = parseInt(event.id.split("-")[0].slice(6));
-                                const schedule = addedCourses[scheduleIndex];
-                                schedule.customEvents = schedule.customEvents.filter(event => event.id !== id);
-                                setAddedCourses([...addedCourses]);
+                                dispatch(removeCustomEvent(id));
                             } else {
-                                removeOffering(offering!);
+                                dispatch(removeOffering(offering!));
                             }
                             close();
                         }}>
@@ -135,8 +139,8 @@ export function EventInfo(
                         <td className="align-top text-sm text-right">Instructors</td>
                         <td><div className="grid justify-items-start *:align-top *:!overflow-clip">
                             {offering!.instructors.map(
-                                (instructor) => {
-                                    return <RateMyProfessorsLink instructor={instructor}/>
+                                (instructor, index) => {
+                                    return <RateMyProfessorsLink key={index} instructor={instructor}/>
                                 }
                             )}
                         </div></td>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Instructor, Review } from "../../../constants/Types";
-import { Card } from "@mui/material";
+import Card from "@mui/material/Card";
 
 /**
  * RateMyProfessors link tag for the given instructor, or a regular text tag if the instructor is STAFF.

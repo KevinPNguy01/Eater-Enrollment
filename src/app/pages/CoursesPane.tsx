@@ -31,9 +31,6 @@ function CoursesPane(props: {calendarPane?: React.JSX.Element}) {
     const [backQueries, setBackQueries] = useState([] as Query[][]);
     const [forwardQueries, setForwardQueries] = useState([] as Query[][]);
 
-    // React State hook for rerendering this component. 
-    const [, setUpdateCounter] = useState(0);
-
     // Functions related to searching.
     const submitSearch = async (searchQueries = queries) => {
         // If there are queries, search for them.
@@ -44,7 +41,7 @@ function CoursesPane(props: {calendarPane?: React.JSX.Element}) {
         setActiveTab("search");         // Switch to search tab.
         setSearchResults([]);           // Clear last results.
         setShowResults(true);           // Show results component.
-        const courses = await requestSchedule(searchQueries, () => setUpdateCounter(a => a+1));
+        const courses = await requestSchedule(searchQueries);
         setSearchResults(courses);      // Update results.
     }
     const resetSearch = () => {

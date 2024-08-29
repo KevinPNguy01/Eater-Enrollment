@@ -1,8 +1,8 @@
-import { useContext } from "react";
-import { ScheduleContext } from "../App";
 import { ScheduleResults } from "../../features/results/components/ScheduleResult";
+import { useSelector } from "react-redux";
+import { selectCurrentSchedule } from "../../features/schedules/selectors/ScheduleSetSelectors";
 
 export function AddedTab() {
-    const { scheduleIndex, addedCourses } = useContext(ScheduleContext);
-    return <ScheduleResults courses={addedCourses[scheduleIndex].courses}/>
+    const currentSchedule = useSelector(selectCurrentSchedule);
+    return <ScheduleResults courses={currentSchedule.courses}/>
 }

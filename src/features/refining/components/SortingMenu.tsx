@@ -1,6 +1,8 @@
-import { Backdrop, Card, IconButton } from "@mui/material";
+import Backdrop from "@mui/material/Backdrop";
 import { SortBy, SortDirection, SortOptions } from "../types/options";
 import CloseIcon from '@mui/icons-material/Close';
+import Card from "@mui/material/Card";
+import IconButton from "@mui/material/IconButton";
 
 export function SortingMenu(props: {optionsState: [SortOptions, (options: SortOptions) => void], close: () => void}) {
     const [options, setOptions] = props.optionsState;

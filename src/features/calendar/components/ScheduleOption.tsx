@@ -1,12 +1,19 @@
-import { useContext, useState } from "react";
-import { ScheduleContext } from "../../../app/App";
+import { useState } from "react";
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import { Backdrop, Button, Card, IconButton } from "@mui/material";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import Backdrop from "@mui/material/Backdrop";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import IconButton from "@mui/material/IconButton";
+import { useDispatch, useSelector } from "react-redux";
+import { selectCurrentScheduleIndex, selectScheduleSet } from "../../schedules/selectors/ScheduleSetSelectors";
+import { duplicateSchedule, removeSchedule, renameSchedule, setCurrentScheduleIndex } from "../../schedules/slices/ScheduleSetSlice";
 
 export function ScheduleOption(props: {name: string, index: number, setMenu: (menu: React.JSX.Element | null) => void} & React.HTMLAttributes<HTMLDivElement>) {
-    const {addedCourses, scheduleIndex, renamed, loadSchedule, setAddedCourses} = useContext(ScheduleContext);
+    const scheduleSet = useSelector(selectScheduleSet);
+    const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
+    const dispatch = useDispatch();
     const {name, index, setMenu} = props;
     const [renaming, setRenaming] = useState(false);    // Whether the schedule is being renamed.
     const [menuOpen, setMenuOpen] = useState(false);    // Whether the action menu is open.
@@ -29,14 +36,7 @@ export function ScheduleOption(props: {name: string, index: number, setMenu: (me
                     color="white" 
                     startIcon={<i className="bi bi-copy"></i>}
                     onClick={() => {
-                        // Deep copy the selected schedule's courses and course offerings and add it to the list.
-                        const newSchedule = {...addedCourses[index]};
-                        newSchedule.courses = [...newSchedule.courses].map(course => {
-                            const newCourse = {...course};
-                            newCourse.offerings = [...course.offerings];
-                            return newCourse;
-                        });
-                        setAddedCourses([...addedCourses, newSchedule]);
+                        dispatch(duplicateSchedule(index));
                     }} 
                 >
                     Duplicate
@@ -58,10 +58,7 @@ export function ScheduleOption(props: {name: string, index: number, setMenu: (me
                     color="white" 
                     startIcon={<i className="bi bi-trash"></i>}
                     onClick={() => {
-                        if (addedCourses.length > 1) {
-                            addedCourses.splice(index, 1)
-                            loadSchedule(Math.min(scheduleIndex, addedCourses.length-1));
-                        }
+                        dispatch(removeSchedule(index));
                     }} 
                 >
                     Delete
@@ -72,9 +69,9 @@ export function ScheduleOption(props: {name: string, index: number, setMenu: (me
 
     return (
         <div 
-            onClick={() => {loadSchedule(props.index)}}
+            onClick={() => dispatch(setCurrentScheduleIndex(index))}
             style={props.style}
-            className={`flex items-center px-1 py-0 gap-2 rounded-lg ${menuOpen && "!bg-tertiary"} font-semibold ${scheduleIndex === props.index ? "!bg-quaternary text-white" : "text-neutral-300"} hover:bg-tertiary hover:cursor-pointer ${props.className}`}
+            className={`flex items-center px-1 py-0 gap-2 rounded-lg ${menuOpen && "!bg-tertiary"} font-semibold ${currentScheduleIndex === index ? "!bg-quaternary text-white" : "text-neutral-300"} hover:bg-tertiary hover:cursor-pointer ${props.className}`}
         > 
             {/** Drag handle. */}
             <div className="cursor-move touch-none" onMouseDown={props.onMouseDown} onTouchStart={props.onTouchStart}>
@@ -85,13 +82,12 @@ export function ScheduleOption(props: {name: string, index: number, setMenu: (me
                 <input 
                     className="min-w-0 flex-grow"
                     autoFocus 
-                    defaultValue={addedCourses[props.index].name} 
+                    defaultValue={scheduleSet[index].name} 
                     onBlur={() => {
                         setTimeout(() => setRenaming(false), 100);
                     }}
                     onChange={e => {
-                        addedCourses[index].name = e.currentTarget.value;
-                        renamed();
+                        dispatch(renameSchedule({index, name: e.currentTarget.value}))
                     }}
                     onKeyDown={e => {
                         if (e.key === "Enter") {

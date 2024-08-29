@@ -12,7 +12,7 @@ export function parseMeeting(meeting: Meeting): ParsedMeeting {
  * @param time The times to parse as a string.
  * @returns A tuple of numbers representing the start/end times represented by the given time string.
  */
-function parseTime(time: string): [Date, Date] | null {
+function parseTime(time: string): [string, string] | null {
     if (!time || time === "TBA") return null;    // Account for asynchronous meeting times.
 
     time = time.replace(/\s+/g, "").replace("am", "").replace("pm", "p")    // Normalize string.
@@ -47,7 +47,7 @@ function parseTime(time: string): [Date, Date] | null {
     const endTime = new Date();
     startTime.setHours(startHour, startMinutes);
     endTime.setHours(endHour, endMinutes);
-    return [startTime, endTime];
+    return [startTime.toISOString(), endTime.toISOString()];
 }
 
 /**
@@ -90,9 +90,10 @@ export function parseFinal(final: string): Final | null {
     const day = days[dayString];
     const time = parseTime(timeString);
     if (!time) return null;
+    const [startTime, endTime] = [new Date(time[0]), new Date(time[1])];
     const start = new Date(`${dateNumber} ${monthString} ${new Date().getFullYear()}`);
     const end = new Date(start);
-    time[0].setMonth(start.getMonth(), start.getDate());
-    time[1].setMonth(end.getMonth(), end.getDate());
-    return {time, day};
+    startTime.setMonth(start.getMonth(), start.getDate());
+    endTime.setMonth(end.getMonth(), end.getDate());
+    return {time: [startTime.toISOString(), endTime.toISOString()], day};
 }

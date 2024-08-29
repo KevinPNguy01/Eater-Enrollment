@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ResponsiveContainer, BarChart, CartesianGrid, Bar, XAxis, YAxis } from "recharts";
 import { CourseOffering } from "../../../constants/Types";
-import { Card } from "@mui/material";
+import Card from "@mui/material/Card";
 
 /**
  * Zotistics link tag for the GradeDistributionCollectionAggregate.
