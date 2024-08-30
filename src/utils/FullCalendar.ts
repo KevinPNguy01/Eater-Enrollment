@@ -1,9 +1,8 @@
 import { CourseOffering } from "../constants/Types";
-import { RGBColor } from "react-color";
 import { CustomEvent } from "../constants/Types";
 import moment from "moment";
 
-export function createCustomEvents(customEvents: CustomEvent[], colorRules: Map<string, RGBColor>) {
+export function createCustomEvents(customEvents: CustomEvent[]) {
     return customEvents.map(customEvent => {
         const events: { backgroundColor: string; textColor: string; title: string; start: string; end: string; id: string; }[] = [];
         for (let i = 0; i < 7; ++i) {
@@ -13,7 +12,8 @@ export function createCustomEvents(customEvents: CustomEvent[], colorRules: Map<
                     start: moment(customEvent.startTime).weekday(i).toISOString(),
                     end: moment(customEvent.endTime).weekday(i).toISOString(),
                     id: `custom${customEvent.id}-${i}`,
-                    ...getColorCustomEvent(customEvent, colorRules)
+                    backgroundColor: customEvent.color,
+                    textColor: getTextColor(customEvent.color)
                 })
             }
         }
@@ -21,7 +21,7 @@ export function createCustomEvents(customEvents: CustomEvent[], colorRules: Map<
     }).flat();
 }
 
-export function createEvents(offerings: CourseOffering[], colorRules: Map<string, RGBColor>) {
+export function createEvents(offerings: CourseOffering[]) {
     return offerings.filter(({parsed_meetings}) => parsed_meetings[0].time).map(offering => {
         // Add an event to the calendar for each meeting day.
         const events = [];
@@ -37,14 +37,15 @@ export function createEvents(offerings: CourseOffering[], colorRules: Map<string
                 start: startDate.toISOString(),
                 end: endDate.toISOString(),
                 id: `${offering.section.code}-${day}`,
-                ...getColor(offering, colorRules)
+                backgroundColor: offering.color,
+                textColor: getTextColor(offering.color)
             });
         }
         return events;
     }).flat();
 }
 
-export function createFinalEvents(offerings: CourseOffering[], colorRules: Map<string, RGBColor>) {
+export function createFinalEvents(offerings: CourseOffering[]) {
     return offerings.filter(({final}) => final && final.time).map(offering => {
         const final = offering.final!;
         const [startDate, endDate] = [getDay(final.day), getDay(final.day)];
@@ -56,39 +57,28 @@ export function createFinalEvents(offerings: CourseOffering[], colorRules: Map<s
             start: startDate.toISOString(),
             end: endDate.toISOString(),
             id: `${offering.section.code}-1`,
-            ...getColor(offering, colorRules)
+            backgroundColor: offering.color,
+            textColor: getTextColor(offering.color)
         };
     });
 }
 
-export function getColor(offering: CourseOffering, colorRules: Map<string, RGBColor>) {
+export function getOfferingColor(offering: CourseOffering) {
     const {course} = offering;
 
     // Calculate color and luminance for event.
-    const hue = hashString(`${course.id}${offering.section.type}`) % 360;
+    const hue = Math.abs(hashString(`${course.id}${offering.section.type}`)) % 360;
     const saturation = 75;
     const lightness = 50;
-    const rgb = colorRules.get(`${offering.quarter} ${offering.year} ${offering.section.code}`) || hslToRgb(hue/360, saturation/100, lightness/100);
-    const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b)/255;
-
-    return {
-        backgroundColor: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`,
-        textColor: luminance > 0.5 ? "black" : "white"
-    }
+    return hslToHex(hue, saturation, lightness);
 }
 
-export function getColorCustomEvent(customEvent: CustomEvent, colorRules: Map<string, RGBColor>) {
+export function getColorCustomEvent(customEvent: CustomEvent) {
     // Calculate color and luminance for event.
-    const hue = hashString(customEvent.title) % 360;
+    const hue = Math.abs(hashString(customEvent.title)) % 360;
     const saturation = 75;
     const lightness = 50;
-    const rgb = colorRules.get(`custom${customEvent.id}`) || hslToRgb(hue/360, saturation/100, lightness/100);
-    const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b)/255;
-
-    return {
-        backgroundColor: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`,
-        textColor: luminance > 0.5 ? "black" : "white"
-    }
+    return hslToHex(hue, saturation, lightness);
 }
 
 /**
@@ -111,38 +101,32 @@ function getDay(days: number) {
     return new Date(d.setDate(diff));
 }
 
-/**
- * Converts an HSL color value to RGB. Conversion formula
- * adapted from https://en.wikipedia.org/wiki/HSL_color_space.
- * Assumes h, s, and l are contained in the set [0, 1] and
- * returns r, g, and b in the set [0, 255].
- *
- * @param   {number}  h       The hue
- * @param   {number}  s       The saturation
- * @param   {number}  l       The lightness
- * @return  {Array}           The RGB representation
- */
-function hslToRgb(h: number, s: number, l: number) {
-    const { round } = Math;
-    let r, g, b;
-  
-    if (s === 0) {
-        r = g = b = l; // achromatic    
-    } else {
-        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        const p = 2 * l - q;
-        r = hueToRgb(p, q, h + 1/3);
-        g = hueToRgb(p, q, h);
-        b = hueToRgb(p, q, h - 1/3);
-    }
-    return {r: round(r * 255), g: round(g * 255), b: round(b * 255)} as RGBColor;
+function getTextColor(hex: string) {
+    const {r, g, b} = hexToRgb(hex);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b)/255;
+    return luminance > 0.5 ? "#000000" : "#ffffff";
 }
 
-function hueToRgb(p: number, q: number, t: number) {
-    if (t < 0) t += 1;
-    if (t > 1) t -= 1;
-    if (t < 1/6) return p + (q - p) * 6 * t;
-    if (t < 1/2) return q;
-    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-    return p;
+function hslToHex(h: number, s: number, l: number) {
+    l /= 100;
+    const a = s * Math.min(l, 1 - l) / 100;
+    const f = (n: number) => {
+        const k = (n + h / 30) % 12;
+        const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+        return Math.round(255 * color).toString(16).padStart(2, '0');   // convert to Hex and prefix "0" if needed
+    };
+    return `#${f(0)}${f(8)}${f(4)}`;
 }
+
+function hexToRgb(hex: string) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : {
+        r: 0,
+        g: 0,
+        b: 0
+    };
+  }

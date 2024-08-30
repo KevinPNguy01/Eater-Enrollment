@@ -1,12 +1,10 @@
 import { MapContainer, TileLayer } from 'react-leaflet'
 import { CourseOffering } from "../../../constants/Types";
-import { getColor } from "../../../utils/FullCalendar";
 import { buildings } from "../constants/Buildings";
-import { RGBColor } from 'react-color';
 import { OfferingMarker } from './OfferingMarker';
 
-export function MapBody(props: {offerings: CourseOffering[], colorRules: Map<string, RGBColor>}) {
-    const {offerings, colorRules} = props;
+export function MapBody(props: {offerings: CourseOffering[]}) {
+    const {offerings} = props;
 
     // Map lists of course offerings to building ids so that markers at the same location can be stacked.
     const buildingOfferings = new Map<number, CourseOffering[]>();
@@ -21,7 +19,7 @@ export function MapBody(props: {offerings: CourseOffering[], colorRules: Map<str
     // Create markers for each of the offerings.
     const markers = [...buildingOfferings.entries()].filter(([id,]) => buildings[id]).map(([, offerings]) => 
         offerings.map((offering, index) => 
-            <OfferingMarker offering={offering} translate_y={offerings.length-index-1} color={getColor(offering, colorRules).backgroundColor}/>
+            <OfferingMarker offering={offering} translate_y={offerings.length-index-1} color={offering.color}/>
         )
     ).flat();
 

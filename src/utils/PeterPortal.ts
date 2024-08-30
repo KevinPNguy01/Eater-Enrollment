@@ -2,6 +2,7 @@ import { Course, CourseOffering, GradeDistribution, GradeDistributionCollection 
 import { populateReviews } from "./RateMyProfessors";
 import coursesJson from "../../src/assets/allCourses.json";
 import { parseFinal, parseMeeting } from "./ParseMeeting";
+import { getOfferingColor } from "./FullCalendar";
 
 const courseMap = new Map<string, Course>((coursesJson as {data: {allCourses: Course[]}}).data.allCourses.map(course => [course.id, course]));
 
@@ -111,6 +112,7 @@ export async function requestSchedule(queries: Query[]): Promise<Course[]> {
             offering.course.offerings = [];
             offering.parsed_meetings = offering.meetings.map(meeting => parseMeeting(meeting));     // Parse each meeting.
             offering.final = parseFinal(offering.final_exam);
+            offering.color = getOfferingColor(offering);
         });
 
         return course;

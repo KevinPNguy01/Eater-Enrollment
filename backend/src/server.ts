@@ -22,56 +22,44 @@ const schedulesDB = new sqlite3.Database('schedules.sqlite3', (err) => {
         user_id TEXT PRIMARY KEY,
         color_rules TEXT
     )`);
+
+    // Create table for schedules.
+    schedulesDB.run(`CREATE TABLE IF NOT EXISTS schedules (
+        user_id TEXT PRIMARY KEY,
+        schedule_set_string TEXT,
+        selected_index INTEGER
+    )`);
 });
 
 const app = express();
 app.use(express.json());
 
-app.post('/api/data', (req: Request, res: Response) => {
-    const { userID, schedules, colors } = req.body;
 
-    const stmt2 = schedulesDB.prepare("INSERT OR REPLACE INTO user_colors (user_id, color_rules) VALUES (?, ?)");
-    stmt2.run(userID, colors, (err: Error | null) => {
-        if (err) {
-            console.log('Error setting course colors.');
-            console.log(err);
-        } else {
-            console.log('Data inserted successfully');
-        }
-    });
-    stmt2.finalize();
+app.post('/api/saveUser', (req: Request, res: Response) => {
+    const {username, scheduleSetString, currentScheduleIndex}: {username: string, scheduleSetString: string, currentScheduleIndex: number} = req.body;
 
-    const stmt = schedulesDB.prepare("INSERT OR REPLACE INTO user_schedules (user_id, schedules) VALUES (?, ?)");
-    stmt.run(userID, schedules, (err: Error | null) => {
+    const stmt = schedulesDB.prepare("INSERT OR REPLACE INTO schedules (user_id, schedule_set_string, selected_index) VALUES (?, ?, ?)");
+    stmt.run(username, scheduleSetString, currentScheduleIndex, (err: Error | null) => {
         if (err) {
             console.log(err);
-            res.status(500).send('Error saving schedule.');
+            res.status(500).send(`Error saving schedules for "${username}".`);
         } else {
-            res.status(200).send('Schedule saved successfully.');
+            res.status(200).send(`Saved schedules for "${username}".`);
         }
     });
     stmt.finalize();
 });
 
-app.get('/api/data/:key', (req: Request, res: Response) => {
+app.get('/api/loadUser/:key', (req: Request, res: Response) => {
     const key = req.params.key;
-    let colors = "";
-    schedulesDB.get("SELECT color_rules FROM user_colors WHERE user_id = ?", [key], (err: Error | null, row: { color_rules: string }) => {
-        if (err) {
-            console.log('Error retrieving course colors.');
+    schedulesDB.get("SELECT schedule_set_string, selected_index FROM schedules WHERE user_id = ?", [key], (err: Error | null, row: { schedule_set_string: string, selected_index: number }) => {
+        if (err || !row) {
+            console.log('Error retrieving user schedules.');
             console.log(err);
         } else {
-            colors = row ? row.color_rules : "";
-        }
-    });
-    schedulesDB.get("SELECT schedules FROM user_schedules WHERE user_id = ?", [key], (err: Error | null, row: { schedules: string }) => {
-        if (err) {
-            res.status(500).send('Error retrieving data');
-        } else {
-            console.log(row)
             res.status(200).json({ 
-                schedules: row ? row.schedules : null,
-                colors: colors
+                scheduleSetString: row.schedule_set_string,
+                selectedIndex: row.selected_index
             });
         }
     });

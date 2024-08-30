@@ -1,6 +1,5 @@
-import { useState, useContext, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { SketchPicker } from "react-color";
-import { ScheduleContext } from "../../../app/App";
 import { RateMyProfessorsLink } from "../../results/components/RateMyProfessorsLink";
 import { BuildingLink } from "../../results/components/BuildingLink";
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -10,16 +9,16 @@ import { EventClickArg } from "fullcalendar/index.js";
 import Card from "@mui/material/Card";
 import IconButton from "@mui/material/IconButton";
 import { useDispatch, useSelector } from "react-redux";
-import { selectCurrentSchedule } from "../../schedules/selectors/ScheduleSetSelectors";
-import { removeCustomEvent, removeOffering } from "../../schedules/slices/ScheduleSetSlice";
+import { selectCurrentSchedule, selectCurrentScheduleIndex } from "../../schedules/selectors/ScheduleSetSelectors";
+import { changeCustomEventColor, changeOfferingColor, removeCustomEvent, removeOffering } from "../../schedules/slices/ScheduleSetSlice";
 
 export function EventInfo(
     {eventClickArg, eventClickArg: {event}, close, calendarRect, scrollPos}: 
     {eventClickArg: EventClickArg, close: () => void, scrollPos: number, calendarRect: DOMRect}
 ) {
     const currentSchedule = useSelector(selectCurrentSchedule);
+    const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
     const dispatch = useDispatch();
-    const {colorRules, setColorRules} = useContext(ScheduleContext);
     const ref = useRef(null as unknown as HTMLDivElement);
     const colorPickerRef = useRef(null as unknown as HTMLDivElement);
     const screenSize = useWindowDimensions();
@@ -32,7 +31,7 @@ export function EventInfo(
     
     // Color of component, color picker, and event.
     const [color, setColor] = useState(event.backgroundColor);
-    const [textColor, setTextColor] = useState(event.textColor as "white" | "black");
+    const [textColor, setTextColor] = useState(event.textColor);
     // Whether to show color picker.
     const [colorVisible, setColorVisible] = useState(false);
 
@@ -64,7 +63,7 @@ export function EventInfo(
     // Get the color and text color everytime the selected event changes.
     useEffect(() => {
         setColor(event.backgroundColor);
-        setTextColor(event.textColor as "white" | "black");
+        setTextColor(event.textColor);
     }, [event]);
 
     // Get the offering this event corresponds to.
@@ -91,8 +90,13 @@ export function EventInfo(
                 onChange={color => {
                     const {r, g, b} = color.rgb;
                     setColor(color.hex);
-                    setTextColor((0.299 * r + 0.587 * g + 0.114 * b)/255 < 0.5 ? "white" : "black");
-                    setColorRules(new Map([...colorRules, [isCustom ? event.id.split("-")[0] : `${offering!.quarter} ${offering!.year} ${offering!.section.code}`, color.rgb]]));
+                    setTextColor((0.299 * r + 0.587 * g + 0.114 * b)/255 < 0.5 ? "#ffffff" : "#000000");
+                    if (isCustom) {
+                        const id = parseInt(event.id.split("-")[0].slice(6));
+                        dispatch(changeCustomEventColor({id, color: color.hex, index: currentScheduleIndex}));
+                    } else {
+                        dispatch(changeOfferingColor({offering: offering!, color: color.hex, index: currentScheduleIndex}));
+                    }
                 }}
             />
         </Card>
@@ -113,7 +117,7 @@ export function EventInfo(
                 >
                     <p className="font-semibold px-2 text-nowrap">{event.title}</p>
                     <div className="flex">
-                        <IconButton color={textColor} onClick={() => {
+                        <IconButton color={textColor === "#000000" ? "black" : "white"} onClick={() => {
                             if (!colorVisible) {
                                 setColorPickerPos(calculateColorPickerPosition(calendarRect, ref.current, pos, colorPickerRef.current));
                             }
@@ -121,12 +125,12 @@ export function EventInfo(
                         }}>
                             <PaletteIcon/>
                         </IconButton>
-                        <IconButton color={textColor} onClick={() => {
+                        <IconButton color={textColor === "#000000" ? "black" : "white"} onClick={() => {
                             if (isCustom) {
                                 const id = parseInt(event.id.split("-")[0].slice(6));
-                                dispatch(removeCustomEvent(id));
+                                dispatch(removeCustomEvent({id, index: currentScheduleIndex}));
                             } else {
-                                dispatch(removeOffering(offering!));
+                                dispatch(removeOffering({offering: offering!, index: currentScheduleIndex}));
                             }
                             close();
                         }}>
