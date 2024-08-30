@@ -1,7 +1,6 @@
 import FullCalendar from "@fullcalendar/react";
 import { CalendarApi } from "fullcalendar/index.js";
 import { MutableRefObject, createContext, useRef, useState, useEffect } from "react";
-import { RGBColor } from "react-color";
 import { anteater } from "../assets";
 import { requestSchedule } from "../utils/PeterPortal";
 import { CoursesPane } from "./pages/CoursesPane";
@@ -18,8 +17,10 @@ import Button from "@mui/material/Button";
 import Backdrop from "@mui/material/Backdrop";
 import Card from "@mui/material/Card";
 import { useDispatch, useSelector } from "react-redux";
-import { setCurrentScheduleIndex, addOffering, addSchedule, clearScheduleSet } from "../features/schedules/slices/ScheduleSetSlice";
-import { selectScheduleSet } from "../features/schedules/selectors/ScheduleSetSelectors";
+import { setCurrentScheduleIndex, addOffering, addSchedule, clearScheduleSet, changeOfferingColor, addCustomEvent } from "../features/schedules/slices/ScheduleSetSlice";
+import { selectCurrentScheduleIndex, selectScheduleSet } from "../features/schedules/selectors/ScheduleSetSelectors";
+import { customEventFromString, customEventToString } from "../utils/CustomEvent";
+import { CourseOffering } from "../constants/Types";
 
 const theme = createTheme();
 const themeOptions: ThemeOptions = createTheme(theme, {
@@ -81,9 +82,7 @@ declare module "@mui/material/IconButton" {
 
 // Define the context type of schedule related functions and data.
 type ScheduleContextType = {
-	calendarReference: MutableRefObject<FullCalendar>,
-	colorRules: Map<string, RGBColor>,
-	setColorRules: (rules: Map<string, RGBColor>) => void
+	calendarReference: MutableRefObject<FullCalendar>
 }
 
 // Context provider for accessing schedule functions and data.
@@ -91,31 +90,13 @@ export const ScheduleContext = createContext(
 	{} as ScheduleContextType
 );
 
-const insertData = async (userID: string, schedules: string, colors: string) => {
-    await fetch('/api/data', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({ userID, schedules, colors }),
-    });
-  };
-
-const getData = async (userID: string) => {
-	const response = await fetch(`/api/data/${userID}`);
-	const data = await response.json();
-	const schedules = data.schedules as string;
-	const colors = data.colors as string;
-	return {schedules, colors};
-};
-
 // Navigation bar with calendar on the left, and everything else on the right.
 export function App() {
 	const scheduleSet = useSelector(selectScheduleSet);
+	const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
 	const dispatch = useDispatch();
 
 	const calendarRef = useRef(null as unknown as FullCalendar);
-	const [colorRules, setColorRules] = useState(new Map<string, RGBColor>());
 	const [updateCounter, setUpdateCounter] = useState(0);
 	const [showingFinals, setShowingFinals] = useState(false);
 	const {height, width} = useWindowDimensions();
@@ -123,72 +104,88 @@ export function App() {
 
 
 	const saveUser = (username: string) => {
-		const schedules = scheduleSet.map(
-			({name, courses}) => (
-				name + ":" + courses.map(
-					(course) => course.offerings.map(
-						(offering) => `${offering.quarter},${offering.year},${offering.section.code}`
-					)
-				).flat().join(";")
-			)
-		).join("\n");
-		const colors = Array.from(colorRules.entries()).map(([offering, rgb]) => `${offering}:${rgb.r} ${rgb.g} ${rgb.b}`).join("\n")
-		insertData(username, schedules, colors);
+		const scheduleSetString = scheduleSet.map(schedule => {
+			const offeringsString = schedule.courses.map(
+				({offerings}) => offerings.map(
+					({quarter, year, section, color}) => `${quarter} ${year} ${section.code} ${color}`
+				)
+			).join(",");
+			const customEventsString = schedule.customEvents.map(
+				event => customEventToString(event)
+			).join(",");
+			return JSON.stringify({
+				name: schedule.name,
+				offerings: offeringsString,
+				custom: customEventsString
+			});
+		}).join("\n");
+		fetch('/api/saveUser', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ username, scheduleSetString, currentScheduleIndex}),
+		});
 		enqueueSnackbar(`Scheduled saved under "${username}"`, {variant: "success"});
 	}
 
-	const loadUser = async (username: string) => {
-		const {schedules: schedulesString, colors} = await getData(username);
-		if (!schedulesString) {
-			enqueueSnackbar(`No schedule found for "${username}"`, {variant: "error"});
+	const loadUser = async (userId: string) => {
+		setUpdateCounter(a => a + 1);
+		const response = await fetch(`/api/loadUser/${userId}`);
+		const data = await response.json();
+		if (!data) {
+			enqueueSnackbar(`No schedule found for "${userId}"`, {variant: "error"});
 			return;
 		}
-		enqueueSnackbar(`Loaded schedule for "${username}"`, {variant: "success"});
+		enqueueSnackbar(`Loaded schedule for "${userId}"`, {variant: "success"});
 
-		localStorage.setItem("userID", username);
-		const calendar = (calendarRef.current! as InstanceType<typeof FullCalendar>)?.getApi() as CalendarApi;
-		dispatch(setCurrentScheduleIndex(0));
-		calendar?.removeAllEvents();
+		localStorage.setItem("userID", userId);
 
-		setUpdateCounter(a => a+1)
-
+		const {scheduleSetString, selectedIndex}: {scheduleSetString: string, selectedIndex: number} = data;
 		dispatch(clearScheduleSet());
-		schedulesString!.split("\n").forEach(
-			(schedule) => {
-				const [name] = schedule.split(":");
+		dispatch(setCurrentScheduleIndex(selectedIndex));
+		scheduleSetString.split("\n").forEach(
+			async (scheduleString, index) => {
+				const {name, offerings: offeringsString, custom: customEventsString}: {name: string, offerings: string, custom: string} = JSON.parse(scheduleString);
 				dispatch(addSchedule({id: -1, name, courses: [], customEvents: []}));
+
+				customEventsString.split(",").forEach(customEventString => {
+					if (!customEventString) {
+						return;
+					}
+					const customEvent = customEventFromString(customEventString);
+					dispatch(addCustomEvent({customEvent, index}));
+				});
+
+				const quarterYearGroups = new Map<string, string[]>();
+				offeringsString.split(",").forEach(offeringString => {
+					if (!offeringString) {
+						return;
+					}
+					const [quarter, year, code] = offeringString.split(" ");
+					const quarterYear = quarter + " " + year;
+					if (!quarterYearGroups.has(quarterYear)) quarterYearGroups.set(quarterYear, []);
+					quarterYearGroups.get(quarterYear)!.push(code)
+				})
+				for (const [quarterYear, codes] of quarterYearGroups) {
+					const [quarter, year] = quarterYear.split(" ");
+					const courses = await requestSchedule([{
+						quarter: quarter, 
+						year: year, 
+						section_codes: codes.join(",")
+					}]);
+					courses.forEach(({offerings}) => offerings.forEach((offering) => dispatch(addOffering({offering, index}))));
+				}
+				offeringsString.split(",").forEach(offeringString => {
+					if (!offeringString) {
+						return;
+					}
+					const [quarter, year, code, color] = offeringString.split(" ");
+					const offering = {quarter, year, section: {code}} as CourseOffering;
+					dispatch(changeOfferingColor({offering, color, index}));
+				});
 			}
 		);
-
-		if (colors) colors.split("\n").forEach(rule => {
-			const [offering, color] = rule.split(":")
-			const [r, g, b] = color.split(" ");
-			colorRules.set(offering, {r: parseInt(r), g: parseInt(g), b: parseInt(b)} as RGBColor);
-		})
-
-		schedulesString!.split("\n").forEach(async (schedule, index) => {
-			const quarterYearGroups = new Map<string, string[]>();
-			const [, offeringsString] = schedule.split(":");
-			if (offeringsString === "") return;
-			offeringsString.split(";").forEach((offeringString) => {
-				const values = offeringString.split(",");
-				const quarterYear = values[0] + " " + values[1];
-				const code = values[2];
-				if (!quarterYearGroups.has(quarterYear)) quarterYearGroups.set(quarterYear, []);
-				quarterYearGroups.get(quarterYear)!.push(code)
-			})
-
-			for (const [quarterYear, codes] of quarterYearGroups) {
-				const [quarter, year] = quarterYear.split(" ");
-				const courses = await requestSchedule([{
-					quarter: quarter, 
-					year: year, 
-					section_codes: codes.join(",")
-				}], () => setUpdateCounter(a => a+1));
-				courses.forEach(({offerings}) => offerings.forEach((offering) => dispatch(addOffering({offering, index}))));
-			
-			}
-		});
 	};
 
 	useEffect(() => {
@@ -206,9 +203,7 @@ export function App() {
 			<ThemeProvider theme={themeOptions}>
 				<ScheduleContext.Provider value={
 					{ 
-						calendarReference: calendarRef,
-						colorRules: colorRules,
-						setColorRules: setColorRules
+						calendarReference: calendarRef
 					}
 				}>
 					<div className="relative h-[100dvh] flex text-white flex-col overflow-y-hidden overflow-x-hidden">

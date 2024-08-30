@@ -25,6 +25,7 @@ export type CourseOffering = {
     grades: GradeDistributionCollection
     parsed_meetings: ParsedMeeting[]
     final: Final | null
+    color: string
 }
   
 export type Course = {
@@ -128,27 +129,28 @@ export type GradeDistribution = {
 }
 
 export type Review = {
-    firstName: string,
-    lastName: string,
-    department: string,
-    avgRating: number,
-    numRatings: number,
-    wouldTakeAgainPercent: number,
-    avgDifficulty: number,
+    firstName: string
+    lastName: string
+    department: string
+    avgRating: number
+    numRatings: number
+    wouldTakeAgainPercent: number
+    avgDifficulty: number
     url: string
 }
 
 export type CustomEvent = {
-    id: number,
-    title: string,
-    startTime: string,
-    endTime: string,
+    id: number
+    title: string
+    startTime: string
+    endTime: string
     days: boolean[]
+    color: string
 }
 
 export type Schedule = {
-    id: number;
-    name: string;
-    courses: Course[];
-    customEvents: CustomEvent[];
+    id: number
+    name: string
+    courses: Course[]
+    customEvents: CustomEvent[]
 }

@@ -69,7 +69,7 @@ function CourseCheckBox(props: {offering: CourseOffering}) {
 
     // Add or remove offering depending on the box was checked or unchecked.
     const handleCheckBoxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(event.target.checked ? addOffering({offering, index: currentScheduleIndex}) : removeOffering(offering));
+        dispatch(event.target.checked ? addOffering({offering, index: currentScheduleIndex}) : removeOffering({offering, index: currentScheduleIndex}));
     };
 
     return (

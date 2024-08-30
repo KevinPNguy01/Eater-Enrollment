@@ -4,11 +4,14 @@ import moment from "moment";
 import { CustomEvent } from "../../../constants/Types";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addCustomEvent } from "../../schedules/slices/ScheduleSetSlice";
+import { getColorCustomEvent } from "../../../utils/FullCalendar";
+import { selectCurrentScheduleIndex } from "../../schedules/selectors/ScheduleSetSelectors";
 
 export function CustomEventMenu(props: {closeMenu: () => void}) {
     const dispatch = useDispatch();
+    const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
     const [days, setDays] = useState([false,false,false,false,false,false,false]);
     const [start, setStart] = useState(moment('10:10 AM', 'hh:mm A'));
     const [end, setEnd] = useState(moment('2:50 PM', 'hh:mm A'));
@@ -61,8 +64,16 @@ export function CustomEventMenu(props: {closeMenu: () => void}) {
                     </Button>
                     <Button variant="contained" onClick={() => {
                         props.closeMenu();
-                        const customEvent = {id: -1, title, startTime: start.clone().toISOString(), endTime: end.clone().toISOString(), days: [...days]} as CustomEvent;
-                        dispatch(addCustomEvent(customEvent));
+                        const customEvent = {
+                            id: -1, 
+                            title, 
+                            startTime: start.clone().toISOString(), 
+                            endTime: end.clone().toISOString(), 
+                            days: [...days],
+                            color: "#ffffff"
+                        } as CustomEvent;
+                        customEvent.color = getColorCustomEvent(customEvent);
+                        dispatch(addCustomEvent({customEvent, index: currentScheduleIndex}));
                     }}>
                         Add Event
                     </Button>

@@ -22,7 +22,7 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 	const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
 	const {showingFinals, setShowingFinals} = props;
 	
-	const { calendarReference, colorRules} = useContext(ScheduleContext);
+	const { calendarReference } = useContext(ScheduleContext);
 	const [eventClickArg, setEventClickArg] = useState(null as EventClickArg | null);
 	const ref = useRef(null as unknown as HTMLDivElement);
 	const [scrollPos, setScrollPos] = useState(0);
@@ -75,12 +75,10 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 						info.jsEvent.stopPropagation();
 						setEventClickArg(eventClickArg && info.event.id === eventClickArg.event.id ? null : info);
 					}}
-					events={
-						(
-							showingFinals ? createFinalEvents(currentSchedule.courses.map(({offerings}) => offerings).flat(), colorRules) : 
-							createEvents(currentSchedule.courses.map(({offerings}) => offerings).flat(), colorRules).concat(createCustomEvents(currentSchedule.customEvents, colorRules))
-					)
-					}
+					events={(
+						showingFinals ? createFinalEvents(currentSchedule.courses.map(({offerings}) => offerings).flat()) : 
+						createEvents(currentSchedule.courses.map(({offerings}) => offerings).flat()).concat(createCustomEvents(currentSchedule.customEvents))
+					)}
 					eventTimeFormat={{
 						hour: "numeric",
 						minute: "2-digit",
@@ -100,6 +98,7 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 function CalendarNavBar(props: {showingFinals: boolean, setShowingFinals: (_: boolean) => void, menuState: boolean, setMenuState: (_: boolean) => void}) {
 	const currentSchedule = useSelector(selectCurrentSchedule);
 	const dispatch = useDispatch();
+	const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
     const {showingFinals, setShowingFinals, menuState, setMenuState} = props
     
     return (
@@ -130,7 +129,7 @@ function CalendarNavBar(props: {showingFinals: boolean, setShowingFinals: (_: bo
 				</IconButton>
 				<IconButton 
 					color="white"
-					onClick={() => currentSchedule.courses.map(({offerings}) => offerings).flat().forEach(offering => dispatch(removeOffering(offering)))}
+					onClick={() => currentSchedule.courses.map(({offerings}) => offerings).flat().forEach(offering => dispatch(removeOffering({offering, index: currentScheduleIndex})))}
 				>
 					<DeleteIcon/>
 				</IconButton>
