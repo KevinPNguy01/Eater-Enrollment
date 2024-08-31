@@ -32,6 +32,7 @@ export function createEvents(offerings: CourseOffering[]) {
             const [startDate, endDate] = [getDay(day), getDay(day)];
             startDate.setHours(startTime.getHours(), startTime.getMinutes());
             endDate.setHours(endTime.getHours(), endTime.getMinutes());
+            console.log(startDate);
             events.push({
                 title: `${offering.course.department} ${offering.course.number} ${offering.section.type}`,
                 start: startDate.toISOString(),
@@ -97,7 +98,7 @@ function hashString(str: string) {
 function getDay(days: number) {
     const d = new Date();
     const day = d.getDay()
-    const diff = d.getDate() - day + 1 + days + (day === 6 ? 7 : 0); // Adjust when day is saturday.
+    const diff = d.getDate() - day + days + 1;
     return new Date(d.setDate(diff));
 }
 
