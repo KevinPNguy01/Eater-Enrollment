@@ -1,6 +1,6 @@
-import { CourseOffering } from "../constants/Types";
-import { CustomEvent } from "../constants/Types";
 import moment from "moment";
+import { CourseOffering } from "../types/CourseOffering";
+import { CustomEvent } from "../types/CustomEvent";
 
 export function createCustomEvents(customEvents: CustomEvent[]) {
     return customEvents.map(customEvent => {

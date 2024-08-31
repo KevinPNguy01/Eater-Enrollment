@@ -1,8 +1,11 @@
-import { Course, CourseOffering, GradeDistribution, GradeDistributionCollection } from "../constants/Types";
 import { populateReviews } from "./RateMyProfessors";
 import coursesJson from "../../src/assets/allCourses.json";
 import { parseFinal, parseMeeting } from "./ParseMeeting";
 import { getOfferingColor } from "./FullCalendar";
+import { Course } from "../types/Course";
+import { CourseOffering } from "../types/CourseOffering";
+import { GradeDistribution } from "../types/GradeDistribution";
+import { GradeDistributionCollection } from "../types/GradeDistributionCollection";
 
 const courseMap = new Map<string, Course>((coursesJson as {data: {allCourses: Course[]}}).data.allCourses.map(course => [course.id, course]));
 

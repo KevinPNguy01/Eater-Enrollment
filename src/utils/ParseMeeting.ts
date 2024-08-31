@@ -1,5 +1,7 @@
-import { Final, Meeting, ParsedMeeting } from "../constants/Types";
 import { buildingIds } from "../features/map/constants/BuildingIds";
+import { Final } from "../types/Final";
+import { Meeting } from "../types/Meeting";
+import { ParsedMeeting } from "../types/ParsedMeeting";
 
 export function parseMeeting(meeting: Meeting): ParsedMeeting {
     const [buildingId, room] = parseBuilding(meeting.building);

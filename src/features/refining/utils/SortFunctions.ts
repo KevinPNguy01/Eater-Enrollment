@@ -1,4 +1,6 @@
-import { Course, CourseOffering, Instructor } from "../../../constants/Types";
+import { Course } from "../../../types/Course";
+import { CourseOffering } from "../../../types/CourseOffering";
+import { Instructor } from "../../../types/Instructor";
 
 /**
  * Sorts two courses by their department and court number.

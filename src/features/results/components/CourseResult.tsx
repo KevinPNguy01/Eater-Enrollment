@@ -1,4 +1,4 @@
-import { Course } from "../../../constants/Types";
+import { Course } from "../../../types/Course";
 import { CourseInfo } from "./CourseInfo";
 import { OfferingResult } from "./OfferingResult";
 

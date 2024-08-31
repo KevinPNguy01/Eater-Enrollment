@@ -1,7 +1,6 @@
 import { TimePicker } from "@mui/x-date-pickers";
 import { useState } from "react";
 import moment from "moment";
-import { CustomEvent } from "../../../constants/Types";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import Divider from "@mui/material/Divider";
@@ -11,6 +10,7 @@ import { getColorCustomEvent } from "../../../utils/FullCalendar";
 import { selectCurrentScheduleIndex } from "../../schedules/selectors/ScheduleSetSelectors";
 import PlaceIcon from '@mui/icons-material/Place';
 import NotesIcon from '@mui/icons-material/Notes';
+import { CustomEvent } from "../../../types/CustomEvent";
 
 export function CustomEventMenu(props: {closeMenu: () => void}) {
     const dispatch = useDispatch();

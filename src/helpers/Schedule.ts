@@ -1,4 +1,6 @@
-import { Course, CourseOffering, Schedule } from "../constants/Types";
+import { Course } from "../types/Course";
+import { CourseOffering } from "../types/CourseOffering";
+import { Schedule } from "../types/Schedule";
 import { courseContainsOffering } from "./Course";
 
 export function scheduleContainsOffering(schedule: Schedule, offering: CourseOffering) {

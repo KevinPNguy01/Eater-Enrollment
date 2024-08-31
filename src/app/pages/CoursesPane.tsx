@@ -1,11 +1,11 @@
 import { useState, createContext } from "react";
 import { navLinks } from "../../constants/Links";
-import { Course } from "../../constants/Types";
 import { requestSchedule, Query } from "../../utils/PeterPortal";
 import { AddedTab } from "./AddedTab";
 import { SearchForms } from "./SearchForms";
 import { SearchResults } from "./SearchResults";
 import { MapTab } from "./MapTab";
+import { Course } from "../../types/Course";
 
 export type SearchFunctions = {
     submitSearch: (queries?: Query[]) => void

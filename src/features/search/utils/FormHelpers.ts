@@ -1,5 +1,5 @@
 import coursesJson from "../../../assets/allCourses.json";
-import { Course } from "../../../constants/Types";
+import { Course } from "../../../types/Course";
 import { Query } from "../../../utils/PeterPortal";
 
 export type SearchSuggestion = {
