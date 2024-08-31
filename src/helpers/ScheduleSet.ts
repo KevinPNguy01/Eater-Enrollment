@@ -1,5 +1,10 @@
 import { Schedule } from "../types/Schedule";
 
+/**
+ * Add a schedule to the schedule set, giving it a unique id.
+ * @param scheduleSet 
+ * @param schedule 
+ */
 export function scheduleSetAdd(scheduleSet: Schedule[], schedule: Schedule) {
     let id = 0;
     const ids = new Set(scheduleSet.map(({id}) => id));
