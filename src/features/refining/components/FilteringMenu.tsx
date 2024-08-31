@@ -77,6 +77,7 @@ export function FilterMenu(props: {optionsState: [FilterOptions, (options: Filte
                                     setMaxCaption(toTimeString(e.maxValue));
                                 }}
                                 onChange={e => setOptions({...options, timeRange: [e.minValue, e.maxValue]})}
+                                barInnerColor="#0090ff"
                             />
                         </fieldset>
                     </div>
