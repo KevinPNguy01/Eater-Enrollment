@@ -139,7 +139,7 @@ export function EventInfo(
                     </div>
                 </div>
                 <table className="border-spacing-x-4 border-separate py-3"><tbody>
-                    {isCustom ? <></> : <tr className="border border-quaternary">
+                    {!isCustom && <tr className="border border-quaternary">
                         <td className="align-top text-sm text-right">Instructors</td>
                         <td><div className="grid justify-items-start *:align-top *:!overflow-clip">
                             {offering!.instructors.map(
@@ -153,9 +153,14 @@ export function EventInfo(
                     <tr>
                         <td className="text-sm text-right">Location</td>
                         <td className="*:float-left *:!overflow-clip">
-                            {isCustom ? "Nowhere" : <BuildingLink location={offering!.meetings[0].building}/>}
+                            {isCustom ? "nowhere" : <BuildingLink location={offering!.meetings[0].building}/>}
                         </td>
                     </tr>
+                    {spacerRow}
+                    {isCustom && <tr>
+                        <td className="align-top text-sm text-right">Description</td>
+                        <td>{event.extendedProps.description}</td>
+                    </tr>}
                 </tbody></table>
                 {colorPicker}
             </Card>

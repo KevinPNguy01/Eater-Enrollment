@@ -4,10 +4,13 @@ import moment from "moment";
 import { CustomEvent } from "../../../constants/Types";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
+import Divider from "@mui/material/Divider";
 import { useDispatch, useSelector } from "react-redux";
 import { addCustomEvent } from "../../schedules/slices/ScheduleSetSlice";
 import { getColorCustomEvent } from "../../../utils/FullCalendar";
 import { selectCurrentScheduleIndex } from "../../schedules/selectors/ScheduleSetSelectors";
+import PlaceIcon from '@mui/icons-material/Place';
+import NotesIcon from '@mui/icons-material/Notes';
 
 export function CustomEventMenu(props: {closeMenu: () => void}) {
     const dispatch = useDispatch();
@@ -16,12 +19,14 @@ export function CustomEventMenu(props: {closeMenu: () => void}) {
     const [start, setStart] = useState(moment('10:10 AM', 'hh:mm A'));
     const [end, setEnd] = useState(moment('2:50 PM', 'hh:mm A'));
     const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
 
     return (
         <Card className="w-3/4 h-3/4 p-4 flex flex-col content-center" elevation={3} onClick={e => e.stopPropagation()}>
             <h1>Add Custom Event</h1>
             <div className="flex flex-col p-2 gap-4">
-                <input className="" placeholder="Event Title" onChange={e => setTitle(e.currentTarget.value)}/>
+                <input className="border-b-0 text-xl font-semibold" placeholder="Event Title" onChange={e => setTitle(e.currentTarget.value)}/>
+                <Divider color="#808080"/>
                 <div className="flex justify-around">
                     {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
                         <Button 
@@ -38,7 +43,8 @@ export function CustomEventMenu(props: {closeMenu: () => void}) {
                         </Button>
                     ))}
                 </div>
-                <div className="flex justify-evenly">
+                <Divider color="#808080"/>
+                <div className="grid grid-cols-2 gap-4 justify-evenly">
                     <TimePicker
                         label="Start Time"
                         defaultValue={start}
@@ -58,7 +64,18 @@ export function CustomEventMenu(props: {closeMenu: () => void}) {
                         }}
                     />
                 </div>
-                <div className="w-full flex justify-end gap-4">
+                <Divider color="#808080"/>
+                <div className="flex gap-4 items-center">
+                    <PlaceIcon/>
+                    <input className="border-b-0 flex-grow text-base" placeholder="Add location" onChange={e => setTitle(e.currentTarget.value)}/>
+                </div>
+                <Divider color="#808080"/>
+                <div className="flex gap-4 items-center">
+                    <NotesIcon/>
+                    <input className="border-b-0 flex-grow text-base" placeholder="Add description" onChange={e => setDescription(e.currentTarget.value)}/>
+                </div>
+                <Divider color="#808080"/>
+                <div className="w-full flex justify-end gap-2">
                     <Button variant="contained" color="info" onClick={props.closeMenu}>
                         Cancel
                     </Button>
@@ -67,6 +84,7 @@ export function CustomEventMenu(props: {closeMenu: () => void}) {
                         const customEvent = {
                             id: -1, 
                             title, 
+                            description,
                             startTime: start.clone().toISOString(), 
                             endTime: end.clone().toISOString(), 
                             days: [...days],
