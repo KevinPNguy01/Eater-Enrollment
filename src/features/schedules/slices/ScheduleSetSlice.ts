@@ -1,8 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { CourseOffering, Schedule, CustomEvent } from '../../../constants/Types'
-import { scheduleAddOffering, scheduleRemoveOffering } from '../../../utils/Schedule';
-import { scheduleSetAdd, scheduleSetReorder } from '../../../utils/ScheduleSet';
-import { offeringEquals } from '../../../utils/CourseOffering';
+import { scheduleAddOffering, scheduleRemoveOffering } from '../../../helpers/Schedule';
+import { scheduleSetAdd, scheduleSetReorder } from '../../../helpers/ScheduleSet';
+import { offeringEquals } from '../../../helpers/CourseOffering';
+import { CourseOffering } from '../../../types/CourseOffering';
+import { Schedule } from '../../../types/Schedule';
+import { CustomEvent } from '../../../types/CustomEvent';
 
 export const schedulesSlice = createSlice({
     name: "schedules",

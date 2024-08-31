@@ -1,4 +1,4 @@
-import { CustomEvent } from "../constants/Types";
+import { CustomEvent } from "../types/CustomEvent";
 
 export function customEventToString(event: CustomEvent): string {
     return JSON.stringify(event);

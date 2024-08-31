@@ -1,5 +1,6 @@
 import { restrictionCodes } from "../../../constants/RestrictionCodes";
-import { Course, CourseOffering } from "../../../constants/Types";
+import { Course } from "../../../types/Course";
+import { CourseOffering } from "../../../types/CourseOffering";
 
 /**
  * @param sectionTypes A set of strings representing the valid sectionTypes types.

@@ -1,6 +1,6 @@
 import { restrictionCodes } from "../../../constants/RestrictionCodes";
 import { statusColors, typeColors } from "../../../constants/TextColors";
-import { Course } from "../../../constants/Types";
+import { Course } from "../../../types/Course";
 import { FilterOptions, SortBy, SortDirection, SortOptions } from "../types/options";
 import { filterDays, filterLevel, filterRestrictions, filterSectionTypes, filterStatus, filterTime } from "./FilterFunctions";
 import { sortOfferingsByGPA, sortOfferingsByRMP, sortInstructorsByRMP, sortCoursesByGPA, sortCoursesByName, sortCoursesByRMP } from "./SortFunctions";

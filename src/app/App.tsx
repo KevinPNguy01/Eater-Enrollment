@@ -18,8 +18,8 @@ import Card from "@mui/material/Card";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentScheduleIndex, addOffering, addSchedule, clearScheduleSet, changeOfferingColor, addCustomEvent } from "../features/schedules/slices/ScheduleSetSlice";
 import { selectCurrentScheduleIndex, selectScheduleSet } from "../features/schedules/selectors/ScheduleSetSelectors";
-import { customEventFromString, customEventToString } from "../utils/CustomEvent";
-import { CourseOffering } from "../constants/Types";
+import { customEventFromString, customEventToString } from "../helpers/CustomEvent";
+import { CourseOffering } from "../types/CourseOffering";
 
 const theme = createTheme();
 const themeOptions: ThemeOptions = createTheme(theme, {
@@ -170,7 +170,7 @@ export function App() {
 						year: year, 
 						section_codes: codes.join(",")
 					}]);
-					courses.forEach(({offerings}) => offerings.forEach((offering) => dispatch(addOffering({offering, index}))));
+					courses.forEach(course => course.offerings.forEach((offering) => dispatch(addOffering({offering, index}))));
 				}
 				offeringsString.split(",").forEach(offeringString => {
 					if (!offeringString) {

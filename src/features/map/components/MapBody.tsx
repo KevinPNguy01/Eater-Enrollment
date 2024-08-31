@@ -1,7 +1,7 @@
 import { MapContainer, TileLayer } from 'react-leaflet'
-import { CourseOffering } from "../../../constants/Types";
 import { buildings } from "../constants/Buildings";
 import { OfferingMarker } from './OfferingMarker';
+import { CourseOffering } from '../../../types/CourseOffering';
 
 export function MapBody(props: {offerings: CourseOffering[]}) {
     const {offerings} = props;

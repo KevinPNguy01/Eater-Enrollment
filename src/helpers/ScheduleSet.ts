@@ -1,4 +1,4 @@
-import { Schedule } from "../constants/Types";
+import { Schedule } from "../types/Schedule";
 
 export function scheduleSetAdd(scheduleSet: Schedule[], schedule: Schedule) {
     let id = 0;

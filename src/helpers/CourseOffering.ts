@@ -1,4 +1,4 @@
-import { CourseOffering } from "../constants/Types";
+import { CourseOffering } from "../types/CourseOffering";
 
 export function offeringEquals(offering1: CourseOffering, offering2: CourseOffering) {
     const {quarter: q1, year: y1, section: {code: c1}} = offering1;

@@ -1,7 +1,7 @@
 import { DivIcon } from "leaflet";
 import { Marker, Popup } from "react-leaflet";
-import { CourseOffering } from "../../../constants/Types";
 import { buildings } from "../constants/Buildings";
+import { CourseOffering } from "../../../types/CourseOffering";
 
 const shadowStyle = `text-shadow: ${"0 0 1px black,".repeat(16).slice(0,-1)}`;
 

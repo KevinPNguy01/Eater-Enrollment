@@ -4,12 +4,12 @@ import { SortingMenu } from "../../features/refining/components/SortingMenu"
 import { FilterOptions, SortBy, SortDirection, SortOptions } from "../../features/refining/types/options"
 import { filterCourses, newFilterOptions, sortCourses } from "../../features/refining/utils"
 import { restrictionCodes } from "../../constants/RestrictionCodes"
-import { Course } from "../../constants/Types"
 import { useState, useEffect } from "react"
 import { SearchFunctions } from "./CoursesPane"
 import { Query } from "../../utils/PeterPortal"
 import { SearchBox } from "../../features/search/components/SearchBox"
 import IconButton from "@mui/material/IconButton"
+import { Course } from "../../types/Course"
 
 const homeIcon = <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 16 16">
     <path stroke="#ddd" strokeWidth="0.5" fill="#ddd" d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4.5a.5.5 0 0 0 .5-.5v-4h2v4a.5.5 0 0 0 .5.5H14a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793zM2.5 14V7.707l5.5-5.5 5.5 5.5V14H10v-4a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5v4z"/>

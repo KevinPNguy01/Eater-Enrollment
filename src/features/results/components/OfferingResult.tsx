@@ -1,13 +1,13 @@
 import { ColoredText } from "../../../components/ColoredText";
 import { typeColors, statusColors } from "../../../constants/TextColors";
-import { CourseOffering } from "../../../constants/Types";
 import { RateMyProfessorsLink } from "./RateMyProfessorsLink";
 import { ZotisticsLink } from "./ZotisticsLink";
 import { BuildingLink } from "./BuildingLink";
 import { useDispatch, useSelector } from "react-redux";
 import { addOffering, removeOffering } from "../../schedules/slices/ScheduleSetSlice";
 import { selectCurrentSchedule, selectCurrentScheduleIndex } from "../../schedules/selectors/ScheduleSetSelectors";
-import { scheduleContainsOffering } from "../../../utils/Schedule";
+import { scheduleContainsOffering } from "../../../helpers/Schedule";
+import { CourseOffering } from "../../../types/CourseOffering";
 
 /**
  * Component for displaying a course result as a tr, to be used in CourseResult.
