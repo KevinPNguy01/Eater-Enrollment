@@ -4,7 +4,7 @@ import moment from "moment";
 
 export function createCustomEvents(customEvents: CustomEvent[]) {
     return customEvents.map(customEvent => {
-        const events: { backgroundColor: string; textColor: string; title: string; start: string; end: string; id: string; }[] = [];
+        const events: { backgroundColor: string; textColor: string; title: string; start: string; end: string; id: string; description: string}[] = [];
         for (let i = 0; i < 7; ++i) {
             if (customEvent.days[i]) {
                 events.push({
@@ -13,7 +13,8 @@ export function createCustomEvents(customEvents: CustomEvent[]) {
                     end: moment(customEvent.endTime).weekday(i).toISOString(),
                     id: `custom${customEvent.id}-${i}`,
                     backgroundColor: customEvent.color,
-                    textColor: getTextColor(customEvent.color)
+                    textColor: getTextColor(customEvent.color),
+                    description: customEvent.description
                 })
             }
         }
@@ -32,7 +33,6 @@ export function createEvents(offerings: CourseOffering[]) {
             const [startDate, endDate] = [getDay(day), getDay(day)];
             startDate.setHours(startTime.getHours(), startTime.getMinutes());
             endDate.setHours(endTime.getHours(), endTime.getMinutes());
-            console.log(startDate);
             events.push({
                 title: `${offering.course.department} ${offering.course.number} ${offering.section.type}`,
                 start: startDate.toISOString(),

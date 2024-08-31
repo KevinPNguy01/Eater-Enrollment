@@ -1,5 +1,4 @@
 import FullCalendar from "@fullcalendar/react";
-import { CalendarApi } from "fullcalendar/index.js";
 import { MutableRefObject, createContext, useRef, useState, useEffect } from "react";
 import { anteater } from "../assets";
 import { requestSchedule } from "../utils/PeterPortal";
@@ -110,9 +109,9 @@ export function App() {
 					({quarter, year, section, color}) => `${quarter} ${year} ${section.code} ${color}`
 				)
 			).join(",");
-			const customEventsString = schedule.customEvents.map(
+			const customEventsString = JSON.stringify(schedule.customEvents.map(
 				event => customEventToString(event)
-			).join(",");
+			));
 			return JSON.stringify({
 				name: schedule.name,
 				offerings: offeringsString,
@@ -146,13 +145,10 @@ export function App() {
 		dispatch(setCurrentScheduleIndex(selectedIndex));
 		scheduleSetString.split("\n").forEach(
 			async (scheduleString, index) => {
-				const {name, offerings: offeringsString, custom: customEventsString}: {name: string, offerings: string, custom: string} = JSON.parse(scheduleString);
+				const {name, offerings: offeringsString, custom: customEventObjects}: {name: string, offerings: string, custom: string} = JSON.parse(scheduleString);
 				dispatch(addSchedule({id: -1, name, courses: [], customEvents: []}));
 
-				customEventsString.split(",").forEach(customEventString => {
-					if (!customEventString) {
-						return;
-					}
+				JSON.parse(customEventObjects).forEach((customEventString: string) => {
 					const customEvent = customEventFromString(customEventString);
 					dispatch(addCustomEvent({customEvent, index}));
 				});
