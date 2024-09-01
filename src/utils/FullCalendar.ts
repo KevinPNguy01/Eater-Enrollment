@@ -1,10 +1,11 @@
 import moment from "moment";
 import { CourseOffering } from "../types/CourseOffering";
 import { CustomEvent } from "../types/CustomEvent";
+import { CalendarEvent } from "../types/CalendarEvent";
 
 export function createCustomEvents(customEvents: CustomEvent[]) {
     return customEvents.map(customEvent => {
-        const events: { backgroundColor: string; textColor: string; title: string; start: string; end: string; id: string; description: string}[] = [];
+        const events: CalendarEvent[] = [];
         for (let i = 0; i < 7; ++i) {
             if (customEvent.days[i]) {
                 events.push({
@@ -14,7 +15,10 @@ export function createCustomEvents(customEvents: CustomEvent[]) {
                     id: `custom${customEvent.id}-${i}`,
                     backgroundColor: customEvent.color,
                     textColor: getTextColor(customEvent.color),
-                    description: customEvent.description
+                    extendedProps: {
+                        type: "CustomEvent",
+                        source: customEvent
+                    }
                 })
             }
         }
@@ -25,7 +29,7 @@ export function createCustomEvents(customEvents: CustomEvent[]) {
 export function createEvents(offerings: CourseOffering[]) {
     return offerings.filter(({parsed_meetings}) => parsed_meetings[0].time).map(offering => {
         // Add an event to the calendar for each meeting day.
-        const events = [];
+        const events: CalendarEvent[] = [];
         for (let i = 4; i >= 0; --i) {
             const day = offering.parsed_meetings[0].days & (1 << i) ? 4 - i : null;
             if (day === null) continue;
@@ -39,7 +43,11 @@ export function createEvents(offerings: CourseOffering[]) {
                 end: endDate.toISOString(),
                 id: `${offering.section.code}-${day}`,
                 backgroundColor: offering.color,
-                textColor: getTextColor(offering.color)
+                textColor: getTextColor(offering.color),
+                extendedProps: {
+                    type: "CourseOffering",
+                    source: offering
+                }
             });
         }
         return events;
@@ -59,7 +67,11 @@ export function createFinalEvents(offerings: CourseOffering[]) {
             end: endDate.toISOString(),
             id: `${offering.section.code}-1`,
             backgroundColor: offering.color,
-            textColor: getTextColor(offering.color)
+            textColor: getTextColor(offering.color),
+            extendedProps: {
+                type: "CourseOffering",
+                source: offering
+            }
         };
     });
 }

@@ -8,21 +8,6 @@ const schedulesDB = new sqlite3.Database('schedules.sqlite3', (err) => {
         return;
     }
     console.log('Connected to the schedules SQLite database.');
-    schedulesDB.run(`CREATE TABLE IF NOT EXISTS key_value_store (
-        key TEXT PRIMARY KEY,
-        value TEXT
-    )`);
-    // Create table for user schedules
-    schedulesDB.run(`CREATE TABLE IF NOT EXISTS user_schedules (
-        user_id TEXT PRIMARY KEY,
-        schedules TEXT
-    )`);
-    // Create table for course color rules.
-    schedulesDB.run(`CREATE TABLE IF NOT EXISTS user_colors (
-        user_id TEXT PRIMARY KEY,
-        color_rules TEXT
-    )`);
-
     // Create table for schedules.
     schedulesDB.run(`CREATE TABLE IF NOT EXISTS schedules (
         user_id TEXT PRIMARY KEY,

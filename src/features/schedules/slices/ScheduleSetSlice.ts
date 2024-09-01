@@ -76,16 +76,23 @@ export const schedulesSlice = createSlice({
             customEvent.id = id;
             schedule.customEvents.push(customEvent);
         },
-        removeCustomEvent: (state, action: PayloadAction<{id: number, index: number}>) => {
-            const {id, index} = action.payload;
+        removeCustomEvent: (state, action: PayloadAction<{customEvent: CustomEvent, index: number}>) => {
+            const {customEvent, index} = action.payload;
             const schedule = state.scheduleSet[index];
-            schedule.customEvents = schedule.customEvents.filter(e => e.id !== id);
+            schedule.customEvents = schedule.customEvents.filter(e => e.id !== customEvent.id);
         },
-        changeCustomEventColor: (state, action: PayloadAction<{id: number, color: string, index: number}>) => {
-            const {id, color, index} = action.payload;
-            const event = state.scheduleSet[index].customEvents.find(e => e.id === id);
+        changeCustomEventColor: (state, action: PayloadAction<{customEvent: CustomEvent, color: string, index: number}>) => {
+            const {customEvent, color, index} = action.payload;
+            const event = state.scheduleSet[index].customEvents.find(e => e.id === customEvent.id);
             if (event) {
                 event.color = color;
+            }
+        },
+        updateCustomEvent: (state, action: PayloadAction<{customEvent: CustomEvent, index: number}>) => {
+            const {customEvent, index} = action.payload;
+            const event = state.scheduleSet[index].customEvents.find(e => e.id === customEvent.id);
+            if (event) {
+                Object.assign(event, customEvent);
             }
         }
     }
@@ -104,7 +111,8 @@ export const {
     changeOfferingColor,
     addCustomEvent, 
     removeCustomEvent,
-    changeCustomEventColor
+    changeCustomEventColor,
+    updateCustomEvent
 } = schedulesSlice.actions;
 
 export default schedulesSlice.reducer;
