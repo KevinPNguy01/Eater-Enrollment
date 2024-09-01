@@ -9,28 +9,34 @@ import { EventClickArg } from "fullcalendar/index.js";
 import Card from "@mui/material/Card";
 import IconButton from "@mui/material/IconButton";
 import { useDispatch, useSelector } from "react-redux";
-import { selectCurrentSchedule, selectCurrentScheduleIndex } from "../../schedules/selectors/ScheduleSetSelectors";
+import { selectCurrentScheduleIndex } from "../../schedules/selectors/ScheduleSetSelectors";
 import { changeCustomEventColor, changeOfferingColor, removeCustomEvent, removeOffering } from "../../schedules/slices/ScheduleSetSlice";
+import { CourseOffering } from "../../../types/CourseOffering";
+import { CustomEvent } from "../../../types/CustomEvent";
+import EditIcon from '@mui/icons-material/Edit';
 
 export function EventInfo(
-    {eventClickArg, eventClickArg: {event}, close, calendarRect, scrollPos}: 
-    {eventClickArg: EventClickArg, close: () => void, scrollPos: number, calendarRect: DOMRect}
+    {eventClickArg, eventClickArg: {event}, updateEvent, close, calendarRect, scrollPos}: 
+    {eventClickArg: EventClickArg, updateEvent: () => void, close: () => void, scrollPos: number, calendarRect: DOMRect}
 ) {
-    const currentSchedule = useSelector(selectCurrentSchedule);
     const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
     const dispatch = useDispatch();
+    
     const ref = useRef(null as unknown as HTMLDivElement);
     const colorPickerRef = useRef(null as unknown as HTMLDivElement);
     const screenSize = useWindowDimensions();
 
-    // Whether the event is a custom event.
-    const isCustom = event.id.startsWith("custom");
+    // The source of this event.
+    const type: string = event.extendedProps.type;
+    const source: CourseOffering | CustomEvent = event.extendedProps.source;
+    const offering = type === "CourseOffering" ? source as CourseOffering : null;
+    const customEvent = type === "CustomEvent" ? source as CustomEvent : null;
 
     // Previous scroll position.
     const [lastScroll, setLastScroll] = useState(scrollPos);
     
     // Color of component, color picker, and event.
-    const [color, setColor] = useState(event.backgroundColor);
+    const [backgroundColor, setBackgroundColor] = useState(event.backgroundColor);
     const [textColor, setTextColor] = useState(event.textColor);
     // Whether to show color picker.
     const [colorVisible, setColorVisible] = useState(false);
@@ -62,19 +68,9 @@ export function EventInfo(
 
     // Get the color and text color everytime the selected event changes.
     useEffect(() => {
-        setColor(event.backgroundColor);
+        setBackgroundColor(event.backgroundColor);
         setTextColor(event.textColor);
     }, [event]);
-
-    // Get the offering this event corresponds to.
-    const offering = currentSchedule.courses.map(
-        ({offerings}) => offerings
-    ).flat().find(
-        ({section: {code}}) => code === event.id.split("-")[0]
-    );
-    if (!isCustom && !offering) {
-        return;
-    }
 
     // Div containing the color picker.
     const colorPicker = (
@@ -86,14 +82,13 @@ export function EventInfo(
         >
             <SketchPicker 
                 className="!bg-tertiary [&_label]:!text-white"
-                color={color}
+                color={backgroundColor}
                 onChange={color => {
                     const {r, g, b} = color.rgb;
-                    setColor(color.hex);
+                    setBackgroundColor(color.hex);
                     setTextColor((0.299 * r + 0.587 * g + 0.114 * b)/255 < 0.5 ? "#ffffff" : "#000000");
-                    if (isCustom) {
-                        const id = parseInt(event.id.split("-")[0].slice(6));
-                        dispatch(changeCustomEventColor({id, color: color.hex, index: currentScheduleIndex}));
+                    if (customEvent) {
+                        dispatch(changeCustomEventColor({customEvent: event.extendedProps.source, color: color.hex, index: currentScheduleIndex}));
                     } else {
                         dispatch(changeOfferingColor({offering: offering!, color: color.hex, index: currentScheduleIndex}));
                     }
@@ -110,25 +105,37 @@ export function EventInfo(
             onClick={e => e.stopPropagation()} 
             ref={ref} 
         >
+            {/** Card is positioned so color picker can be positioned relative to it. */}
             <Card elevation={3} className="!overflow-visible !rounded-xl relative bg-tertiary">
+                {/** Title and buttons */}
                 <div 
                     className="flex justify-between items-center bg-secondary p-2 gap-8 rounded-t-xl" 
-                    style={{backgroundColor: color, color: textColor}}
+                    style={{backgroundColor: backgroundColor, color: textColor}}
                 >
+                    {/** Title */}
                     <p className="font-semibold px-2 text-nowrap">{event.title}</p>
+                    {/** Buttons */}
                     <div className="flex">
+                        {/** Edit event (Only for custom events). */}
+                        {customEvent && (
+                            <IconButton color={textColor === "#000000" ? "black" : "white"} onClick={() => {
+                                updateEvent();
+                                close();
+                            }}>
+                                <EditIcon/>
+                            </IconButton>
+                        )}
+                        {/** Toggle color picker visibility. */}
                         <IconButton color={textColor === "#000000" ? "black" : "white"} onClick={() => {
-                            if (!colorVisible) {
-                                setColorPickerPos(calculateColorPickerPosition(calendarRect, ref.current, pos, colorPickerRef.current));
-                            }
+                            setColorPickerPos(calculateColorPickerPosition(calendarRect, ref.current, pos, colorPickerRef.current));
                             setColorVisible(!colorVisible)
                         }}>
                             <PaletteIcon/>
                         </IconButton>
+                        {/** Delete event. */}
                         <IconButton color={textColor === "#000000" ? "black" : "white"} onClick={() => {
-                            if (isCustom) {
-                                const id = parseInt(event.id.split("-")[0].slice(6));
-                                dispatch(removeCustomEvent({id, index: currentScheduleIndex}));
+                            if (customEvent) {
+                                dispatch(removeCustomEvent({customEvent, index: currentScheduleIndex}));
                             } else {
                                 dispatch(removeOffering({offering: offering!, index: currentScheduleIndex}));
                             }
@@ -139,28 +146,35 @@ export function EventInfo(
                     </div>
                 </div>
                 <table className="border-spacing-x-4 border-separate py-3"><tbody>
-                    {!isCustom && <tr className="border border-quaternary">
-                        <td className="align-top text-sm text-right">Instructors</td>
-                        <td><div className="grid justify-items-start *:align-top *:!overflow-clip">
-                            {offering!.instructors.map(
-                                (instructor, index) => {
-                                    return <RateMyProfessorsLink key={index} instructor={instructor}/>
-                                }
-                            )}
-                        </div></td>
-                    </tr>}
+                    {offering ? (
+                        <tr className="border border-quaternary w-full">
+                            {/** List of instructors. */}
+                            <td className="align-top text-sm text-right">Instructors</td>
+                            <td className="w-full">
+                                <div className="grid justify-items-start *:align-top *:!overflow-clip">
+                                    {offering!.instructors.map(
+                                        (instructor, index) => {
+                                            return <RateMyProfessorsLink key={index} instructor={instructor}/>
+                                        }
+                                    )}
+                                </div>
+                            </td>
+                        </tr>
+                    ) : (
+                        <tr>
+                            {/** Custom event description. */}
+                            <td className="text-sm text-right">Description</td>
+                            <td className="align-top w-full">{event.extendedProps.source.description}</td>
+                        </tr>
+                    )}
                     {spacerRow}
                     <tr>
+                        {/** Location of event. */}
                         <td className="text-sm text-right">Location</td>
                         <td className="*:float-left *:!overflow-clip">
-                            {isCustom ? "nowhere" : <BuildingLink location={offering!.meetings[0].building}/>}
+                            {<BuildingLink location={offering ? offering.meetings[0].building : customEvent!.location || ""}/>}
                         </td>
                     </tr>
-                    {spacerRow}
-                    {isCustom && <tr>
-                        <td className="align-top text-sm text-right">Description</td>
-                        <td>{event.extendedProps.description}</td>
-                    </tr>}
                 </tbody></table>
                 {colorPicker}
             </Card>

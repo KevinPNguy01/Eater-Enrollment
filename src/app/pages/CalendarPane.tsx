@@ -16,6 +16,7 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import { selectCurrentSchedule, selectCurrentScheduleIndex } from '../../features/schedules/selectors/ScheduleSetSelectors';
 import { removeOffering } from '../../features/schedules/slices/ScheduleSetSlice';
+import { newCustomEvent } from '../../helpers/CustomEvent';
 
 export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (_: boolean) => void}) {
 	const currentSchedule = useSelector(selectCurrentSchedule);
@@ -29,6 +30,7 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 	const [calendarRect, setCalendarRect] = useState(null as unknown as DOMRect);
 	const screenSize = useWindowDimensions();
 	const [menuState, setMenuState] = useState(false);
+	const [customEvent, setCustomEvent] = useState(newCustomEvent());
 
 	useEffect(() => {
 		setCalendarRect(ref.current.getBoundingClientRect())
@@ -52,7 +54,7 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 				setMenuState(false);
 			}}
 		>
-			<CalendarNavBar showingFinals={showingFinals} setShowingFinals={setShowingFinals} menuState={menuState} setMenuState={setMenuState}/>
+			<CalendarNavBar showingFinals={showingFinals} setShowingFinals={setShowingFinals} menuState={menuState} setMenuState={bool => {setCustomEvent(newCustomEvent());setMenuState(bool)}}/>
 			<div ref={ref} id="calendar" className="relative flex flex-col flex-grow relative">
 				<FullCalendar 
 					ref={calendarReference}
@@ -85,9 +87,9 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 						meridiem: true
 					}}
 				/>
-				{eventClickArg ? <EventInfo eventClickArg={eventClickArg} scrollPos={scrollPos} close={() => setEventClickArg(null)} calendarRect={calendarRect}/> : null}
+				{eventClickArg ? <EventInfo eventClickArg={eventClickArg} updateEvent={() => {setCustomEvent(eventClickArg.event.extendedProps.source); setMenuState(true)}} scrollPos={scrollPos} close={() => setEventClickArg(null)} calendarRect={calendarRect}/> : null}
 				<Backdrop className="!absolute z-20" open={menuState} onClick={() => setMenuState(false)}>
-					{menuState && <CustomEventMenu closeMenu={() => setMenuState(false)}/>}
+					{menuState && <CustomEventMenu event={customEvent} closeMenu={() => setMenuState(false)}/>}
 				</Backdrop>
 			</div>
 		</div>
