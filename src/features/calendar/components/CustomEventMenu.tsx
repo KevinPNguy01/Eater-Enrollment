@@ -20,9 +20,9 @@ export function CustomEventMenu(props: {event: CustomEvent, closeMenu: () => voi
     const dispatch = useDispatch();
     const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
     const {event, closeMenu} = props;
-    const [days, setDays] = useState([...event.days]);
-    const [start, setStart] = useState(moment(event.startTime));
-    const [end, setEnd] = useState(moment(event.endTime));
+    const [days, setDays] = useState(event.days);
+    const [start, setStart] = useState(moment(event.startTime, 'hh:mm A'));
+    const [end, setEnd] = useState(moment(event.endTime, 'hh:mm A'));
     const [title, setTitle] = useState(event.title);
     const [description, setDescription] = useState(event.description);
     const [location, setLocation] = useState(event.location);
@@ -37,12 +37,11 @@ export function CustomEventMenu(props: {event: CustomEvent, closeMenu: () => voi
                     {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
                         <Button 
                             color="white"
-                            className={`${days[index] == true ? "!border-solid !border-blue-500 !text-blue-500" : ""} !font-semibold !rounded-full !min-w-fit !min-h-fit !w-8 !h-8 !aspect-square`}
+                            className={`${days & (1 << (6-index)) ? "!border-solid !border-blue-500 !text-blue-500" : ""} !font-semibold !rounded-full !min-w-fit !min-h-fit !w-8 !h-8 !aspect-square`}
                             style={{border: "1px"}}
                             key={index}
                             onClick={() => {
-                                days[index] = !days[index];
-                                setDays([...days]);
+                                setDays(days ^ (1 << (6-index)));
                             }}
                         >
                             {day}
@@ -115,10 +114,10 @@ export function CustomEventMenu(props: {event: CustomEvent, closeMenu: () => voi
                             id: event.id, 
                             title, 
                             description,
-                            location: location + " ",
-                            startTime: start.toISOString(), 
-                            endTime: end.toISOString(), 
-                            days: [...days],
+                            location: location,
+                            startTime: start.format('hh:mm A'), 
+                            endTime: end.format('hh:mm A'), 
+                            days: days,
                         } as CustomEvent;
                         if (customEvent.id === -1) {
                             customEvent.color = getColorCustomEvent(customEvent);

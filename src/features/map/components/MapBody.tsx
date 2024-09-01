@@ -1,25 +1,33 @@
 import { MapContainer, TileLayer } from 'react-leaflet'
 import { buildings } from "../constants/Buildings";
-import { OfferingMarker } from './OfferingMarker';
+import { EventMarker } from './EventMarker';
 import { CourseOffering } from '../../../types/CourseOffering';
+import { CustomEvent } from '../../../types/CustomEvent';
+import { buildingIds } from '../constants/BuildingIds';
 
-export function MapBody(props: {offerings: CourseOffering[]}) {
-    const {offerings} = props;
+export function MapBody(props: {offerings: CourseOffering[], customEvents: CustomEvent[]}) {
+    const {offerings, customEvents} = props;
 
     // Map lists of course offerings to building ids so that markers at the same location can be stacked.
-    const buildingOfferings = new Map<number, CourseOffering[]>();
+    const buildingEvents = new Map<number, (CourseOffering | CustomEvent)[]>();
     offerings.forEach((offering) => { 
         const id = offering.parsed_meetings[0].buildingId;
-        if (!buildingOfferings.has(id)) {
-            buildingOfferings.set(id, []);
+        if (!buildingEvents.has(id)) {
+            buildingEvents.set(id, []);
         }
-        buildingOfferings.get(id)!.push(offering)
+        buildingEvents.get(id)!.push(offering)
     });
-
+    customEvents.forEach((customEvent) => {
+        const id = buildingIds[customEvent.location];
+        if (!buildingEvents.has(id)) {
+            buildingEvents.set(id, []);
+        }
+        buildingEvents.get(id)!.push(customEvent)
+    });
     // Create markers for each of the offerings.
-    const markers = [...buildingOfferings.entries()].filter(([id,]) => buildings[id]).map(([, offerings]) => 
-        offerings.map((offering, index) => 
-            <OfferingMarker offering={offering} translate_y={offerings.length-index-1} color={offering.color}/>
+    const markers = [...buildingEvents.entries()].filter(([id,]) => buildings[id]).map(([, events]) => 
+        events.map((event, index) => 
+            <EventMarker type={"course" in event ? "CourseOffering" : "CustomEvent"} event={"course" in event ? event as CourseOffering : event as CustomEvent} translate_y={events.length-index-1} color={event.color}/>
         )
     ).flat();
 

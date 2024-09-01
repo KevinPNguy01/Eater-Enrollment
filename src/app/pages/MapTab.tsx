@@ -11,11 +11,12 @@ export function MapTab() {
 
     const offerings = courses.map(({offerings}) => offerings).flat();                                       // Flat list of course offerings.
     const offeringsToday = offerings.filter(({parsed_meetings}) => parsed_meetings[0].days & daysMask);     // Filter offerings for the day selected.
+    const customEventsToday = schedule.customEvents.filter(({days}) => days & daysMask)
 
     return  (
         <div id="map" className="h-full mb-1 relative">
             <MapNavBar activeDayState={[daysMask, setDaysMask]}/>
-            <MapBody offerings={offeringsToday}/>
+            <MapBody offerings={offeringsToday} customEvents={customEventsToday}/>
         </div>
     );
 }

@@ -172,7 +172,7 @@ export function EventInfo(
                         {/** Location of event. */}
                         <td className="text-sm text-right">Location</td>
                         <td className="*:float-left *:!overflow-clip">
-                            {<BuildingLink location={offering ? offering.meetings[0].building : customEvent!.location || ""}/>}
+                            {<BuildingLink location={offering ? offering.meetings[0].building : customEvent!.location + " "}/>}
                         </td>
                     </tr>
                 </tbody></table>

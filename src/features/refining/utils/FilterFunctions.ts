@@ -1,3 +1,4 @@
+import moment from "moment";
 import { restrictionCodes } from "../../../constants/RestrictionCodes";
 import { Course } from "../../../types/Course";
 import { CourseOffering } from "../../../types/CourseOffering";
@@ -36,9 +37,10 @@ export function filterDays(dayTypes: Set<string>) {
  */
 export function filterTime(timeRange: [number, number]) {
     return (offering: CourseOffering) => {
-        if (!offering.parsed_meetings[0].time) return true;
-        const [startTime, endTime] = offering.parsed_meetings[0].time.map(s => new Date(s));
-        const [start, end] = [startTime.getHours() * 60 + startTime.getMinutes(), endTime.getHours() * 60 + endTime.getMinutes()]
+        if (!offering.parsed_meetings[0].startTime) return true;
+        const startTime = moment(offering.parsed_meetings[0].startTime, "hh:mm A");
+        const endTime = moment(offering.parsed_meetings[0].endTime, "hh:mm A");
+        const [start, end] = [startTime.get("hours") * 60 + startTime.get("minutes"), endTime.get("hours") * 60 + endTime.get("minutes")]
         return timeRange[0] <= start && start <= timeRange[1] && timeRange[0] <= end && end <= timeRange[1];
     }
 }
