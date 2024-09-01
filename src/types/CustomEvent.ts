@@ -5,6 +5,6 @@ export type CustomEvent = {
     location: string
     startTime: string
     endTime: string
-    days: boolean[]
+    days: number
     color: string
 }

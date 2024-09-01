@@ -7,11 +7,11 @@ export function createCustomEvents(customEvents: CustomEvent[]) {
     return customEvents.map(customEvent => {
         const events: CalendarEvent[] = [];
         for (let i = 0; i < 7; ++i) {
-            if (customEvent.days[i]) {
+            if (customEvent.days & (1 << (6-i))) {
                 events.push({
                     title: customEvent.title,
-                    start: moment(customEvent.startTime).weekday(i).toISOString(),
-                    end: moment(customEvent.endTime).weekday(i).toISOString(),
+                    start: moment(customEvent.startTime, 'hh:mm A').weekday(i).toISOString(),
+                    end: moment(customEvent.endTime, 'hh:mm A').weekday(i).toISOString(),
                     id: `custom${customEvent.id}-${i}`,
                     backgroundColor: customEvent.color,
                     textColor: getTextColor(customEvent.color),
@@ -27,20 +27,18 @@ export function createCustomEvents(customEvents: CustomEvent[]) {
 }
 
 export function createEvents(offerings: CourseOffering[]) {
-    return offerings.filter(({parsed_meetings}) => parsed_meetings[0].time).map(offering => {
+    return offerings.filter(({parsed_meetings}) => parsed_meetings[0].startTime).map(offering => {
         // Add an event to the calendar for each meeting day.
         const events: CalendarEvent[] = [];
-        for (let i = 4; i >= 0; --i) {
-            const day = offering.parsed_meetings[0].days & (1 << i) ? 4 - i : null;
-            if (day === null) continue;
-            const [startTime, endTime] = offering.parsed_meetings[0].time!.map(s => new Date(s));
-            const [startDate, endDate] = [getDay(day), getDay(day)];
-            startDate.setHours(startTime.getHours(), startTime.getMinutes());
-            endDate.setHours(endTime.getHours(), endTime.getMinutes());
+        for (let i = 0; i < 7; ++i) {
+            const day = offering.parsed_meetings[0].days & (1 << (6-i));
+            if (!day) continue;
+            const startTime = moment(offering.parsed_meetings[0].startTime, "hh:mm A").weekday(i);
+            const endTime = moment(offering.parsed_meetings[0].endTime, "hh:mm A").weekday(i);
             events.push({
                 title: `${offering.course.department} ${offering.course.number} ${offering.section.type}`,
-                start: startDate.toISOString(),
-                end: endDate.toISOString(),
+                start: startTime.toISOString(),
+                end: endTime.toISOString(),
                 id: `${offering.section.code}-${day}`,
                 backgroundColor: offering.color,
                 textColor: getTextColor(offering.color),

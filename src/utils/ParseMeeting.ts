@@ -1,3 +1,4 @@
+import moment from "moment";
 import { buildingIds } from "../features/map/constants/BuildingIds";
 import { Final } from "../types/Final";
 import { Meeting } from "../types/Meeting";
@@ -6,8 +7,8 @@ import { ParsedMeeting } from "../types/ParsedMeeting";
 export function parseMeeting(meeting: Meeting): ParsedMeeting {
     const [buildingId, room] = parseBuilding(meeting.building);
     const days = parseDays(meeting.days);
-    const time = parseTime(meeting.time);
-    return {buildingId, room, days, time}
+    const [startTime, endTime] = parseTime(meeting.time) || ["", ""];
+    return {buildingId, room, days, startTime, endTime}
 }
 
 /**
@@ -45,11 +46,13 @@ function parseTime(time: string): [string, string] | null {
         startHour -= 12;
     }
 
-    const startTime = new Date();
-    const endTime = new Date();
-    startTime.setHours(startHour, startMinutes);
-    endTime.setHours(endHour, endMinutes);
-    return [startTime.toISOString(), endTime.toISOString()];
+    const startTime = moment();
+    const endTime = moment();
+    startTime.set("hour", startHour);
+    startTime.set("minutes", startMinutes)
+    endTime.set("hour", endHour);
+    endTime.set("minutes", endMinutes)
+    return [startTime.format("hh:mm A"), endTime.format("hh:mm A")];
 }
 
 /**
@@ -70,11 +73,11 @@ function parseBuilding(location: string): [number, string] {
  */
 function parseDays(days: string): number {
     let dayBits = 0;
-    if (days.includes("M")) dayBits |= 0b10000;
-    if (days.includes("Tu")) dayBits |= 0b01000;
-    if (days.includes("W")) dayBits |= 0b00100;
-    if (days.includes("Th")) dayBits |= 0b00010;
-    if (days.includes("F")) dayBits |= 0b00001;
+    if (days.includes("M")) dayBits |= 0b0100000;
+    if (days.includes("Tu")) dayBits |= 0b0010000;
+    if (days.includes("W")) dayBits |= 0b0001000;
+    if (days.includes("Th")) dayBits |= 0b0000100;
+    if (days.includes("F")) dayBits |= 0b0000010;
     return dayBits;
 }
 
@@ -92,10 +95,7 @@ export function parseFinal(final: string): Final | null {
     const day = days[dayString];
     const time = parseTime(timeString);
     if (!time) return null;
-    const [startTime, endTime] = [new Date(time[0]), new Date(time[1])];
-    const start = new Date(`${dateNumber} ${monthString} ${new Date().getFullYear()}`);
-    const end = new Date(start);
-    startTime.setMonth(start.getMonth(), start.getDate());
-    endTime.setMonth(end.getMonth(), end.getDate());
-    return {time: [startTime.toISOString(), endTime.toISOString()], day};
+    const start = moment(`${monthString} ${dateNumber} ${new Date().getFullYear()} ${time[0]}`, "MMM D YYYY hh:mm A");
+    const end = moment(`${monthString} ${dateNumber} ${new Date().getFullYear()} ${time[1]}`, "MMM D YYYY hh:mm A");
+    return {time: [start.toISOString(), end.toISOString()], day};
 }

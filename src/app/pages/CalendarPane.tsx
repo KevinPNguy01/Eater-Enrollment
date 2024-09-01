@@ -61,7 +61,7 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 					plugins={[ timeGridPlugin ]}
 					initialView="timeGridWeek"
 					headerToolbar={false}
-					weekends={showingFinals || currentSchedule.customEvents.map(({days}) => days[0] || days[6]).some(val => val)}
+					weekends={showingFinals || currentSchedule.customEvents.map(({days}) => days & 65).some(val => val)}
 					allDaySlot={false}
 					height="100%"
 					expandRows={true}
