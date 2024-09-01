@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { MapNavBar } from '../../features/map/components/MapNavBar';
 import { MapBody } from '../../features/map/components/MapBody';
 import { useSelector } from 'react-redux';
-import { selectCurrentSchedule } from '../../features/schedules/selectors/ScheduleSetSelectors';
+import { selectCurrentSchedule } from '../../features/store/selectors/ScheduleSetSelectors';
 
 export function MapTab() {
     const schedule = useSelector(selectCurrentSchedule);

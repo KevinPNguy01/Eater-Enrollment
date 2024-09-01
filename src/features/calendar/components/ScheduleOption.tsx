@@ -7,8 +7,8 @@ import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import IconButton from "@mui/material/IconButton";
 import { useDispatch, useSelector } from "react-redux";
-import { selectCurrentScheduleIndex, selectScheduleSet } from "../../schedules/selectors/ScheduleSetSelectors";
-import { duplicateSchedule, removeSchedule, renameSchedule, setCurrentScheduleIndex } from "../../schedules/slices/ScheduleSetSlice";
+import { selectCurrentScheduleIndex, selectScheduleSet } from "../../store/selectors/ScheduleSetSelectors";
+import { duplicateSchedule, removeSchedule, renameSchedule, setCurrentScheduleIndex } from "../../store/slices/ScheduleSetSlice";
 
 export function ScheduleOption(props: {name: string, index: number, setMenu: (menu: React.JSX.Element | null) => void} & React.HTMLAttributes<HTMLDivElement>) {
     const scheduleSet = useSelector(selectScheduleSet);

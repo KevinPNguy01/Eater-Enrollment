@@ -4,10 +4,10 @@ import { RateMyProfessorsLink } from "./RateMyProfessorsLink";
 import { ZotisticsLink } from "./ZotisticsLink";
 import { BuildingLink } from "./BuildingLink";
 import { useDispatch, useSelector } from "react-redux";
-import { addOffering, removeOffering } from "../../schedules/slices/ScheduleSetSlice";
-import { selectCurrentSchedule, selectCurrentScheduleIndex } from "../../schedules/selectors/ScheduleSetSelectors";
 import { scheduleContainsOffering } from "../../../helpers/Schedule";
 import { CourseOffering } from "../../../types/CourseOffering";
+import { selectCurrentSchedule, selectCurrentScheduleIndex } from "../../store/selectors/ScheduleSetSelectors";
+import { addOffering, removeOffering } from "../../store/slices/ScheduleSetSlice";
 
 /**
  * Component for displaying a course result as a tr, to be used in CourseResult.
