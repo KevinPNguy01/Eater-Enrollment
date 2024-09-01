@@ -16,8 +16,8 @@ import Button from "@mui/material/Button";
 import Backdrop from "@mui/material/Backdrop";
 import Card from "@mui/material/Card";
 import { useDispatch, useSelector } from "react-redux";
-import { setCurrentScheduleIndex, addOffering, addSchedule, clearScheduleSet, changeOfferingColor, addCustomEvent } from "../features/schedules/slices/ScheduleSetSlice";
-import { selectCurrentScheduleIndex, selectScheduleSet } from "../features/schedules/selectors/ScheduleSetSelectors";
+import { setCurrentScheduleIndex, addOffering, addSchedule, clearScheduleSet, changeOfferingColor, addCustomEvent } from "../features/store/slices/ScheduleSetSlice";
+import { selectCurrentScheduleIndex, selectScheduleSet } from "../features/store/selectors/ScheduleSetSelectors";
 import { customEventFromString, customEventToString } from "../helpers/CustomEvent";
 import { CourseOffering } from "../types/CourseOffering";
 

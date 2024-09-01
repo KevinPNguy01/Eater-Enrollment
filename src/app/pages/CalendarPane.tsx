@@ -14,8 +14,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import Backdrop from '@mui/material/Backdrop';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
-import { selectCurrentSchedule, selectCurrentScheduleIndex } from '../../features/schedules/selectors/ScheduleSetSelectors';
-import { removeOffering } from '../../features/schedules/slices/ScheduleSetSlice';
+import { selectCurrentSchedule, selectCurrentScheduleIndex } from '../../features/store/selectors/ScheduleSetSelectors';
+import { removeOffering } from '../../features/store/slices/ScheduleSetSlice';
 import { newCustomEvent } from '../../helpers/CustomEvent';
 
 export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (_: boolean) => void}) {

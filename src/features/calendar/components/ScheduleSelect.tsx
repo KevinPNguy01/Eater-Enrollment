@@ -8,8 +8,8 @@ import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import { useDispatch, useSelector } from "react-redux";
-import { addSchedule, reorderScheduleSet, setCurrentScheduleIndex } from "../../schedules/slices/ScheduleSetSlice";
-import { selectCurrentSchedule, selectCurrentScheduleIndex, selectScheduleSet } from "../../schedules/selectors/ScheduleSetSelectors";
+import { addSchedule, reorderScheduleSet, setCurrentScheduleIndex } from "../../store/slices/ScheduleSetSlice";
+import { selectCurrentSchedule, selectCurrentScheduleIndex, selectScheduleSet } from "../../store/selectors/ScheduleSetSelectors";
 import Button from "@mui/material/Button";
 
 export function ScheduleSelect() {
