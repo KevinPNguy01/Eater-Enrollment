@@ -1,6 +1,6 @@
-import { SearchBox } from "../../features/search/components/SearchBox";
-import { TermDropDown } from "../../features/search/components/TermDropDown";
-import { Query } from "../../utils/PeterPortal";
+import { SearchBox } from "features/search/components/SearchBox";
+import { TermDropDown } from "features/search/components/TermDropDown";
+import { Query } from "utils/PeterPortal";
 
 export function SearchForms(props: {queriesState: [Query[], (queries: Query[]) => void], multiState: [boolean, (_: boolean) => void], defaultQueryState: [Query, (queries: Query) => void], submit: (queries?: Query[]) => void}) {
     const {multiState, submit} = props;

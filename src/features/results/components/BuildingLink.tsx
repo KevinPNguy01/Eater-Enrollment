@@ -1,5 +1,5 @@
-import { buildingIds } from "../../map/constants/BuildingIds";
-import { buildings } from "../../map/constants/Buildings";
+import { buildingIds } from "constants/BuildingIds";
+import { buildings } from "constants/Buildings";
 
 export function BuildingLink(props: {location: string}) {
     const {location} = props;

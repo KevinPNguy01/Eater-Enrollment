@@ -1,4 +1,4 @@
-import { IRootState } from "../../../app/store";
+import { IRootState } from "app/store";
 
 export const selectScheduleSet = (state: IRootState) => state.schedules.present.scheduleSet;
 

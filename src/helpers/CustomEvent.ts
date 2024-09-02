@@ -1,4 +1,4 @@
-import { CustomEvent } from "../types/CustomEvent";
+import { CustomEvent } from "types/CustomEvent";
 
 export function newCustomEvent(): CustomEvent {
     return {

@@ -1,31 +1,31 @@
-import FullCalendar from '@fullcalendar/react'
-import timeGridPlugin from '@fullcalendar/timegrid'
-import { useContext, useEffect, useRef, useState } from 'react';
-import { EventInfo } from '../../features/calendar/components/EventInfo';
-import { ScheduleSelect } from '../../features/calendar/components/ScheduleSelect';
-import { ScheduleContext } from '../App';
-import { createCustomEvents, createEvents, createFinalEvents } from '../../utils/FullCalendar';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { EventClickArg } from 'fullcalendar/index.js';
-import useWindowDimensions from '../../utils/WindowDimensions';
+import FullCalendar from '@fullcalendar/react';
+import timeGridPlugin from '@fullcalendar/timegrid';
 import AddIcon from '@mui/icons-material/Add';
-import { CustomEventMenu } from '../../features/calendar/components/CustomEventMenu';
-import { useDispatch, useSelector } from 'react-redux';
+import DeleteIcon from '@mui/icons-material/Delete';
+import RedoIcon from '@mui/icons-material/Redo';
+import UndoIcon from '@mui/icons-material/Undo';
 import Backdrop from '@mui/material/Backdrop';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
-import { selectCurrentSchedule, selectCurrentScheduleIndex, selectNextState, selectPrevState } from '../../features/store/selectors/ScheduleSetSelectors';
-import { removeCustomEvent, removeOffering } from '../../features/store/slices/ScheduleSetSlice';
-import { newCustomEvent } from '../../helpers/CustomEvent';
-import UndoIcon from '@mui/icons-material/Undo';
-import RedoIcon from '@mui/icons-material/Redo';
+import { CustomEventMenu } from 'features/calendar/components/CustomEventMenu';
+import { EventInfo } from 'features/calendar/components/EventInfo';
+import { ScheduleSelect } from 'features/calendar/components/ScheduleSelect';
+import { EventClickArg } from 'fullcalendar/index.js';
+import { useContext, useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { ActionCreators } from 'redux-undo';
+import { selectCurrentSchedule, selectCurrentScheduleIndex, selectNextState, selectPrevState } from 'stores/selectors/ScheduleSetSelectors';
+import { removeCustomEvent, removeOffering } from 'stores/slices/ScheduleSetSlice';
+import { createCustomEvents, createEvents, createFinalEvents } from 'utils/FullCalendar';
+import useWindowDimensions from 'utils/WindowDimensions';
+import { newCustomEvent } from '../../helpers/CustomEvent';
+import { ScheduleContext } from '../App';
 
-export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (_: boolean) => void}) {
+export function CalendarPane(props: { showingFinals: boolean, setShowingFinals: (_: boolean) => void }) {
 	const currentSchedule = useSelector(selectCurrentSchedule);
 	const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
-	const {showingFinals, setShowingFinals} = props;
-	
+	const { showingFinals, setShowingFinals } = props;
+
 	const { calendarReference } = useContext(ScheduleContext);
 	const [eventClickArg, setEventClickArg] = useState(null as EventClickArg | null);
 	const ref = useRef(null as unknown as HTMLDivElement);
@@ -45,26 +45,26 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 
 	useEffect(() => {
 		document.getElementsByClassName("fc-scroller-liquid-absolute").item(0)?.addEventListener(
-			"scroll", 
+			"scroll",
 			e => setScrollPos((e.target as HTMLDivElement).scrollTop));
 	}, []);
 
 	return (
-		<div 
-			className={`flex flex-col flex-grow`} 
+		<div
+			className={`flex flex-col flex-grow`}
 			onClick={() => {
 				setEventClickArg(null);
 				setMenuState(false);
 			}}
 		>
-			<CalendarNavBar showingFinals={showingFinals} setShowingFinals={setShowingFinals} menuState={menuState} setMenuState={bool => {setCustomEvent(newCustomEvent());setMenuState(bool)}}/>
+			<CalendarNavBar showingFinals={showingFinals} setShowingFinals={setShowingFinals} menuState={menuState} setMenuState={bool => { setCustomEvent(newCustomEvent()); setMenuState(bool) }} />
 			<div ref={ref} id="calendar" className="relative flex flex-col flex-grow relative">
-				<FullCalendar 
+				<FullCalendar
 					ref={calendarReference}
-					plugins={[ timeGridPlugin ]}
+					plugins={[timeGridPlugin]}
 					initialView="timeGridWeek"
 					headerToolbar={false}
-					weekends={showingFinals || currentSchedule.customEvents.map(({days}) => days & 65).some(val => val)}
+					weekends={showingFinals || currentSchedule.customEvents.map(({ days }) => days & 65).some(val => val)}
 					allDaySlot={false}
 					height="100%"
 					expandRows={true}
@@ -72,7 +72,7 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 					slotMaxTime="23:00:00"
 					firstDay={showingFinals ? 6 : 7}
 					slotLabelFormat={{
-					hour: "numeric"
+						hour: "numeric"
 					}}
 					dayHeaderFormat={{ weekday: 'short' }}
 					eventBorderColor="#00000080"
@@ -81,8 +81,8 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 						setEventClickArg(eventClickArg && info.event.id === eventClickArg.event.id ? null : info);
 					}}
 					events={(
-						showingFinals ? createFinalEvents(currentSchedule.courses.map(({offerings}) => offerings).flat()) : 
-						createEvents(currentSchedule.courses.map(({offerings}) => offerings).flat()).concat(createCustomEvents(currentSchedule.customEvents))
+						showingFinals ? createFinalEvents(currentSchedule.courses.map(({ offerings }) => offerings).flat()) :
+							createEvents(currentSchedule.courses.map(({ offerings }) => offerings).flat()).concat(createCustomEvents(currentSchedule.customEvents))
 					)}
 					eventTimeFormat={{
 						hour: "numeric",
@@ -90,9 +90,9 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 						meridiem: true
 					}}
 				/>
-				{eventClickArg ? <EventInfo eventClickArg={eventClickArg} updateEvent={() => {setCustomEvent(eventClickArg.event.extendedProps.source); setMenuState(true)}} scrollPos={scrollPos} close={() => setEventClickArg(null)} calendarRect={calendarRect}/> : null}
+				{eventClickArg ? <EventInfo eventClickArg={eventClickArg} updateEvent={() => { setCustomEvent(eventClickArg.event.extendedProps.source); setMenuState(true) }} scrollPos={scrollPos} close={() => setEventClickArg(null)} calendarRect={calendarRect} /> : null}
 				<Backdrop className="!absolute z-20" open={menuState} onClick={() => setMenuState(false)}>
-					{menuState && <CustomEventMenu event={customEvent} closeMenu={() => setMenuState(false)}/>}
+					{menuState && <CustomEventMenu event={customEvent} closeMenu={() => setMenuState(false)} />}
 				</Backdrop>
 			</div>
 		</div>
@@ -100,23 +100,23 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 
 }
 
-function CalendarNavBar(props: {showingFinals: boolean, setShowingFinals: (_: boolean) => void, menuState: boolean, setMenuState: (_: boolean) => void}) {
+function CalendarNavBar(props: { showingFinals: boolean, setShowingFinals: (_: boolean) => void, menuState: boolean, setMenuState: (_: boolean) => void }) {
 	const currentSchedule = useSelector(selectCurrentSchedule);
 	const prevState = useSelector(selectPrevState);
 	const nextState = useSelector(selectNextState);
 	const dispatch = useDispatch();
 	const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
-    const {showingFinals, setShowingFinals, menuState, setMenuState} = props
-    
-    return (
-        <nav className="w-full bg-tertiary flex my-1 items-center justify-between px-0.5">
+	const { showingFinals, setShowingFinals, menuState, setMenuState } = props
+
+	return (
+		<nav className="w-full bg-tertiary flex my-1 items-center justify-between px-0.5">
 			<div className="flex w-1/2 items-center gap-4 h-fit">
-				<ScheduleSelect/>
-				<Button 
-					className="w-fit h-fit !px-4 !py-0.5" 
-					sx={showingFinals ? {"&:hover": {backgroundColor: "#008000", border: "#bbb 1px solid"}} : null} 
-					variant={showingFinals ? "contained" : "outlined"} 
-					color={showingFinals ? "primary" : "white"} 
+				<ScheduleSelect />
+				<Button
+					className="w-fit h-fit !px-4 !py-0.5"
+					sx={showingFinals ? { "&:hover": { backgroundColor: "#008000", border: "#bbb 1px solid" } } : null}
+					variant={showingFinals ? "contained" : "outlined"}
+					color={showingFinals ? "primary" : "white"}
 					onClick={() => {
 						setShowingFinals(!showingFinals);
 					}}
@@ -124,29 +124,29 @@ function CalendarNavBar(props: {showingFinals: boolean, setShowingFinals: (_: bo
 					Finals
 				</Button>
 			</div>
-            <div className="px-4">
+			<div className="px-4">
 				<IconButton
 					color="white"
 					disabled={!prevState}
 					onClick={() => dispatch(ActionCreators.undo())}
 				>
-					<UndoIcon/>
+					<UndoIcon />
 				</IconButton>
 				<IconButton
 					color="white"
 					disabled={!nextState}
 					onClick={() => dispatch(ActionCreators.redo())}
 				>
-					<RedoIcon/>
+					<RedoIcon />
 				</IconButton>
-				<IconButton 
+				<IconButton
 					color="white"
 					onClick={() => {
-						currentSchedule.courses.map(({offerings}) => offerings).flat().forEach(offering => dispatch(removeOffering({offering, index: currentScheduleIndex})));
-						currentSchedule.customEvents.map(customEvent => dispatch(removeCustomEvent({customEvent, index: currentScheduleIndex})));
+						currentSchedule.courses.map(({ offerings }) => offerings).flat().forEach(offering => dispatch(removeOffering({ offering, index: currentScheduleIndex })));
+						currentSchedule.customEvents.map(customEvent => dispatch(removeCustomEvent({ customEvent, index: currentScheduleIndex })));
 					}}
 				>
-					<DeleteIcon/>
+					<DeleteIcon />
 				</IconButton>
 				<IconButton
 					color="white"
@@ -155,9 +155,9 @@ function CalendarNavBar(props: {showingFinals: boolean, setShowingFinals: (_: bo
 						setMenuState(!menuState);
 					}}
 				>
-					<AddIcon/>
+					<AddIcon />
 				</IconButton>
 			</div>
-        </nav>
-    )
+		</nav>
+	)
 }

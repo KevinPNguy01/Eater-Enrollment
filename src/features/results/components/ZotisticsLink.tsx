@@ -1,18 +1,18 @@
-import { useState } from "react";
-import { ResponsiveContainer, BarChart, CartesianGrid, Bar, XAxis, YAxis } from "recharts";
 import Card from "@mui/material/Card";
-import { CourseOffering } from "../../../types/CourseOffering";
+import { useState } from "react";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { CourseOffering } from "types/CourseOffering";
 
 /**
  * Zotistics link tag for the GradeDistributionCollectionAggregate.
  * Shows a graph displaying the grades on hover.
  * @param instructor The grades to render data for.
  */
-export function ZotisticsLink(props: {offering: CourseOffering}) {
+export function ZotisticsLink(props: { offering: CourseOffering }) {
     const [gradesVisible, setGradesVisible] = useState(false);
-    const {offering} = props;
-    const {grades, course} = offering;
-    const {department, number} = course;
+    const { offering } = props;
+    const { grades, course } = offering;
+    const { department, number } = course;
     // Return null if grades don't exist.
     if (!grades || !grades.aggregate.average_gpa) {
         return null;
@@ -22,20 +22,20 @@ export function ZotisticsLink(props: {offering: CourseOffering}) {
     return (
         <div className="relative" >
             {/** On click, open Zotistics in a new tab. On hover, set Zotistics graph visible. */}
-            <a 
-                className="text-sky-500" 
-                href={zotisticsLink} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                onMouseEnter={()=>setGradesVisible(true)} 
-                onMouseLeave={()=>setGradesVisible(false)}
+            <a
+                className="text-sky-500"
+                href={zotisticsLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                onMouseEnter={() => setGradesVisible(true)}
+                onMouseLeave={() => setGradesVisible(false)}
             >
                 {grades.aggregate.average_gpa.toFixed(2)}
-                <br/>
+                <br />
             </a>
 
             {/** Display Zotistics graph if gpa is hovered over. */}
-            {gradesVisible ? <ZotisticsGraph offering={props.offering}/> : null}
+            {gradesVisible ? <ZotisticsGraph offering={props.offering} /> : null}
         </div>
     );
 }
@@ -44,10 +44,10 @@ export function ZotisticsLink(props: {offering: CourseOffering}) {
  * Graph for a grades distribution.
  * @param offering The offering to display a graph for.
  */
-function ZotisticsGraph(props: {offering: CourseOffering}) {
-    const {offering} = props;
-    const {grades} = offering;
-    const {aggregate} = grades;
+function ZotisticsGraph(props: { offering: CourseOffering }) {
+    const { offering } = props;
+    const { grades } = offering;
+    const { aggregate } = grades;
 
     const letterGrades = new Map([
         ["A", aggregate.sum_grade_a_count],
@@ -60,21 +60,21 @@ function ZotisticsGraph(props: {offering: CourseOffering}) {
     ]);
     // Find the percent of grades for each letter.
     const totalGrades = Array.from(letterGrades).map(([, count]) => count).reduce((a, b) => a + b);
-    const data = Array.from(letterGrades).map(([letter, count]) => ({"letter":letter, "count":count/totalGrades*100}));
+    const data = Array.from(letterGrades).map(([letter, count]) => ({ "letter": letter, "count": count / totalGrades * 100 }));
 
     return (
         <Card elevation={3} className={`absolute left-full -translate-y-1/2 text-nowrap text-white text-left border border-quaternary bg-tertiary mx-4 p-4 z-20 w-fit`}>
             <p className="whitespace-pre text-lg font-bold">{`${offering.course.department} ${offering.course.number} | ${aggregate.average_gpa.toFixed(2)} GPA Average          `}</p>
-            <br/>
+            <br />
             <ResponsiveContainer aspect={2} width="100%">
-                <BarChart margin={{left:0}} data={data}>
-                    <CartesianGrid stroke="#808080" strokeOpacity="100%" strokeDasharray="0" strokeWidth={1} 
-                        verticalCoordinatesGenerator={({width}) => [width*.999]}
-                        horizontalCoordinatesGenerator={({height}) => [0, height*.2, height*.4, height*.6]}
+                <BarChart margin={{ left: 0 }} data={data}>
+                    <CartesianGrid stroke="#808080" strokeOpacity="100%" strokeDasharray="0" strokeWidth={1}
+                        verticalCoordinatesGenerator={({ width }) => [width * .999]}
+                        horizontalCoordinatesGenerator={({ height }) => [0, height * .2, height * .4, height * .6]}
                     />
-                    <Bar dataKey="count" fill="#0080FF"/>
-                    <XAxis stroke="#FFFFFF" dataKey="letter"/>
-                    <YAxis stroke="#FFFFFF" dataKey="count" unit="%" width={40} ticks={[25, 50, 75, 100]} tickLine={false}/>
+                    <Bar dataKey="count" fill="#0080FF" />
+                    <XAxis stroke="#FFFFFF" dataKey="letter" />
+                    <YAxis stroke="#FFFFFF" dataKey="count" unit="%" width={40} ticks={[25, 50, 75, 100]} tickLine={false} />
                 </BarChart>
             </ResponsiveContainer>
         </Card>

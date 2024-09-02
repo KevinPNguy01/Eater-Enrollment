@@ -1,14 +1,14 @@
+import { restrictionCodes } from "constants/RestrictionCodes";
 import moment from "moment";
-import { restrictionCodes } from "../../../constants/RestrictionCodes";
-import { Course } from "../../../types/Course";
-import { CourseOffering } from "../../../types/CourseOffering";
+import { Course } from "types/Course";
+import { CourseOffering } from "types/CourseOffering";
 
 /**
  * @param sectionTypes A set of strings representing the valid sectionTypes types.
  * @returns A function to filter out course offerings with an invalid section type.
  */
 export function filterSectionTypes(sectionTypes: Set<string>) {
-    return ({section}: CourseOffering) => sectionTypes.has(section.type);
+    return ({ section }: CourseOffering) => sectionTypes.has(section.type);
 }
 
 /**
@@ -16,7 +16,7 @@ export function filterSectionTypes(sectionTypes: Set<string>) {
  * @returns A function to filter out course offerings with an invalid status type.
  */
 export function filterStatus(statusTypes: Set<string>) {
-    return ({status}: CourseOffering) => statusTypes.has(status)
+    return ({ status }: CourseOffering) => statusTypes.has(status)
 }
 
 /**
@@ -64,12 +64,12 @@ export function filterLevel(levelTypes: Set<string>) {
  */
 export function filterRestrictions(restrictionTypes: Set<string>) {
     return (offering: CourseOffering) => {
-        const {restrictions} = offering;
+        const { restrictions } = offering;
         // Don't filter offerings with no restrictions.
         if (!restrictions) {
             return true;
         }
-    
+
         // If the offering specifies either of two codes can be met, OR the codes, else AND them.
         const code1 = restrictions[0];
         const code2 = restrictions[restrictions.length - 1];

@@ -1,4 +1,4 @@
-import { CourseOffering } from "../types/CourseOffering";
+import { CourseOffering } from "types/CourseOffering";
 
 /**
  * Two offerings are equal if the have the same quarter, year, and section code.

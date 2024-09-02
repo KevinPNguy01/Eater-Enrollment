@@ -1,6 +1,6 @@
-import { Course } from "../types/Course";
-import { CourseOffering } from "../types/CourseOffering";
-import { offeringEquals } from "./CourseOffering";
+import { offeringEquals } from "helpers/CourseOffering";
+import { Course } from "types/Course";
+import { CourseOffering } from "types/CourseOffering";
 
 /**
  * @param course 
