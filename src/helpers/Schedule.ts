@@ -74,6 +74,6 @@ export function scheduleRemoveOffering(schedule: Schedule, offering: CourseOffer
     }
     // If the course has no offerings, remove it.
     if (offerings.length == 0) {
-        schedule.courses.splice(schedule.courses.findIndex(({id}) => id === course.id));
+        schedule.courses.splice(schedule.courses.findIndex(({id}) => id === course.id), 1);
     }
 }

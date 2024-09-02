@@ -71,8 +71,13 @@ export const schedulesSlice = createSlice({
             const {customEvent, index} = action.payload;
             const schedule = state.scheduleSet[index];
             const ids = new Set(schedule.customEvents.map(({id}) => id));
-            let id;
-            for (id = 0; ids.has(id); ++id);
+            let id = customEvent.id;
+            if (id === -1) {
+                for (id = 0; ids.has(id); ++id);
+            } 
+            if (ids.has(id)) {
+                return;
+            }
             customEvent.id = id;
             schedule.customEvents.push(customEvent);
         },

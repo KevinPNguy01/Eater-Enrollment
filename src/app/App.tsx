@@ -16,10 +16,10 @@ import Button from "@mui/material/Button";
 import Backdrop from "@mui/material/Backdrop";
 import Card from "@mui/material/Card";
 import { useDispatch, useSelector } from "react-redux";
-import { setCurrentScheduleIndex, addOffering, addSchedule, clearScheduleSet, changeOfferingColor, addCustomEvent } from "../features/store/slices/ScheduleSetSlice";
+import { setCurrentScheduleIndex, addOffering, addSchedule, clearScheduleSet, addCustomEvent } from "../features/store/slices/ScheduleSetSlice";
 import { selectCurrentScheduleIndex, selectScheduleSet } from "../features/store/selectors/ScheduleSetSelectors";
 import { customEventFromString, customEventToString } from "../helpers/CustomEvent";
-import { CourseOffering } from "../types/CourseOffering";
+import { ActionCreators } from "redux-undo";
 
 const theme = createTheme();
 const themeOptions: ThemeOptions = createTheme(theme, {
@@ -44,7 +44,11 @@ const themeOptions: ThemeOptions = createTheme(theme, {
 			main: '#808080',
 		},
 		white: theme.palette.augmentColor({color: {main: "#fff"}}),
-		black: theme.palette.augmentColor({color: {main: "#000"}})
+		black: theme.palette.augmentColor({color: {main: "#000"}}),
+		action: {
+			disabledBackground: '#808080',
+			disabled: '#808080'
+		}
 	},
 
 	typography: {
@@ -148,11 +152,6 @@ export function App() {
 				const {name, offerings: offeringsString, custom: customEventObjects}: {name: string, offerings: string, custom: string} = JSON.parse(scheduleString);
 				dispatch(addSchedule({id: -1, name, courses: [], customEvents: []}));
 
-				JSON.parse(customEventObjects).forEach((customEventString: string) => {
-					const customEvent = customEventFromString(customEventString);
-					dispatch(addCustomEvent({customEvent, index}));
-				});
-
 				const quarterYearGroups = new Map<string, string[]>();
 				offeringsString.split(",").forEach(offeringString => {
 					if (!offeringString) {
@@ -170,15 +169,22 @@ export function App() {
 						year: year, 
 						section_codes: codes.join(",")
 					}]);
-					courses.forEach(course => course.offerings.forEach((offering) => dispatch(addOffering({offering, index}))));
+					const offerings = courses.map(course => course.offerings).flat();
+					const colorMap = new Map(offeringsString.split(",").map(s => {
+						const [quarter, year, code, color] = s.split(" ");
+						return [`${quarter} ${year} ${code}`, color];
+					}));
+					offerings.forEach(offering => {
+						const {quarter, year, section: {code}} = offering;
+						offering.color = colorMap.get(`${quarter} ${year} ${code}`)!;
+						dispatch(addOffering({offering, index}));
+					});
 				}
-				offeringsString.split(",").forEach(offeringString => {
-					if (!offeringString) {
-						return;
-					}
-					const [quarter, year, code, color] = offeringString.split(" ");
-					const offering = {quarter, year, section: {code}} as CourseOffering;
-					dispatch(changeOfferingColor({offering, color, index}));
+
+				JSON.parse(customEventObjects).forEach((customEventString: string) => {
+					const customEvent = customEventFromString(customEventString);
+					dispatch(addCustomEvent({customEvent, index}));
+					dispatch(ActionCreators.clearHistory());
 				});
 			}
 		);

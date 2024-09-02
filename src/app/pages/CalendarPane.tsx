@@ -14,9 +14,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import Backdrop from '@mui/material/Backdrop';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
-import { selectCurrentSchedule, selectCurrentScheduleIndex } from '../../features/store/selectors/ScheduleSetSelectors';
-import { removeOffering } from '../../features/store/slices/ScheduleSetSlice';
+import { selectCurrentSchedule, selectCurrentScheduleIndex, selectNextState, selectPrevState } from '../../features/store/selectors/ScheduleSetSelectors';
+import { removeCustomEvent, removeOffering } from '../../features/store/slices/ScheduleSetSlice';
 import { newCustomEvent } from '../../helpers/CustomEvent';
+import UndoIcon from '@mui/icons-material/Undo';
+import RedoIcon from '@mui/icons-material/Redo';
+import { ActionCreators } from 'redux-undo';
 
 export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (_: boolean) => void}) {
 	const currentSchedule = useSelector(selectCurrentSchedule);
@@ -99,6 +102,8 @@ export function CalendarPane(props: {showingFinals: boolean, setShowingFinals: (
 
 function CalendarNavBar(props: {showingFinals: boolean, setShowingFinals: (_: boolean) => void, menuState: boolean, setMenuState: (_: boolean) => void}) {
 	const currentSchedule = useSelector(selectCurrentSchedule);
+	const prevState = useSelector(selectPrevState);
+	const nextState = useSelector(selectNextState);
 	const dispatch = useDispatch();
 	const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
     const {showingFinals, setShowingFinals, menuState, setMenuState} = props
@@ -122,18 +127,35 @@ function CalendarNavBar(props: {showingFinals: boolean, setShowingFinals: (_: bo
             <div className="px-4">
 				<IconButton
 					color="white"
+					disabled={!prevState}
+					onClick={() => dispatch(ActionCreators.undo())}
+				>
+					<UndoIcon/>
+				</IconButton>
+				<IconButton
+					color="white"
+					disabled={!nextState}
+					onClick={() => dispatch(ActionCreators.redo())}
+				>
+					<RedoIcon/>
+				</IconButton>
+				<IconButton 
+					color="white"
+					onClick={() => {
+						currentSchedule.courses.map(({offerings}) => offerings).flat().forEach(offering => dispatch(removeOffering({offering, index: currentScheduleIndex})));
+						currentSchedule.customEvents.map(customEvent => dispatch(removeCustomEvent({customEvent, index: currentScheduleIndex})));
+					}}
+				>
+					<DeleteIcon/>
+				</IconButton>
+				<IconButton
+					color="white"
 					onClick={e => {
 						e.stopPropagation();
 						setMenuState(!menuState);
 					}}
 				>
 					<AddIcon/>
-				</IconButton>
-				<IconButton 
-					color="white"
-					onClick={() => currentSchedule.courses.map(({offerings}) => offerings).flat().forEach(offering => dispatch(removeOffering({offering, index: currentScheduleIndex})))}
-				>
-					<DeleteIcon/>
 				</IconButton>
 			</div>
         </nav>

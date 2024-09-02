@@ -87,6 +87,9 @@ export function EventInfo(
                     const {r, g, b} = color.rgb;
                     setBackgroundColor(color.hex);
                     setTextColor((0.299 * r + 0.587 * g + 0.114 * b)/255 < 0.5 ? "#ffffff" : "#000000");
+                    
+                }}
+                onChangeComplete={color => {
                     if (customEvent) {
                         dispatch(changeCustomEventColor({customEvent: event.extendedProps.source, color: color.hex, index: currentScheduleIndex}));
                     } else {
