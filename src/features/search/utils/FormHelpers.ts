@@ -1,10 +1,10 @@
 import { Course } from "types/Course";
-import { Query } from "utils/PeterPortal";
+import { ScheduleQuery } from "types/ScheduleQuery";
 import coursesJson from "../../../assets/allCourses.json";
 
 export type SearchSuggestion = {
     text: string;
-    value: Query;
+    value: ScheduleQuery;
 }
 
 type CoursesJson = { data: { allCourses: Course[] } };
@@ -17,13 +17,13 @@ const departmentSuggestions = [
 ].map(
     ([department, department_name]) => ({
         text: `${department}: ${department_name}`,
-        value: { department: department } as Query
+        value: { department: department } as ScheduleQuery
     } as SearchSuggestion)
 );
 const courseSuggestions = courses.map(
     ({ department, number, title }) => ({
         text: `${department} ${number}: ${title}`,
-        value: { department, number } as Query
+        value: { department, number } as ScheduleQuery
     } as SearchSuggestion)
 );
 const geSuggestions = [
@@ -37,7 +37,7 @@ const geSuggestions = [
     ["GE VI (6): Language other than English", "GE-6"],
     ["GE VII (7): Multicultural Studies", "GE-7"],
     ["GE VIII (8): International/Global Issues", "GE-8"]
-].map(([text, ge]) => ({ text, value: { ge } as Query } as SearchSuggestion));
+].map(([text, ge]) => ({ text, value: { ge } as ScheduleQuery } as SearchSuggestion));
 
 const searchSuggestions = [...geSuggestions, ...departmentSuggestions, ...courseSuggestions];
 

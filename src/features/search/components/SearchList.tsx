@@ -1,4 +1,4 @@
-import { Query } from "utils/PeterPortal";
+import { ScheduleQuery } from "types/ScheduleQuery";
 import { SearchSuggestion } from "../utils/FormHelpers";
 
 const departmentIcon = <svg fill="#bbb" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
@@ -16,9 +16,9 @@ const geIcon = <svg fill="#bbb" xmlns="http://www.w3.org/2000/svg" width="16" he
 /**
  * Displays a list of clickable and selectable search suggestions.
  * @param suggestions The array of search suggestions to display.
- * @param appendFunction Called when a search suggestion is selected to add a query.
+ * @param appendFunction Called when a search suggestion is selected to add a ScheduleQuery.
  */
-export function SearchList(props: { suggestions: SearchSuggestion[], appendFunction: (query: Query) => void }) {
+export function SearchList(props: { suggestions: SearchSuggestion[], appendFunction: (ScheduleQuery: ScheduleQuery) => void }) {
     const { suggestions, appendFunction } = props;
     const buttonStyle = "flex items-center gap-2 px-4 py-2 text-left border-quaternary hover:bg-tertiary last:rounded-b-[20px]";
 

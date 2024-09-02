@@ -1,21 +1,22 @@
 import { navLinks } from "constants/Links";
 import { createContext, useState } from "react";
 import { Course } from "types/Course";
-import { Query, requestSchedule } from "utils/PeterPortal";
+import { ScheduleQuery } from "types/ScheduleQuery";
+import { requestSchedule } from "utils/PeterPortal";
 import { AddedTab } from "./AddedTab";
 import { MapTab } from "./MapTab";
 import { SearchForms } from "./SearchForms";
 import { SearchResults } from "./SearchResults";
 
 export type SearchFunctions = {
-    submitSearch: (queries?: Query[]) => void
+    submitSearch: (queries?: ScheduleQuery[]) => void
     resetSearch: () => void
     backSearch: () => void
     forwardSearch: () => void
     refreshSearch: () => void
 }
 
-const SearchContext = createContext((queries: Partial<Query>[]) => { queries });
+const SearchContext = createContext((queries: Partial<ScheduleQuery>[]) => { queries });
 
 function CoursesPane(props: { calendarPane?: React.JSX.Element }) {
     const [activeTab, setActiveTab] = useState("search");
@@ -23,13 +24,13 @@ function CoursesPane(props: { calendarPane?: React.JSX.Element }) {
     const [searchResults, setSearchResults] = useState(new Array<Course>());
 
     // React State hooks used for storing search queries.
-    const queriesState = useState([] as Query[])
-    const [lastQueries, setLastQueries] = useState([] as Query[]);
+    const queriesState = useState([] as ScheduleQuery[])
+    const [lastQueries, setLastQueries] = useState([] as ScheduleQuery[]);
     const [queries, setQueries] = queriesState;
-    const defaultQueryState = useState({ quarter: "Fall", year: "2024" } as Query);
-    const [defaultQuery] = defaultQueryState;
-    const [backQueries, setBackQueries] = useState([] as Query[][]);
-    const [forwardQueries, setForwardQueries] = useState([] as Query[][]);
+    const defaultScheduleQueryState = useState({ quarter: "Fall", year: "2024" } as ScheduleQuery);
+    const [defaultScheduleQuery] = defaultScheduleQueryState;
+    const [backQueries, setBackQueries] = useState([] as ScheduleQuery[][]);
+    const [forwardQueries, setForwardQueries] = useState([] as ScheduleQuery[][]);
 
     // Functions related to searching.
     const submitSearch = async (searchQueries = queries) => {
@@ -56,7 +57,7 @@ function CoursesPane(props: { calendarPane?: React.JSX.Element }) {
         // Store last search if exists.
         if (lastQueries.length)
             setForwardQueries([...forwardQueries, lastQueries]);
-        // Search for most recent back query.
+        // Search for most recent back ScheduleQuery.
         const newQueries = backQueries.pop()!;
         setQueries(newQueries);
         submitSearch(newQueries);
@@ -66,7 +67,7 @@ function CoursesPane(props: { calendarPane?: React.JSX.Element }) {
         // Store last search if exists.
         if (lastQueries.length)
             setBackQueries([...backQueries, lastQueries]);
-        // Search for most recent forward query.
+        // Search for most recent forward ScheduleQuery.
         const newQueries = forwardQueries.pop()!;
         setQueries(newQueries);
         submitSearch(newQueries);
@@ -77,12 +78,12 @@ function CoursesPane(props: { calendarPane?: React.JSX.Element }) {
         setQueries(lastQueries);
         setLastQueries([...lastQueries]);
     }
-    const search = (searchQueries: Partial<Query>[]) => {
+    const search = (searchQueries: Partial<ScheduleQuery>[]) => {
         // Store last search if exists.
         if (lastQueries.length)
             setBackQueries([...backQueries, lastQueries]);
         // Search for new queries.
-        const newQueries = searchQueries.map(query => ({ ...defaultQuery, ...query }));
+        const newQueries = searchQueries.map(ScheduleQuery => ({ ...defaultScheduleQuery, ...ScheduleQuery }));
         setQueries(newQueries);
         submitSearch(newQueries);
     }
@@ -113,12 +114,12 @@ function CoursesPane(props: { calendarPane?: React.JSX.Element }) {
                                 multiState={[multi, setMulti]}
                                 courses={searchResults}
                                 queriesState={queriesState}
-                                defaultQuery={defaultQuery}
+                                defaultScheduleQuery={defaultScheduleQuery}
                                 lastQueries={lastQueries}
                                 searchFunctions={{ submitSearch, resetSearch, backSearch, forwardSearch, refreshSearch }}
                             />
                         ) : (
-                            <SearchForms multiState={[multi, setMulti]} queriesState={queriesState} defaultQueryState={defaultQueryState} submit={submitSearch} />
+                            <SearchForms multiState={[multi, setMulti]} queriesState={queriesState} defaultScheduleQueryState={defaultScheduleQueryState} submit={submitSearch} />
                         );
                         case "added": return <AddedTab />;
                         case "map": return <MapTab />;

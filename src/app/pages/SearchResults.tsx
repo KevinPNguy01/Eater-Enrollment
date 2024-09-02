@@ -8,7 +8,7 @@ import { ScheduleResults } from "features/results/components/ScheduleResult"
 import { SearchBox } from "features/search/components/SearchBox"
 import { useEffect, useState } from "react"
 import { Course } from "types/Course"
-import { Query } from "utils/PeterPortal"
+import { ScheduleQuery } from "types/ScheduleQuery"
 import { SearchFunctions } from "./CoursesPane"
 
 const homeIcon = <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 16 16">
@@ -39,13 +39,13 @@ const filterIcon = <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18
 export function SearchResults(props: {
     courses: Course[],
     multiState: [boolean, (_: boolean) => void]
-    queriesState: [Query[], (_: Query[]) => void],
-    defaultQuery: Query,
-    lastQueries: Query[],
+    queriesState: [ScheduleQuery[], (_: ScheduleQuery[]) => void],
+    defaultScheduleQuery: ScheduleQuery,
+    lastQueries: ScheduleQuery[],
     searchFunctions: SearchFunctions
 }
 ) {
-    const { courses, queriesState, defaultQuery, lastQueries, searchFunctions } = props;
+    const { courses, queriesState, defaultScheduleQuery, lastQueries, searchFunctions } = props;
     const [sortOptions, setSortOptions] = useState({
         sortBy: SortBy.Name,
         direction: SortDirection.Ascending,
@@ -85,7 +85,7 @@ export function SearchResults(props: {
                 searchFunctions={searchFunctions}
                 queriesState={queriesState}
                 multiState={props.multiState}
-                defaultQuery={defaultQuery}
+                defaultScheduleQuery={defaultScheduleQuery}
                 lastQueries={lastQueries}
             />
             {filteredCourses.length ? <ScheduleResults courses={filteredCourses} /> : <LoadingSymbol />}
@@ -98,13 +98,13 @@ function SearchResultsNavBar(props: {
     filterOptionsState: [FilterOptions, (options: FilterOptions) => void],
     defaultFilterOptions: FilterOptions,
     searchFunctions: SearchFunctions,
-    queriesState: [Query[], (_: Query[]) => void],
-    defaultQuery: Query,
+    queriesState: [ScheduleQuery[], (_: ScheduleQuery[]) => void],
+    defaultScheduleQuery: ScheduleQuery,
     multiState: [boolean, (_: boolean) => void],
-    lastQueries: Query[]
+    lastQueries: ScheduleQuery[]
 }
 ) {
-    const { queriesState, multiState, defaultQuery, lastQueries } = props;
+    const { queriesState, multiState, defaultScheduleQuery, lastQueries } = props;
     const { submitSearch, resetSearch, backSearch, forwardSearch, refreshSearch } = props.searchFunctions;
     const [sortMenuVisible, setSortMenuVisible] = useState(false);
     const [filterMenuVisible, setFilterMenuVisible] = useState(false);
@@ -116,7 +116,7 @@ function SearchResultsNavBar(props: {
             <IconButton color="info" onClick={refreshSearch}>{refreshIcon}</IconButton>
             <IconButton color="info" onClick={resetSearch}>{homeIcon}</IconButton>
             <div className="flex-grow w-0">
-                <SearchBox multiState={multiState} queriesState={queriesState} defaultQuery={defaultQuery} lastQueries={lastQueries} submitQueries={submitSearch} />
+                <SearchBox multiState={multiState} queriesState={queriesState} defaultScheduleQuery={defaultScheduleQuery} lastQueries={lastQueries} submitQueries={submitSearch} />
             </div>
             <div className="flex">
                 <IconButton onClick={() => setSortMenuVisible(true)}>{sortIcon}</IconButton>
