@@ -1,6 +1,6 @@
 import { Tooltip } from "components/Tooltip";
 import { useEffect, useRef, useState } from "react";
-import { Query } from "utils/PeterPortal";
+import { ScheduleQuery } from "types/ScheduleQuery";
 import { SearchSuggestion, getSuggestions } from "../utils/FormHelpers";
 import { QueryBubble } from "./QueryBubble";
 
@@ -20,11 +20,11 @@ export function SearchBubble(props: {
     inputState: [string, (_: string) => void],
     focusState: [boolean, (_: boolean) => void],
     multiState: [boolean, (_: boolean) => void],
-    queriesState: [Query[], (_: Query[]) => void],
+    queriesState: [ScheduleQuery[], (_: ScheduleQuery[]) => void],
     suggestionsState: [SearchSuggestion[], (_: SearchSuggestion[]) => void],
-    addQuery: (query: Query) => void,
+    addQuery: (query: ScheduleQuery) => void,
     deleteQuery: (index: number) => void,
-    submitQueries: (query?: Query[]) => void
+    submitQueries: (query?: ScheduleQuery[]) => void
 }
 ) {
     const [suggestions, setSuggestions] = props.suggestionsState;
