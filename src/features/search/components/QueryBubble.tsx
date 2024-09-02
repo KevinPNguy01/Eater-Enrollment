@@ -1,4 +1,4 @@
-import { Query } from "../../../utils/PeterPortal";
+import { Query } from "utils/PeterPortal";
 
 const bubbleStyle = "flex items-center whitespace-nowrap border border-quaternary bg-tertiary px-4 rounded-full group hover:pr-0 hover:bg-red-500 hover:cursor-pointer";
 

@@ -1,13 +1,13 @@
-import { populateReviews } from "./RateMyProfessors";
+import { Course } from "types/Course";
+import { CourseOffering } from "types/CourseOffering";
+import { GradeDistribution } from "types/GradeDistribution";
+import { GradeDistributionCollection } from "types/GradeDistributionCollection";
 import coursesJson from "../../src/assets/allCourses.json";
-import { parseFinal, parseMeeting } from "./ParseMeeting";
 import { getOfferingColor } from "./FullCalendar";
-import { Course } from "../types/Course";
-import { CourseOffering } from "../types/CourseOffering";
-import { GradeDistribution } from "../types/GradeDistribution";
-import { GradeDistributionCollection } from "../types/GradeDistributionCollection";
+import { parseFinal, parseMeeting } from "./ParseMeeting";
+import { populateReviews } from "./RateMyProfessors";
 
-const courseMap = new Map<string, Course>((coursesJson as {data: {allCourses: Course[]}}).data.allCourses.map(course => [course.id, course]));
+const courseMap = new Map<string, Course>((coursesJson as { data: { allCourses: Course[] } }).data.allCourses.map(course => [course.id, course]));
 
 /**
  * Makes a request to the PeterPortal API.
@@ -19,7 +19,7 @@ async function makeRequest(query: string) {
         {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({'query': query})
+            body: JSON.stringify({ 'query': query })
         }
     );
     return (await response.json());
@@ -49,19 +49,19 @@ export function queryToString(query: Query) {
 export async function requestSchedule(queries: Query[]): Promise<Course[]> {
     let numQueries = 0;
 
-    const query =  `
+    const query = `
         query {
             ${queries.map(query => {
-                const {quarter, year, department, section_codes, number, ge} = query;
-                const codes = (section_codes || "").split(",");
-                // If no codes were provided, initialize with empty code chunk so at least one iteration happens.
-                const codeChunks: string[][] = codes.length ? [] : [[]];
-                // API has a limit of 10 codes per query.
-                for (let i = 0; i < codes.length; i+=10) {
-                    codeChunks.push(codes.slice(i, i + 10));
-                }
+        const { quarter, year, department, section_codes, number, ge } = query;
+        const codes = (section_codes || "").split(",");
+        // If no codes were provided, initialize with empty code chunk so at least one iteration happens.
+        const codeChunks: string[][] = codes.length ? [] : [[]];
+        // API has a limit of 10 codes per query.
+        for (let i = 0; i < codes.length; i += 10) {
+            codeChunks.push(codes.slice(i, i + 10));
+        }
 
-                return codeChunks.map((section_codes) => `
+        return codeChunks.map((section_codes) => `
                     schedule${numQueries++}: schedule(
                     quarter: "${quarter}" 
                     year: ${year}
@@ -76,7 +76,7 @@ export async function requestSchedule(queries: Query[]): Promise<Course[]> {
                     instructors { shortened_name }
                     course { id department number title }
                 }`).join("\n");
-            })}
+    })}
         }
     `;
 
@@ -86,7 +86,7 @@ export async function requestSchedule(queries: Query[]): Promise<Course[]> {
     for (let i = 0; i < numQueries; ++i) {
         (response.data[`schedule${i}`] as CourseOffering[]).forEach(offering => {
             // Add offering if it is not a duplicate.
-            if (!offerings.find(({quarter, year, section}) => (section.code === offering.section.code && quarter === offering.quarter && year === offering.year))) {
+            if (!offerings.find(({ quarter, year, section }) => (section.code === offering.section.code && quarter === offering.quarter && year === offering.year))) {
                 offerings.push(offering);
             }
         });
@@ -105,13 +105,13 @@ export async function requestSchedule(queries: Query[]): Promise<Course[]> {
 
     // Process each course here.
     const courses = Array.from(courseOfferings.entries()).map(([id, offerings]) => {
-        const course = {...courseMap.get(id)} as Course;
+        const course = { ...courseMap.get(id) } as Course;
         course.offerings = offerings;                                                   // Attach offerings to course.
         course.prerequisite_list = course.prerequisite_list.filter(course => course);   // Filter null prerequisites.
 
         // Process each offering here.
         offerings.forEach(offering => {
-            offering.course = {...course};
+            offering.course = { ...course };
             offering.course.offerings = [];
             offering.parsed_meetings = offering.meetings.map(meeting => parseMeeting(meeting));     // Parse each meeting.
             offering.final = parseFinal(offering.final_exam);
@@ -132,18 +132,18 @@ export async function requestSchedule(queries: Query[]): Promise<Course[]> {
 async function requestGrades(courses: Course[]) {
     const courseChunks = [] as Course[][];
     // Split courses into chunks so each query is under the payload limit.
-    for (let i = 0; i < courses.length; i+=10) {
+    for (let i = 0; i < courses.length; i += 10) {
         courseChunks.push(courses.slice(i, i + 10));
     }
 
-    const requests = [] as Promise<{data: GradeDistributionCollection}>[];
-    const grades = {grade_distributions: [] as GradeDistribution[]} as GradeDistributionCollection;
+    const requests = [] as Promise<{ data: GradeDistributionCollection }>[];
+    const grades = { grade_distributions: [] as GradeDistribution[] } as GradeDistributionCollection;
     courseChunks.forEach(async (chunk) => {
         let index = 0;
-        const query =  `
+        const query = `
             query {
-                ${chunk.map(({department, number}) => {
-                    return `
+                ${chunk.map(({ department, number }) => {
+            return `
                         grades${index++}: grades (
                             ${department ? `department: "${department}"` : ""}
                             ${number ? `number: "${number}"` : ""}
@@ -166,7 +166,7 @@ async function requestGrades(courses: Course[]) {
                             }
                         }
                     `;
-                }).join("\n")}
+        }).join("\n")}
             }
         `;
         const request = makeRequest(query)

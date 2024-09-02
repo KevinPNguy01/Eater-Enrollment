@@ -1,13 +1,13 @@
+import { Course } from "types/Course";
+import { Query } from "utils/PeterPortal";
 import coursesJson from "../../../assets/allCourses.json";
-import { Course } from "../../../types/Course";
-import { Query } from "../../../utils/PeterPortal";
 
 export type SearchSuggestion = {
     text: string;
     value: Query;
 }
 
-type CoursesJson = {data: {allCourses: Course[]}};
+type CoursesJson = { data: { allCourses: Course[] } };
 const courses = (coursesJson as CoursesJson).data.allCourses as Course[];
 
 const departmentSuggestions = [
@@ -17,13 +17,13 @@ const departmentSuggestions = [
 ].map(
     ([department, department_name]) => ({
         text: `${department}: ${department_name}`,
-        value: {department: department} as Query
+        value: { department: department } as Query
     } as SearchSuggestion)
 );
 const courseSuggestions = courses.map(
-    ({department, number, title}) => ({
+    ({ department, number, title }) => ({
         text: `${department} ${number}: ${title}`,
-        value: {department, number} as Query
+        value: { department, number } as Query
     } as SearchSuggestion)
 );
 const geSuggestions = [
@@ -37,7 +37,7 @@ const geSuggestions = [
     ["GE VI (6): Language other than English", "GE-6"],
     ["GE VII (7): Multicultural Studies", "GE-7"],
     ["GE VIII (8): International/Global Issues", "GE-8"]
-].map(([text, ge]) => ({text, value: {ge} as Query} as SearchSuggestion));
+].map(([text, ge]) => ({ text, value: { ge } as Query } as SearchSuggestion));
 
 const searchSuggestions = [...geSuggestions, ...departmentSuggestions, ...courseSuggestions];
 
@@ -45,7 +45,7 @@ export function getSuggestions(searchStr: string) {
     if (searchStr.length < 2) return [];
     const regExp = buildRegExp(searchStr);
     return searchSuggestions.filter(
-        ({text}) => (regExp.test(` ${text.toLowerCase()}`)))
+        ({ text }) => (regExp.test(` ${text.toLowerCase()}`)))
 }
 
 function buildRegExp(searchStr: string) {

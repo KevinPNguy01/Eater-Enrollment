@@ -1,14 +1,14 @@
+import { buildingIds } from "constants/BuildingIds";
 import moment from "moment";
-import { buildingIds } from "../features/map/constants/BuildingIds";
-import { Final } from "../types/Final";
-import { Meeting } from "../types/Meeting";
-import { ParsedMeeting } from "../types/ParsedMeeting";
+import { Final } from "types/Final";
+import { Meeting } from "types/Meeting";
+import { ParsedMeeting } from "types/ParsedMeeting";
 
 export function parseMeeting(meeting: Meeting): ParsedMeeting {
     const [buildingId, room] = parseBuilding(meeting.building);
     const days = parseDays(meeting.days);
     const [startTime, endTime] = parseTime(meeting.time) || ["", ""];
-    return {buildingId, room, days, startTime, endTime}
+    return { buildingId, room, days, startTime, endTime }
 }
 
 /**
@@ -19,11 +19,11 @@ function parseTime(time: string): [string, string] | null {
     if (!time || time === "TBA") return null;    // Account for asynchronous meeting times.
 
     time = time.replace(/\s+/g, "").replace("am", "").replace("pm", "p")    // Normalize string.
-    const pm = time[time.length-1] === "p" ? true : false;                  // The time ends past 12 if the string ends in 'p'.
+    const pm = time[time.length - 1] === "p" ? true : false;                  // The time ends past 12 if the string ends in 'p'.
     const timeArray = time.replace("p", "").split("-");                     // Drop the p and split by '-' into two separate times.
 
     // Isolate the start/end hours and minutes.
-    const startArray = timeArray[0].split(":");             
+    const startArray = timeArray[0].split(":");
     const endArray = timeArray[1].split(":");
     let startHour = parseInt(startArray[0]);
     const startMinutes = parseInt(startArray[1]);
@@ -62,7 +62,7 @@ function parseTime(time: string): [string, string] | null {
 function parseBuilding(location: string): [number, string] {
     const tokens = location.split(" ");
     const code = tokens.slice(0, -1).join(" ");
-    const number = tokens[tokens.length-1];
+    const number = tokens[tokens.length - 1];
     const id = buildingIds[code];
     return [id, number]
 }
@@ -97,5 +97,5 @@ export function parseFinal(final: string): Final | null {
     if (!time) return null;
     const start = moment(`${monthString} ${dateNumber} ${new Date().getFullYear()} ${time[0]}`, "MMM D YYYY hh:mm A");
     const end = moment(`${monthString} ${dateNumber} ${new Date().getFullYear()} ${time[1]}`, "MMM D YYYY hh:mm A");
-    return {time: [start.toISOString(), end.toISOString()], day};
+    return { time: [start.toISOString(), end.toISOString()], day };
 }

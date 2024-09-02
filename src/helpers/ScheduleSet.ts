@@ -1,4 +1,4 @@
-import { Schedule } from "../types/Schedule";
+import { Schedule } from "types/Schedule";
 
 /**
  * Add a schedule to the schedule set, giving it a unique id.

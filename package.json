@@ -40,7 +40,8 @@
     "recharts": "^2.12.7",
     "redux-undo": "^1.1.0",
     "request": "^2.88.2",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "vite-tsconfig-paths": "^5.0.1"
   },
   "devDependencies": {
     "@types/jquery": "^3.5.29",

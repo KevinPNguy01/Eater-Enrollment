@@ -2,11 +2,15 @@
   "compilerOptions": {
     "target": "ES2022",
     "useDefineForClassFields": true,
-    "lib": ["ES2021", "DOM", "DOM.Iterable", "ES2023.Array"],
+    "lib": [
+      "ES2021",
+      "DOM",
+      "DOM.Iterable",
+      "ES2023.Array"
+    ],
     "module": "ESNext",
     "skipLibCheck": true,
     "esModuleInterop": true,
-
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -14,13 +18,49 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    /* Absolute imports */
+    "baseUrl": "src",
+    "paths": {
+      "app/*": [
+        "app/*"
+      ],
+      "components/*": [
+        "components/*"
+      ],
+      "constants/*": [
+        "constants/*"
+      ],
+      "features/*": [
+        "features/*"
+      ],
+      "helpers/*": [
+        "helpers/*"
+      ],
+      "shared/*": [
+        "shared/*"
+      ],
+      "stores/*": [
+        "stores/*"
+      ],
+      "types/*": [
+        "types/*"
+      ],
+      "util/*": [
+        "util/*"
+      ],
+    }
   },
-  "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
 }

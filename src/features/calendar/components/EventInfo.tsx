@@ -1,27 +1,27 @@
-import { useState, useEffect, useRef } from "react";
-import { SketchPicker } from "react-color";
-import { RateMyProfessorsLink } from "../../results/components/RateMyProfessorsLink";
-import { BuildingLink } from "../../results/components/BuildingLink";
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import PaletteIcon from '@mui/icons-material/Palette';
-import useWindowDimensions from "../../../utils/WindowDimensions";
-import { EventClickArg } from "fullcalendar/index.js";
 import Card from "@mui/material/Card";
 import IconButton from "@mui/material/IconButton";
+import { EventClickArg } from "fullcalendar/index.js";
+import { useEffect, useRef, useState } from "react";
+import { SketchPicker } from "react-color";
 import { useDispatch, useSelector } from "react-redux";
-import { selectCurrentScheduleIndex } from "../../store/selectors/ScheduleSetSelectors";
-import { changeCustomEventColor, changeOfferingColor, removeCustomEvent, removeOffering } from "../../store/slices/ScheduleSetSlice";
-import { CourseOffering } from "../../../types/CourseOffering";
-import { CustomEvent } from "../../../types/CustomEvent";
-import EditIcon from '@mui/icons-material/Edit';
+import { selectCurrentScheduleIndex } from "stores/selectors/ScheduleSetSelectors";
+import { changeCustomEventColor, changeOfferingColor, removeCustomEvent, removeOffering } from "stores/slices/ScheduleSetSlice";
+import { CourseOffering } from "types/CourseOffering";
+import { CustomEvent } from "types/CustomEvent";
+import useWindowDimensions from "utils/WindowDimensions";
+import { BuildingLink } from "../../results/components/BuildingLink";
+import { RateMyProfessorsLink } from "../../results/components/RateMyProfessorsLink";
 
 export function EventInfo(
-    {eventClickArg, eventClickArg: {event}, updateEvent, close, calendarRect, scrollPos}: 
-    {eventClickArg: EventClickArg, updateEvent: () => void, close: () => void, scrollPos: number, calendarRect: DOMRect}
+    { eventClickArg, eventClickArg: { event }, updateEvent, close, calendarRect, scrollPos }:
+        { eventClickArg: EventClickArg, updateEvent: () => void, close: () => void, scrollPos: number, calendarRect: DOMRect }
 ) {
     const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
     const dispatch = useDispatch();
-    
+
     const ref = useRef(null as unknown as HTMLDivElement);
     const colorPickerRef = useRef(null as unknown as HTMLDivElement);
     const screenSize = useWindowDimensions();
@@ -34,7 +34,7 @@ export function EventInfo(
 
     // Previous scroll position.
     const [lastScroll, setLastScroll] = useState(scrollPos);
-    
+
     // Color of component, color picker, and event.
     const [backgroundColor, setBackgroundColor] = useState(event.backgroundColor);
     const [textColor, setTextColor] = useState(event.textColor);
@@ -42,9 +42,9 @@ export function EventInfo(
     const [colorVisible, setColorVisible] = useState(false);
 
     // Where this component should be positioned.
-    const [pos, setPos] = useState({x:0, y:0});
+    const [pos, setPos] = useState({ x: 0, y: 0 });
     // Where the color picker should be positioned.
-    const [colorPickerPos, setColorPickerPos] = useState({x:0, y:0});
+    const [colorPickerPos, setColorPickerPos] = useState({ x: 0, y: 0 });
 
     /**
      * Reposition the EventInfo card relative to the selected calendar event.
@@ -54,14 +54,14 @@ export function EventInfo(
         const infoPos = calculatePosition(calendarRect, eventClickArg.el.getBoundingClientRect(), ref.current);
         setPos(infoPos);
         setColorPickerPos(calculateColorPickerPosition(calendarRect, ref.current, infoPos, colorPickerRef.current));
-    }, 
+    },
         [eventClickArg, ref.current?.clientWidth, ref.current?.clientHeight, screenSize, calendarRect]
     );
 
     // Reposition on scroll.
     useEffect(() => {
         if (scrollPos != lastScroll) {
-            setPos({x: pos.x, y: pos.y + (lastScroll - scrollPos)})
+            setPos({ x: pos.x, y: pos.y + (lastScroll - scrollPos) })
             setLastScroll(scrollPos);
         }
     }, [scrollPos, lastScroll, pos.x, pos.y]);
@@ -74,46 +74,46 @@ export function EventInfo(
 
     // Div containing the color picker.
     const colorPicker = (
-        <Card 
-            elevation={3} 
+        <Card
+            elevation={3}
             className={`absolute bg-tertiary`}
-            style={{top: `${colorVisible ? colorPickerPos.y : calendarRect.bottom}px`, left: `${colorPickerPos.x}px`}}
+            style={{ top: `${colorVisible ? colorPickerPos.y : calendarRect.bottom}px`, left: `${colorPickerPos.x}px` }}
             ref={colorPickerRef}
         >
-            <SketchPicker 
+            <SketchPicker
                 className="!bg-tertiary [&_label]:!text-white"
                 color={backgroundColor}
                 onChange={color => {
-                    const {r, g, b} = color.rgb;
+                    const { r, g, b } = color.rgb;
                     setBackgroundColor(color.hex);
-                    setTextColor((0.299 * r + 0.587 * g + 0.114 * b)/255 < 0.5 ? "#ffffff" : "#000000");
-                    
+                    setTextColor((0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.5 ? "#ffffff" : "#000000");
+
                 }}
                 onChangeComplete={color => {
                     if (customEvent) {
-                        dispatch(changeCustomEventColor({customEvent: event.extendedProps.source, color: color.hex, index: currentScheduleIndex}));
+                        dispatch(changeCustomEventColor({ customEvent: event.extendedProps.source, color: color.hex, index: currentScheduleIndex }));
                     } else {
-                        dispatch(changeOfferingColor({offering: offering!, color: color.hex, index: currentScheduleIndex}));
+                        dispatch(changeOfferingColor({ offering: offering!, color: color.hex, index: currentScheduleIndex }));
                     }
                 }}
             />
         </Card>
     );
-    
+
     const spacerRow = <tr><td colSpan={2} className="border-b border-quaternary"></td></tr>;
     return (
-        <div 
-            className={`${!pos.x ? "opacity-0" : ""} !overflow-visible absolute !z-10`} 
-            style={{top: `${pos.y}px`, left: `${pos.x}px`}}
-            onClick={e => e.stopPropagation()} 
-            ref={ref} 
+        <div
+            className={`${!pos.x ? "opacity-0" : ""} !overflow-visible absolute !z-10`}
+            style={{ top: `${pos.y}px`, left: `${pos.x}px` }}
+            onClick={e => e.stopPropagation()}
+            ref={ref}
         >
             {/** Card is positioned so color picker can be positioned relative to it. */}
             <Card elevation={3} className="!overflow-visible !rounded-xl relative bg-tertiary">
                 {/** Title and buttons */}
-                <div 
-                    className="flex justify-between items-center bg-secondary p-2 gap-8 rounded-t-xl" 
-                    style={{backgroundColor: backgroundColor, color: textColor}}
+                <div
+                    className="flex justify-between items-center bg-secondary p-2 gap-8 rounded-t-xl"
+                    style={{ backgroundColor: backgroundColor, color: textColor }}
                 >
                     {/** Title */}
                     <p className="font-semibold px-2 text-nowrap">{event.title}</p>
@@ -125,7 +125,7 @@ export function EventInfo(
                                 updateEvent();
                                 close();
                             }}>
-                                <EditIcon/>
+                                <EditIcon />
                             </IconButton>
                         )}
                         {/** Toggle color picker visibility. */}
@@ -133,18 +133,18 @@ export function EventInfo(
                             setColorPickerPos(calculateColorPickerPosition(calendarRect, ref.current, pos, colorPickerRef.current));
                             setColorVisible(!colorVisible)
                         }}>
-                            <PaletteIcon/>
+                            <PaletteIcon />
                         </IconButton>
                         {/** Delete event. */}
                         <IconButton color={textColor === "#000000" ? "black" : "white"} onClick={() => {
                             if (customEvent) {
-                                dispatch(removeCustomEvent({customEvent, index: currentScheduleIndex}));
+                                dispatch(removeCustomEvent({ customEvent, index: currentScheduleIndex }));
                             } else {
-                                dispatch(removeOffering({offering: offering!, index: currentScheduleIndex}));
+                                dispatch(removeOffering({ offering: offering!, index: currentScheduleIndex }));
                             }
                             close();
                         }}>
-                            <DeleteIcon/>
+                            <DeleteIcon />
                         </IconButton>
                     </div>
                 </div>
@@ -157,7 +157,7 @@ export function EventInfo(
                                 <div className="grid justify-items-start *:align-top *:!overflow-clip">
                                     {offering!.instructors.map(
                                         (instructor, index) => {
-                                            return <RateMyProfessorsLink key={index} instructor={instructor}/>
+                                            return <RateMyProfessorsLink key={index} instructor={instructor} />
                                         }
                                     )}
                                 </div>
@@ -175,7 +175,7 @@ export function EventInfo(
                         {/** Location of event. */}
                         <td className="text-sm text-right">Location</td>
                         <td className="*:float-left *:!overflow-clip">
-                            {<BuildingLink location={offering ? offering.meetings[0].building : customEvent!.location + " "}/>}
+                            {<BuildingLink location={offering ? offering.meetings[0].building : customEvent!.location + " "} />}
                         </td>
                     </tr>
                 </tbody></table>
@@ -188,27 +188,27 @@ export function EventInfo(
 const calculatePosition = (calendarRect: DOMRect, eventRect: DOMRect, infoCard: HTMLDivElement) => {
     const {
         height: eventHeight,
-        width: eventWidth, 
-        top: eventTop, 
-        bottom: eventBottom, 
+        width: eventWidth,
+        top: eventTop,
+        bottom: eventBottom,
         left: eventLeft
     } = eventRect;
     const {
         height: calendarHeight,
-        width: calendarWidth, 
+        width: calendarWidth,
         top: calendarTop
     } = calendarRect;
-    const {clientHeight: infoHeight, clientWidth: infoWidth} = infoCard;
+    const { clientHeight: infoHeight, clientWidth: infoWidth } = infoCard;
 
     // Default position: To the right of the event, centered vertically.
     let x = eventLeft + eventWidth + 5;
-    let y = eventTop - calendarTop + eventHeight/2 - infoHeight/2;
+    let y = eventTop - calendarTop + eventHeight / 2 - infoHeight / 2;
     // If the component overflows to the right of the calendar, position it to the left of the event.
     if (x + infoWidth > calendarWidth) {
         x = eventLeft - infoWidth - 10;
         // If the component overflows to the left of the calendar, position it below the event, centered horizontally.
         if (x < 0) {
-            x = Math.max(5, eventLeft + eventWidth/2 - infoWidth/2);
+            x = Math.max(5, eventLeft + eventWidth / 2 - infoWidth / 2);
             y = eventBottom - calendarTop + 5;
             // If the component overflows to the right, try sticking to right, then left.
             if (x + infoWidth > calendarWidth) {
@@ -220,23 +220,23 @@ const calculatePosition = (calendarRect: DOMRect, eventRect: DOMRect, infoCard: 
             }
         }
     }
-    return {x, y};
+    return { x, y };
 }
 
-const calculateColorPickerPosition = (calendarRect: DOMRect, infoCard: HTMLDivElement, infoPos: {x: number, y: number}, colorPicker: HTMLDivElement) => {
-    const {height: calendarHeight} = calendarRect;
-    const {clientHeight: infoHeight, clientWidth: infoWidth} = infoCard;
-    const {y: infoY} = infoPos;
-    const {clientHeight: pickerHeight, clientWidth: pickerWidth} = colorPicker;
+const calculateColorPickerPosition = (calendarRect: DOMRect, infoCard: HTMLDivElement, infoPos: { x: number, y: number }, colorPicker: HTMLDivElement) => {
+    const { height: calendarHeight } = calendarRect;
+    const { clientHeight: infoHeight, clientWidth: infoWidth } = infoCard;
+    const { y: infoY } = infoPos;
+    const { clientHeight: pickerHeight, clientWidth: pickerWidth } = colorPicker;
 
     // Default position: Below the EventInfo card, centered horizontally.
-    const x = infoWidth/2 - pickerWidth/2;
+    const x = infoWidth / 2 - pickerWidth / 2;
     let y = infoHeight + 10;
 
     // If the color picker clips past the bottom, position it above the EventInfo card.
     if (infoY + infoHeight + 10 + pickerHeight > calendarHeight) {
         y = -5 - pickerHeight;
     }
-    
-    return {x, y};
+
+    return { x, y };
 }

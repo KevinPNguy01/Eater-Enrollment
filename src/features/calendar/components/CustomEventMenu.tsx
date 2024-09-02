@@ -1,25 +1,25 @@
-import { TimePicker } from "@mui/x-date-pickers";
-import { useState } from "react";
-import moment from "moment";
+import NotesIcon from '@mui/icons-material/Notes';
+import PlaceIcon from '@mui/icons-material/Place';
+import Autocomplete from "@mui/material/Autocomplete";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import Divider from "@mui/material/Divider";
-import { useDispatch, useSelector } from "react-redux";
-import { addCustomEvent, updateCustomEvent } from "../../store/slices/ScheduleSetSlice";
-import { selectCurrentScheduleIndex } from "../../store/selectors/ScheduleSetSelectors";
-import PlaceIcon from '@mui/icons-material/Place';
-import NotesIcon from '@mui/icons-material/Notes';
-import { CustomEvent } from "../../../types/CustomEvent";
-import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
-import { buildings } from "../../map/constants/Buildings";
-import { buildingIds } from "../../map/constants/BuildingIds";
-import { getColorCustomEvent } from "../../../utils/FullCalendar";
+import { TimePicker } from "@mui/x-date-pickers";
+import { buildingIds } from "constants/BuildingIds";
+import { buildings } from "constants/Buildings";
+import moment from "moment";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { selectCurrentScheduleIndex } from "stores/selectors/ScheduleSetSelectors";
+import { addCustomEvent, updateCustomEvent } from "stores/slices/ScheduleSetSlice";
+import { CustomEvent } from "types/CustomEvent";
+import { getColorCustomEvent } from "utils/FullCalendar";
 
-export function CustomEventMenu(props: {event: CustomEvent, closeMenu: () => void}) {
+export function CustomEventMenu(props: { event: CustomEvent, closeMenu: () => void }) {
     const dispatch = useDispatch();
     const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
-    const {event, closeMenu} = props;
+    const { event, closeMenu } = props;
     const [days, setDays] = useState(event.days);
     const [start, setStart] = useState(moment(event.startTime, 'hh:mm A'));
     const [end, setEnd] = useState(moment(event.endTime, 'hh:mm A'));
@@ -31,17 +31,17 @@ export function CustomEventMenu(props: {event: CustomEvent, closeMenu: () => voi
         <Card className="w-3/4 h-fit p-4 flex flex-col content-center" elevation={3} onClick={e => e.stopPropagation()}>
             <h1>{event.id === -1 ? "Add" : "Update"} Custom Event</h1>
             <div className="flex flex-col p-2 gap-4">
-                <input className="border-b-0 text-xl font-semibold" placeholder="Event Title" value={title} onChange={e => setTitle(e.currentTarget.value)}/>
-                <Divider color="#808080"/>
+                <input className="border-b-0 text-xl font-semibold" placeholder="Event Title" value={title} onChange={e => setTitle(e.currentTarget.value)} />
+                <Divider color="#808080" />
                 <div className="flex justify-around">
                     {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
-                        <Button 
+                        <Button
                             color="white"
-                            className={`${days & (1 << (6-index)) ? "!border-solid !border-blue-500 !text-blue-500" : ""} !font-semibold !rounded-full !min-w-fit !min-h-fit !w-8 !h-8 !aspect-square`}
-                            style={{border: "1px"}}
+                            className={`${days & (1 << (6 - index)) ? "!border-solid !border-blue-500 !text-blue-500" : ""} !font-semibold !rounded-full !min-w-fit !min-h-fit !w-8 !h-8 !aspect-square`}
+                            style={{ border: "1px" }}
                             key={index}
                             onClick={() => {
-                                setDays(days ^ (1 << (6-index)));
+                                setDays(days ^ (1 << (6 - index)));
                             }}
                         >
                             {day}
@@ -68,14 +68,14 @@ export function CustomEventMenu(props: {event: CustomEvent, closeMenu: () => voi
                         }}
                     />
                 </div>
-                <Divider color="#808080"/>
+                <Divider color="#808080" />
                 <div className="flex gap-4 items-center">
-                    <PlaceIcon/>
-                    <Autocomplete 
+                    <PlaceIcon />
+                    <Autocomplete
                         color="warning"
                         className="flex-grow"
-                        renderInput={(params) => <TextField {...params} label="Add location" />} 
-                        value={{code: location, label: buildingIds[location] ? buildings[buildingIds[location]].name : location}}
+                        renderInput={(params) => <TextField {...params} label="Add location" />}
+                        value={{ code: location, label: buildingIds[location] ? buildings[buildingIds[location]].name : location }}
                         options={Object.keys(buildingIds).map((code) => {
                             const id = buildingIds[code];
                             return {
@@ -98,12 +98,12 @@ export function CustomEventMenu(props: {event: CustomEvent, closeMenu: () => voi
                         onChange={(_, val) => setLocation(val?.code || "")}
                     />
                 </div>
-                <Divider color="#808080"/>
+                <Divider color="#808080" />
                 <div className="flex gap-4 items-center">
-                    <NotesIcon/>
-                    <input className="border-b-0 flex-grow text-base" placeholder="Add description" value={description} onChange={e => setDescription(e.currentTarget.value)}/>
+                    <NotesIcon />
+                    <input className="border-b-0 flex-grow text-base" placeholder="Add description" value={description} onChange={e => setDescription(e.currentTarget.value)} />
                 </div>
-                <Divider color="#808080"/>
+                <Divider color="#808080" />
                 <div className="w-full flex justify-end gap-2">
                     <Button variant="contained" color="info" onClick={closeMenu}>
                         Cancel
@@ -111,18 +111,18 @@ export function CustomEventMenu(props: {event: CustomEvent, closeMenu: () => voi
                     <Button variant="contained" onClick={() => {
                         closeMenu();
                         const customEvent = {
-                            id: event.id, 
-                            title, 
+                            id: event.id,
+                            title,
                             description,
                             location: location,
-                            startTime: start.format('hh:mm A'), 
-                            endTime: end.format('hh:mm A'), 
+                            startTime: start.format('hh:mm A'),
+                            endTime: end.format('hh:mm A'),
                             days: days,
                         } as CustomEvent;
                         if (customEvent.id === -1) {
                             customEvent.color = getColorCustomEvent(customEvent);
                         }
-                        dispatch((event.id === -1 ? addCustomEvent : updateCustomEvent)({customEvent, index: currentScheduleIndex}));
+                        dispatch((event.id === -1 ? addCustomEvent : updateCustomEvent)({ customEvent, index: currentScheduleIndex }));
                     }}>
                         {event.id === -1 ? "Add" : "Update"} Event
                     </Button>

@@ -1,6 +1,6 @@
-import { configureStore } from '@reduxjs/toolkit'
-import schedulesReducer from "../features/store/slices/ScheduleSetSlice"
+import { configureStore } from '@reduxjs/toolkit';
 import undoable from "redux-undo";
+import schedulesReducer from "stores/slices/ScheduleSetSlice";
 
 export const store = configureStore({
     reducer: {

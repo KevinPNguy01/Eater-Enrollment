@@ -1,13 +1,13 @@
 import moment from "moment";
-import { CourseOffering } from "../types/CourseOffering";
-import { CustomEvent } from "../types/CustomEvent";
-import { CalendarEvent } from "../types/CalendarEvent";
+import { CalendarEvent } from "types/CalendarEvent";
+import { CourseOffering } from "types/CourseOffering";
+import { CustomEvent } from "types/CustomEvent";
 
 export function createCustomEvents(customEvents: CustomEvent[]) {
     return customEvents.map(customEvent => {
         const events: CalendarEvent[] = [];
         for (let i = 0; i < 7; ++i) {
-            if (customEvent.days & (1 << (6-i))) {
+            if (customEvent.days & (1 << (6 - i))) {
                 events.push({
                     title: customEvent.title,
                     start: moment(customEvent.startTime, 'hh:mm A').weekday(i).toISOString(),
@@ -27,11 +27,11 @@ export function createCustomEvents(customEvents: CustomEvent[]) {
 }
 
 export function createEvents(offerings: CourseOffering[]) {
-    return offerings.filter(({parsed_meetings}) => parsed_meetings[0].startTime).map(offering => {
+    return offerings.filter(({ parsed_meetings }) => parsed_meetings[0].startTime).map(offering => {
         // Add an event to the calendar for each meeting day.
         const events: CalendarEvent[] = [];
         for (let i = 0; i < 7; ++i) {
-            const day = offering.parsed_meetings[0].days & (1 << (6-i));
+            const day = offering.parsed_meetings[0].days & (1 << (6 - i));
             if (!day) continue;
             const startTime = moment(offering.parsed_meetings[0].startTime, "hh:mm A").weekday(i);
             const endTime = moment(offering.parsed_meetings[0].endTime, "hh:mm A").weekday(i);
@@ -53,7 +53,7 @@ export function createEvents(offerings: CourseOffering[]) {
 }
 
 export function createFinalEvents(offerings: CourseOffering[]) {
-    return offerings.filter(({final}) => final && final.time).map(offering => {
+    return offerings.filter(({ final }) => final && final.time).map(offering => {
         const final = offering.final!;
         const [startDate, endDate] = [getDay(final.day), getDay(final.day)];
         const [startTime, endTime] = final.time!.map(s => new Date(s));
@@ -75,7 +75,7 @@ export function createFinalEvents(offerings: CourseOffering[]) {
 }
 
 export function getOfferingColor(offering: CourseOffering) {
-    const {course} = offering;
+    const { course } = offering;
 
     // Calculate color and luminance for event.
     const hue = Math.abs(hashString(`${course.id}${offering.section.type}`)) % 360;
@@ -113,8 +113,8 @@ function getDay(days: number) {
 }
 
 function getTextColor(hex: string) {
-    const {r, g, b} = hexToRgb(hex);
-    const luminance = (0.299 * r + 0.587 * g + 0.114 * b)/255;
+    const { r, g, b } = hexToRgb(hex);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     return luminance > 0.5 ? "#000000" : "#ffffff";
 }
 
@@ -140,4 +140,4 @@ function hexToRgb(hex: string) {
         g: 0,
         b: 0
     };
-  }
+}

@@ -1,6 +1,6 @@
-import { Course } from "../types/Course";
-import { CourseOffering } from "../types/CourseOffering";
-import { Schedule } from "../types/Schedule";
+import { Course } from "types/Course";
+import { CourseOffering } from "types/CourseOffering";
+import { Schedule } from "types/Schedule";
 import { courseContainsOffering } from "./Course";
 import { offeringEquals } from "./CourseOffering";
 
