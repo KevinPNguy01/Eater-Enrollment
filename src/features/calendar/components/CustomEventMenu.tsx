@@ -11,8 +11,8 @@ import { buildings } from "constants/Buildings";
 import moment from "moment";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { selectCurrentScheduleIndex } from "stores/selectors/ScheduleSetSelectors";
-import { addCustomEvent, updateCustomEvent } from "stores/slices/ScheduleSetSlice";
+import { selectCurrentScheduleIndex } from "stores/selectors/ScheduleSet";
+import { addCustomEvent, updateCustomEvent } from "stores/slices/ScheduleSet";
 import { CustomEvent } from "types/CustomEvent";
 import { getColorCustomEvent } from "utils/FullCalendar";
 

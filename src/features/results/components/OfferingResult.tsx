@@ -1,8 +1,8 @@
 import { ColoredText } from "components/ColoredText";
 import { statusColors, typeColors } from "constants/TextColors";
 import { useDispatch, useSelector } from "react-redux";
-import { selectCurrentSchedule, selectCurrentScheduleIndex } from "stores/selectors/ScheduleSetSelectors";
-import { addOffering, removeOffering } from "stores/slices/ScheduleSetSlice";
+import { selectCurrentSchedule, selectCurrentScheduleIndex } from "stores/selectors/ScheduleSet";
+import { addOffering, removeOffering } from "stores/slices/ScheduleSet";
 import { CourseOffering } from "types/CourseOffering";
 import { scheduleContainsOffering } from "../../../helpers/Schedule";
 import { BuildingLink } from "./BuildingLink";

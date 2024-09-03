@@ -6,8 +6,8 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import Button from "@mui/material/Button";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { selectCurrentSchedule, selectCurrentScheduleIndex, selectScheduleSet } from "stores/selectors/ScheduleSetSelectors";
-import { addSchedule, reorderScheduleSet, setCurrentScheduleIndex } from "stores/slices/ScheduleSetSlice";
+import { selectCurrentSchedule, selectCurrentScheduleIndex, selectScheduleSet } from "stores/selectors/ScheduleSet";
+import { addSchedule, reorderScheduleSet, setCurrentScheduleIndex } from "stores/slices/ScheduleSet";
 import useWindowDimensions from "utils/WindowDimensions";
 import { ScheduleOption } from "./ScheduleOption";
 
