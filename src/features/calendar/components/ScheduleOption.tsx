@@ -7,8 +7,8 @@ import IconButton from "@mui/material/IconButton";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { selectCurrentScheduleIndex, selectScheduleSet } from "stores/selectors/ScheduleSetSelectors";
-import { duplicateSchedule, removeSchedule, renameSchedule, setCurrentScheduleIndex } from "stores/slices/ScheduleSetSlice";
+import { selectCurrentScheduleIndex, selectScheduleSet } from "stores/selectors/ScheduleSet";
+import { duplicateSchedule, removeSchedule, renameSchedule, setCurrentScheduleIndex } from "stores/slices/ScheduleSet";
 
 export function ScheduleOption(props: { name: string, index: number, setMenu: (menu: React.JSX.Element | null) => void } & React.HTMLAttributes<HTMLDivElement>) {
     const scheduleSet = useSelector(selectScheduleSet);
