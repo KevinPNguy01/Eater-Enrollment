@@ -27,6 +27,9 @@
     /* Absolute imports */
     "baseUrl": "src",
     "paths": {
+      "api/*": [
+        "api/*"
+      ],
       "app/*": [
         "app/*"
       ],

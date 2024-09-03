@@ -2,7 +2,7 @@ import { navLinks } from "constants/Links";
 import { createContext, useState } from "react";
 import { Course } from "types/Course";
 import { ScheduleQuery } from "types/ScheduleQuery";
-import { requestSchedule } from "utils/PeterPortal";
+import { requestSchedule } from "api/PeterPortalGraphQL";
 import { AddedTab } from "./AddedTab";
 import { MapTab } from "./MapTab";
 import { SearchForms } from "./SearchForms";

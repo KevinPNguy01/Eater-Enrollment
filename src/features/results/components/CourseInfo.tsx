@@ -23,7 +23,7 @@ export function CourseInfo(props: { course: Course }) {
             </AccordionSummary>
             <AccordionDetails className="text-left text-base">
                 <div className="flex flex-col gap-4">
-                    <CourseDescription course={course} />
+                    {course.description ? <CourseDescription course={course} /> : null}
                     {course.ge_list.length ? <GeInfo course={course} /> : null}
                     {course.prerequisite_text ? <PrerequisiteInfo course={course} /> : null}
                     {course.prerequisite_for.length ? <PrerequisiteFor course={course} /> : null}
