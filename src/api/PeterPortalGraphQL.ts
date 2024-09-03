@@ -1,14 +1,16 @@
+import { populateGrades } from "helpers/Course";
 import { groupOfferings, offeringEquals } from "helpers/CourseOffering";
-import { aggregatedGrades, newGradeDistributionCollection, updateGradesCollection } from "helpers/GradeDistributionCollection";
+import { aggregatedGrades } from "helpers/GradeDistributionCollection";
 import { Course } from "types/Course";
 import { CourseOffering } from "types/CourseOffering";
 import { GradeDistribution } from "types/GradeDistribution";
 import { GradeDistributionCollection } from "types/GradeDistributionCollection";
 import { ScheduleQuery } from "types/ScheduleQuery";
-import { populateReviews } from "./RateMyProfessors";
+import { populateReviews } from "utils/RateMyProfessors";
+import { requestSchedule as requestRestSchedule } from "./PeterPortalREST";
 
 /**
- * Makes a request to the PeterPortal API.
+ * Makes a request to the PeterPortal GraphQL API.
  * @param query 
  * @returns The data fetched from the API.
  */
@@ -73,6 +75,7 @@ export async function requestSchedule(queries: ScheduleQuery[]): Promise<Course[
 
     // The schedule query returns a list of course offerings.
     const offerings = [] as CourseOffering[];
+    const missingOfferings = [] as CourseOffering[];
     const response = await makeRequest(query);
 
     // Combine offerings from all of the queries.
@@ -80,17 +83,23 @@ export async function requestSchedule(queries: ScheduleQuery[]): Promise<Course[
         (response.data[`schedule${i}`] as CourseOffering[]).forEach(offering => {
             // Add offering if it is not a duplicate.
             if (!offerings.find(otherOffering => offeringEquals(offering, otherOffering))) {
-                offerings.push(offering);
+                (offering.course ? offerings : missingOfferings).push(offering);
             }
         });
     }
 
-    const courses = groupOfferings(offerings);
+    // Get missing offerings from REST API and combine with other offerings.
+    if (missingOfferings) {
+        (await requestRestSchedule(missingOfferings)).forEach(
+            offering => offerings.push(offering)
+        );
+    }
+
+    const courses = await groupOfferings(offerings);
     (async () => {
         populateGrades(courses);
         populateReviews(courses);
     })();
-
     return courses;
 }
 
@@ -98,7 +107,7 @@ export async function requestSchedule(queries: ScheduleQuery[]): Promise<Course[
  * Requests grades from the PeterPortal GraphQL API for the given courses.
  * @returns A map of "<department> <number> <instructor>" to GradeDistributions.
  */
-async function requestGrades(courses: Course[]) {
+export async function requestGrades(courses: Course[]) {
     // The fields to select on GradeDistributionCollection.
     const gradesFragment = `
     fragment gradeFields on GradeDistributionCollection {
@@ -139,34 +148,4 @@ async function requestGrades(courses: Course[]) {
     });
 
     return aggregatedGrades(grades);
-}
-
-/**
- * Populate the grades field for every offering of the given courses.
- * @param courses 
- */
-export async function populateGrades(courses: Course[]) {
-    const offerings = courses.map(course => course.offerings).flat();
-    const grades = await requestGrades(courses);
-
-    // Calculate and set grades for each course offering.
-    offerings.forEach((offering) => {
-        const course = offering.course;
-        if (!course) return;
-
-        // Combine grades for when there are multiple instructors teaching a single course offering.
-        const combinedGrades = newGradeDistributionCollection();
-        for (const instructor of offering.instructors) {
-            const instructorGrades = grades.get(`${course.department} ${course.number} ${instructor.shortened_name}`.toUpperCase());
-            if (instructorGrades && instructor.shortened_name !== "STAFF") {
-                updateGradesCollection(combinedGrades, instructorGrades);
-                combinedGrades.instructors.push(instructor.shortened_name)
-            }
-        }
-
-        // Use average grades from all instructors if the instructor is unspecified or has no grades records.
-        const staffGrades = grades.get(`${course.department} ${course.number} STAFF`.toUpperCase())
-        if (staffGrades && !combinedGrades.instructors.length) updateGradesCollection(combinedGrades, staffGrades);
-        offering.grades = combinedGrades;
-    });
 }

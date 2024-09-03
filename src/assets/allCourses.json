@@ -96335,6 +96335,79 @@
         "ge_text": "(II and (Va or Vb) )."
       },
       {
+        "id": "I&CSCIH32",
+        "department": "I&C SCI",
+        "number": "H32",
+        "school": "Donald Bren School of Information and Computer Sciences",
+        "title": "Python Programming and Libraries (Accelerated)",
+        "restriction": "School of Info & Computer Sci students have first consideration for enrollment. Computer Science Engineering Majors have first consideration for enrollment.",
+        "course_level": "Lower Division (1-99)",
+        "description": "Introduces Python syntax and semantics for fundamental programming concepts.  Constructing programs for varied problems and environments. Using library modules for applications such as graphics, sound, GUI, database, Web, and network programming. Accelerated course for students with previous programming background.",
+        "department_name": "Information and Computer Science",
+        "prerequisite_tree": "{\"AND\":[\"AP COMP SCI A\"]}",
+        "prerequisite_text": "AP COMP SCI A AND ( SCHOOL OF I&C SCI ONLY OR COMPUTER SCI & ENGR MAJORS ONLY )",
+        "prerequisite_list": [
+          null
+        ],
+        "prerequisite_for": [
+          {
+            "department": "COMPSCI",
+            "number": "125"
+          },
+          {
+            "department": "IN4MATX",
+            "number": "43"
+          },
+          {
+            "department": "IN4MATX",
+            "number": "131"
+          },
+          {
+            "department": "IN4MATX",
+            "number": "143"
+          },
+          {
+            "department": "IN4MATX",
+            "number": "148"
+          },
+          {
+            "department": "IN4MATX",
+            "number": "153"
+          },
+          {
+            "department": "IN4MATX",
+            "number": "161"
+          },
+          {
+            "department": "I&C SCI",
+            "number": "6N"
+          },
+          {
+            "department": "I&C SCI",
+            "number": "33"
+          },
+          {
+            "department": "I&C SCI",
+            "number": "62"
+          },
+          {
+            "department": "I&C SCI",
+            "number": "163"
+          }
+        ],
+        "repeatability": "",
+        "concurrent": "",
+        "same_as": "",
+        "overlap": "",
+        "corequisite": "",
+        "ge_list": [
+          "GE II: Science and Technology",
+          "GE Va: Quantitative Literacy",
+          "GE Vb: Formal Reasoning"
+        ],
+        "ge_text": "(II and (Va or Vb) )."
+      },
+      {
         "id": "I&CSCI33",
         "department": "I&C SCI",
         "number": "33",

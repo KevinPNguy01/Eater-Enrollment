@@ -22,7 +22,7 @@ export async function populateReviews(courses: Course[]) {
         (async () => {
             const review = await searchProfessor(instructor);
             if (review) {
-                offerings.forEach(offering => offering.instructors.filter(({shortened_name}) => shortened_name === instructor).forEach(instructor => instructor.review = review));
+                offerings.forEach(offering => offering.instructors.filter(({ shortened_name }) => shortened_name === instructor).forEach(instructor => instructor.review = review));
             }
         })();
         await new Promise(r => setTimeout(r, 500));
