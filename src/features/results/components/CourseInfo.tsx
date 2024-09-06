@@ -1,9 +1,10 @@
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
-import { useContext } from "react";
 import { Course } from "types/Course";
-import { SearchContext } from "../../../app/pages/CoursesPane";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "app/store";
+import { fetchSchedule, setSearchInput, setSearchType } from "stores/slices/Search";
 
 const downArrowIcon = <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
     <path fill="#bbb" stroke="#bbb" strokeWidth="0.5" transform="translate(0,-1.5)" d="M8 9.8l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 10.293L8 9.8z" />
@@ -57,8 +58,9 @@ function GeInfo(props: { course: Course }) {
 }
 
 function PrerequisiteInfo(props: { course: Course }) {
-    const search = useContext(SearchContext);
     const { course } = props;
+
+    const dispatch = useDispatch<AppDispatch>();
 
     // Combine course department and numbers into ids.
     let text = course.prerequisite_text.slice();
@@ -90,9 +92,20 @@ function PrerequisiteInfo(props: { course: Course }) {
                 {strings.map((string, index) => {
                     if (courseIds.has(string)) {
                         const { department, number } = courseIds.get(string)!;
-                        return <a key={index} className="text-sky-500 hover:cursor-pointer" onClick={() => search([{ department, number }])}>
-                            {`${department} ${number} `}
-                        </a>
+                        const { year, quarter } = course.offerings[0];
+                        return (
+                            <a
+                                key={index}
+                                className="text-sky-500 hover:cursor-pointer"
+                                onClick={() => {
+                                    dispatch(fetchSchedule([{ quarter, year, department, number }]));
+                                    dispatch(setSearchInput(`${department} ${number}`));
+                                    dispatch(setSearchType("single"));
+                                }}
+                            >
+                                {`${department} ${number} `}
+                            </a>
+                        );
                     } else {
                         return <span key={index}>{string + " "}</span>
                     }
@@ -103,7 +116,6 @@ function PrerequisiteInfo(props: { course: Course }) {
 }
 
 function PrerequisiteFor(props: { course: Course }) {
-    const search = useContext(SearchContext);
     const { course } = props;
 
     const prerequisites = new Map<string, string[]>();
@@ -114,6 +126,9 @@ function PrerequisiteFor(props: { course: Course }) {
         prerequisites.get(department)!.push(number);
     });
 
+    const dispatch = useDispatch<AppDispatch>();
+    const { year, quarter } = course.offerings[0];
+
     return (
         <div>
             <span className="font-semibold">Prerequisite For:</span>
@@ -123,7 +138,15 @@ function PrerequisiteFor(props: { course: Course }) {
                     <fieldset key={department} className="border border-quaternary rounded px-4 py-2 my-2 w-full flex flex-wrap flex-1 gap-x-4">
                         <legend className="text-base">{department}</legend>
                         {numbers.map(number => (
-                            <a key={number} className="text-nowrap text-sky-500 hover:cursor-pointer" onClick={() => search([{ department, number }])}>
+                            <a
+                                key={number}
+                                className="text-nowrap text-sky-500 hover:cursor-pointer"
+                                onClick={() => {
+                                    dispatch(fetchSchedule([{ quarter, year, department, number }]))
+                                    dispatch(setSearchInput(`${department} ${number}`));
+                                    dispatch(setSearchType("single"));
+                                }}
+                            >
                                 {`${department} ${number}`}
                                 <br />
                             </a>

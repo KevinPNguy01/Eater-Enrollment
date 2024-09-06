@@ -11,6 +11,27 @@ export function parseMeeting(meeting: Meeting): ParsedMeeting {
     return { buildingId, room, days, startTime, endTime }
 }
 
+export function parseFinal(final: string): Final | null {
+    const days: Record<string, number> = {
+        Sat: -1,
+        Sun: 0,
+        Mon: 1,
+        Tue: 2,
+        Wed: 3,
+        Thu: 4,
+        Fri: 5,
+    };
+    const [dayString, , , timeString] = final.split(" ");
+    const day = days[dayString];
+    const time = parseTime(timeString);
+    if (!time) return null;
+    return {
+        day,
+        startTime: time[0],
+        endTime: time[1]
+    };
+}
+
 /**
  * @param time The times to parse as a string.
  * @returns A tuple of numbers representing the start/end times represented by the given time string.
@@ -79,23 +100,4 @@ function parseDays(days: string): number {
     if (days.includes("Th")) dayBits |= 0b0000100;
     if (days.includes("F")) dayBits |= 0b0000010;
     return dayBits;
-}
-
-export function parseFinal(final: string): Final | null {
-    const days: Record<string, number> = {
-        Sat: -2,
-        Sun: -1,
-        Mon: 0,
-        Tue: 1,
-        Wed: 2,
-        Thu: 3,
-        Fri: 4,
-    };
-    const [dayString, monthString, dateNumber, timeString] = final.split(" ");
-    const day = days[dayString];
-    const time = parseTime(timeString);
-    if (!time) return null;
-    const start = moment(`${monthString} ${dateNumber} ${new Date().getFullYear()} ${time[0]}`, "MMM D YYYY hh:mm A");
-    const end = moment(`${monthString} ${dateNumber} ${new Date().getFullYear()} ${time[1]}`, "MMM D YYYY hh:mm A");
-    return { time: [start.toISOString(), end.toISOString()], day };
 }

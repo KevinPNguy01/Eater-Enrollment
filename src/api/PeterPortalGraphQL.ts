@@ -1,12 +1,10 @@
-import { populateGrades } from "helpers/Course";
-import { groupOfferings, offeringEquals } from "helpers/CourseOffering";
+import { offeringEquals } from "helpers/CourseOffering";
 import { aggregatedGrades } from "helpers/GradeDistributionCollection";
 import { Course } from "types/Course";
 import { CourseOffering } from "types/CourseOffering";
 import { GradeDistribution } from "types/GradeDistribution";
 import { GradeDistributionCollection } from "types/GradeDistributionCollection";
 import { ScheduleQuery } from "types/ScheduleQuery";
-import { populateReviews } from "utils/RateMyProfessors";
 import { requestSchedule as requestRestSchedule } from "./PeterPortalREST";
 
 /**
@@ -29,7 +27,7 @@ async function makeRequest(query: string) {
  * Requests a schedule from the Peter Portal GraphQL API with the given arguments.
  * @returns A list of courses representing the schedule.
  */
-export async function requestSchedule(queries: ScheduleQuery[]): Promise<Course[]> {
+export async function requestSchedule(queries: ScheduleQuery[]): Promise<CourseOffering[]> {
     let numQueries = 0;
 
     // The fields to select on CourseOffering.
@@ -91,16 +89,13 @@ export async function requestSchedule(queries: ScheduleQuery[]): Promise<Course[
     // Get missing offerings from REST API and combine with other offerings.
     if (missingOfferings) {
         (await requestRestSchedule(missingOfferings)).forEach(
-            offering => offerings.push(offering)
+            offering => {
+                offerings.push(offering);
+            }
         );
     }
 
-    const courses = await groupOfferings(offerings);
-    (async () => {
-        populateGrades(courses);
-        populateReviews(courses);
-    })();
-    return courses;
+    return offerings;
 }
 
 /**

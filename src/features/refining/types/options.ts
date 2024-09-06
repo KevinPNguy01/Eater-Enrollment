@@ -23,3 +23,9 @@ export type FilterOptions = {
     levelTypes: Set<string>
     timeRange: [number, number]
 }
+
+export const defaultSortOptions = {
+    sortBy: SortBy.Name,
+    direction: SortDirection.Ascending,
+    sortWithin: false
+}

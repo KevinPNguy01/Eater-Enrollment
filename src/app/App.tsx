@@ -1,97 +1,22 @@
 import { ThemeProvider } from "@emotion/react";
-import FullCalendar from "@fullcalendar/react";
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import SaveIcon from '@mui/icons-material/Save';
 import Backdrop from "@mui/material/Backdrop";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
-import { ThemeOptions, createTheme } from '@mui/material/styles';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
-import { requestSchedule } from "api/PeterPortalGraphQL";
-import { SnackbarProvider, enqueueSnackbar } from "notistack";
-import { MutableRefObject, createContext, useEffect, useRef, useState } from "react";
+import { SnackbarProvider } from "notistack";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { ActionCreators } from "redux-undo";
 import { selectCurrentScheduleIndex, selectScheduleSet } from "stores/selectors/ScheduleSet";
-import { addCustomEvent, addOffering, addSchedule, clearScheduleSet, setCurrentScheduleIndex } from "stores/slices/ScheduleSet";
+import { setState } from "stores/slices/ScheduleSet";
+import { loadUser as loadUser2, saveUser } from "utils/SaveLoad";
 import useWindowDimensions from "utils/WindowDimensions";
 import { anteater } from "../assets";
-import { customEventFromString, customEventToString } from "../helpers/CustomEvent";
 import { CalendarPane } from "./pages/CalendarPane";
 import { CoursesPane } from "./pages/CoursesPane";
-
-const theme = createTheme();
-const themeOptions: ThemeOptions = createTheme(theme, {
-	palette: {
-		mode: 'light',
-		primary: {
-			main: '#008000',
-		},
-		secondary: {
-			main: '#0080ff',
-		},
-		background: {
-			default: '#303030',
-			paper: '#404040',
-		},
-		text: {
-			primary: 'rgba(255,255,255,0.95)',
-			secondary: 'rgba(255,255,255,0.85)',
-			disabled: 'rgba(255,255,255,0.75)',
-		},
-		info: {
-			main: '#808080',
-		},
-		white: theme.palette.augmentColor({ color: { main: "#fff" } }),
-		black: theme.palette.augmentColor({ color: { main: "#000" } }),
-		action: {
-			disabledBackground: '#808080',
-			disabled: '#808080'
-		}
-	},
-
-	typography: {
-		button: {
-			textTransform: 'none'
-		}
-	}
-});
-
-declare module "@mui/material/styles" {
-	interface Palette {
-		white: string;
-		black: string;
-	}
-	interface PaletteOptions {
-		white: string;
-		black: string;
-	}
-}
-
-declare module "@mui/material/Button" {
-	interface ButtonPropsColorOverrides {
-		white: true;
-		black: true;
-	}
-}
-
-declare module "@mui/material/IconButton" {
-	interface IconButtonPropsColorOverrides {
-		white: true;
-		black: true;
-	}
-}
-
-// Define the context type of schedule related functions and data.
-type ScheduleContextType = {
-	calendarReference: MutableRefObject<FullCalendar>
-}
-
-// Context provider for accessing schedule functions and data.
-export const ScheduleContext = createContext(
-	{} as ScheduleContextType
-);
+import { themeOptions } from "./theme";
 
 // Navigation bar with calendar on the left, and everything else on the right.
 export function App() {
@@ -99,124 +24,34 @@ export function App() {
 	const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
 	const dispatch = useDispatch();
 
-	const calendarRef = useRef(null as unknown as FullCalendar);
-	const [updateCounter, setUpdateCounter] = useState(0);
-	const [showingFinals, setShowingFinals] = useState(false);
 	const { height, width } = useWindowDimensions();
 	const aspect = width / height;
 
-
-	const saveUser = (username: string) => {
-		const scheduleSetString = scheduleSet.map(schedule => {
-			const offeringsString = schedule.courses.map(
-				({ offerings }) => offerings.map(
-					({ quarter, year, section, color }) => `${quarter} ${year} ${section.code} ${color}`
-				)
-			).join(",");
-			const customEventsString = JSON.stringify(schedule.customEvents.map(
-				event => customEventToString(event)
-			));
-			return JSON.stringify({
-				name: schedule.name,
-				offerings: offeringsString,
-				custom: customEventsString
-			});
-		}).join("\n");
-		fetch('/api/saveUser', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({ username, scheduleSetString, currentScheduleIndex }),
-		});
-		enqueueSnackbar(`Scheduled saved under "${username}"`, { variant: "success" });
-	}
-
 	const loadUser = async (userId: string) => {
-		setUpdateCounter(a => a + 1);
-		const response = await fetch(`/api/loadUser/${userId}`);
-		const data = await response.json();
-		if (!data) {
-			enqueueSnackbar(`No schedule found for "${userId}"`, { variant: "error" });
-			return;
+		const state = await loadUser2(userId);
+		if (state) {
+			dispatch(setState(state));
+			dispatch({ type: "schedules/clearHistory" })
 		}
-		enqueueSnackbar(`Loaded schedule for "${userId}"`, { variant: "success" });
 
-		localStorage.setItem("userID", userId);
-
-		const { scheduleSetString, selectedIndex }: { scheduleSetString: string, selectedIndex: number } = data;
-		dispatch(clearScheduleSet());
-		dispatch(setCurrentScheduleIndex(selectedIndex));
-		scheduleSetString.split("\n").forEach(
-			async (scheduleString, index) => {
-				const { name, offerings: offeringsString, custom: customEventObjects }: { name: string, offerings: string, custom: string } = JSON.parse(scheduleString);
-				dispatch(addSchedule({ id: -1, name, courses: [], customEvents: [] }));
-
-				const quarterYearGroups = new Map<string, string[]>();
-				offeringsString.split(",").forEach(offeringString => {
-					if (!offeringString) {
-						return;
-					}
-					const [quarter, year, code] = offeringString.split(" ");
-					const quarterYear = quarter + " " + year;
-					if (!quarterYearGroups.has(quarterYear)) quarterYearGroups.set(quarterYear, []);
-					quarterYearGroups.get(quarterYear)!.push(code)
-				})
-				for (const [quarterYear, codes] of quarterYearGroups) {
-					const [quarter, year] = quarterYear.split(" ");
-					const courses = await requestSchedule([{
-						quarter: quarter,
-						year: year,
-						section_codes: codes.join(",")
-					}]);
-					const offerings = courses.map(course => course.offerings).flat();
-					const colorMap = new Map(offeringsString.split(",").map(s => {
-						const [quarter, year, code, color] = s.split(" ");
-						return [`${quarter} ${year} ${code}`, color];
-					}));
-					offerings.forEach(offering => {
-						const { quarter, year, section: { code } } = offering;
-						offering.color = colorMap.get(`${quarter} ${year} ${code}`)!;
-						dispatch(addOffering({ offering, index }));
-					});
-				}
-
-				JSON.parse(customEventObjects).forEach((customEventString: string) => {
-					const customEvent = customEventFromString(customEventString);
-					dispatch(addCustomEvent({ customEvent, index }));
-					dispatch(ActionCreators.clearHistory());
-				});
-			}
-		);
 	};
 
 	useEffect(() => {
-		if (!updateCounter) {
-			const userID = localStorage.getItem("userID");
-			if (userID) loadUser(userID);
-		}
+		const userID = localStorage.getItem("userID");
+		if (userID) loadUser(userID);
 	}, []);
-
-
-	const calendarPane = <CalendarPane showingFinals={showingFinals} setShowingFinals={setShowingFinals} />;
 
 	return (
 		<LocalizationProvider dateAdapter={AdapterMoment}>
 			<ThemeProvider theme={themeOptions}>
-				<ScheduleContext.Provider value={
-					{
-						calendarReference: calendarRef
-					}
-				}>
-					<div className="relative h-[100dvh] flex text-white flex-col overflow-y-hidden overflow-x-hidden">
-						<NavBar save={saveUser} load={loadUser} />
-						<div id="main" className={`h-1 grow bg-secondary grid ${aspect >= 1 ? "grid-cols-2" : "grid-cols-1"}`}>
-							{aspect >= 1 ? calendarPane : null}
-							<CoursesPane calendarPane={aspect < 1 ? calendarPane : undefined} />
-						</div>
-						<SnackbarProvider />
+				<div className="relative h-[100dvh] flex text-white flex-col overflow-y-hidden overflow-x-hidden">
+					<NavBar save={(userId) => saveUser(userId, scheduleSet, currentScheduleIndex)} load={loadUser} />
+					<div id="main" className={`h-1 grow bg-secondary grid ${aspect >= 1 ? "grid-cols-2" : "grid-cols-1"}`}>
+						{aspect >= 1 ? <CalendarPane /> : null}
+						<CoursesPane includeCalendar={aspect < 1} />
 					</div>
-				</ScheduleContext.Provider>
+					<SnackbarProvider />
+				</div>
 			</ThemeProvider>
 		</LocalizationProvider>
 	)

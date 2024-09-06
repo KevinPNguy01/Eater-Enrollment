@@ -15,11 +15,11 @@ body {
 }
 
 :root {
-  --color-primary: rgb(0,128,0);
-  --color-secondary: rgb(48,48,48);
-  --color-tertiary: rgb(64,64,64);
-  --color-quaternary: rgb(80,80,80);
-  --color-dim-white: rgb(208,208,208);
+  --color-primary: rgb(0, 128, 0);
+  --color-secondary: rgb(48, 48, 48);
+  --color-tertiary: rgb(64, 64, 64);
+  --color-quaternary: rgb(80, 80, 80);
+  --color-dim-white: rgb(208, 208, 208);
 }
 
 * {
@@ -64,7 +64,8 @@ body {
   background: #666;
 }
 
-input, select {
+input,
+select {
   color: white;
   background: none;
   border-bottom: 1px solid white;
@@ -83,27 +84,32 @@ input:focus {
   background-color: inherit !important;
 }
 
-.fc-col-header-cell-cushion, .fc-timegrid-slot-label-cushion {
+.fc-col-header-cell-cushion,
+.fc-timegrid-slot-label-cushion {
   color: white;
 }
 
-.fc-timegrid-slot{
+.fc-timegrid-slot {
   border: 1px solid rgba(255, 255, 255, .05) !important;
 }
-.fc-timegrid-slot-minor{
+
+.fc-timegrid-slot-minor {
   border: 1px solid rgba(255, 255, 255, .2) !important;
 }
 
 @layer utilities {
   .bg-primary {
-    background: var(--color-primary); 
+    background: var(--color-primary);
   }
+
   .bg-secondary {
     background: var(--color-secondary);
   }
+
   .bg-tertiary {
     background: var(--color-tertiary);
   }
+
   .bg-quaternary {
     background: var(--color-quaternary);
   }
@@ -111,12 +117,15 @@ input:focus {
   .border-primary {
     border-color: var(--color-primary);
   }
+
   .border-secondary {
     border-color: var(--color-secondary);
   }
+
   .border-tertiary {
     border-color: var(--color-tertiary);
   }
+
   .border-quaternary {
     border-color: var(--color-quaternary);
   }
@@ -124,12 +133,15 @@ input:focus {
   .text-primary {
     color: var(--color-primary);
   }
+
   .text-secondary {
     color: var(--color-secondary);
   }
+
   .text-tertiary {
     color: var(--color-tertiary);
   }
+
   .text-quaternary {
     color: var(--color-quaternary);
   }
@@ -149,7 +161,7 @@ h1 {
 .course-result:nth-last-child(2) td:first-child {
   border-bottom-left-radius: 4px;
 }
-  
+
 .course-result:nth-last-child(2) td:last-child {
   border-bottom-right-radius: 4px;
 }
@@ -157,17 +169,17 @@ h1 {
 .course-result th:first-child {
   border-top-left-radius: 4px;
 }
-  
+
 .course-result th:last-child {
   border-top-right-radius: 4px;
 }
 
-.course-result th:first-child, 
+.course-result th:first-child,
 .course-result td:first-child {
   border-left: 1px solid var(--color-quaternary);
 }
 
-.course-result th:last-child, 
+.course-result th:last-child,
 .course-result td:last-child {
   border-right: 1px solid var(--color-quaternary);
 }
@@ -189,10 +201,13 @@ fieldset {
 }
 
 .hide-scroll {
-  -ms-overflow-style: none;  /* Internet Explorer 10+ */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  /* Internet Explorer 10+ */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
-.hide-scroll::-webkit-scrollbar { 
-  display: none;  /* Safari and Chrome */
+.hide-scroll::-webkit-scrollbar {
+  display: none;
+  /* Safari and Chrome */
 }

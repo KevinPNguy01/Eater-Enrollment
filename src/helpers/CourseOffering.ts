@@ -1,8 +1,8 @@
 import { Course } from "types/Course";
 import { CourseOffering } from "types/CourseOffering";
-import { getOfferingColor } from "utils/FullCalendar";
 import { parseMeeting, parseFinal } from "utils/ParseMeeting";
-import coursesJson from "../../src/assets/allCourses.json";
+import { courseMap } from "./Course";
+import { stringColor } from "utils/FullCalendar";
 
 /**
  * Two offerings are equal if the have the same quarter, year, and section code.
@@ -16,14 +16,12 @@ export function offeringEquals(offering1: CourseOffering, offering2: CourseOffer
     return (q1 === q2) && (y1 === y2) && (c1 === c2);
 }
 
-// Load all courses from JSON file.
-const courseMap = new Map<string, Course>((coursesJson as { data: { allCourses: Course[] } }).data.allCourses.map(course => [course.id, course]));
 /**
  * Groups offerings into matching courses.
  * @param offerings 
  * @returns An array of Courses containing the appropriate offerings.
  */
-export async function groupOfferings(offerings: CourseOffering[]) {
+export function groupOfferings(offerings: CourseOffering[]) {
     const courseOfferings = new Map<string, CourseOffering[]>();
     offerings.forEach((offering) => {
         const id = offering.course.id;
@@ -44,14 +42,13 @@ export async function groupOfferings(offerings: CourseOffering[]) {
         offerings.forEach(offering => {
             if (!Object.keys(course).length) {
                 course = { ...offering.course };
-                console.log(course)
                 course.offerings = [...offerings];
             }
             offering.course = { ...course };                                                        // Assign course as copy to prevent circular reference.
             offering.course.offerings = [];                                                         // Prevent circular reference.
             offering.parsed_meetings = offering.meetings.map(meeting => parseMeeting(meeting));     // Parse each meeting.
             offering.final = parseFinal(offering.final_exam);                                       // Parse final.
-            offering.color = getOfferingColor(offering);                                            // Calculate default color.
+            offering.color = offering.color || stringColor(course.id + offering.section.type);        // Calculate default color.
         });
         return course;
     });

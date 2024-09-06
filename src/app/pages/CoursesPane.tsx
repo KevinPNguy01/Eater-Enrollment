@@ -1,135 +1,47 @@
 import { navLinks } from "constants/Links";
-import { createContext, useState } from "react";
-import { Course } from "types/Course";
-import { ScheduleQuery } from "types/ScheduleQuery";
-import { requestSchedule } from "api/PeterPortalGraphQL";
 import { AddedTab } from "./AddedTab";
 import { MapTab } from "./MapTab";
 import { SearchForms } from "./SearchForms";
 import { SearchResults } from "./SearchResults";
+import { useSelector } from "react-redux";
+import { selectDisplayResults } from "stores/selectors/Search";
+import { useState } from "react";
+import { CalendarPane } from "./CalendarPane";
 
-export type SearchFunctions = {
-    submitSearch: (queries?: ScheduleQuery[]) => void
-    resetSearch: () => void
-    backSearch: () => void
-    forwardSearch: () => void
-    refreshSearch: () => void
-}
-
-const SearchContext = createContext((queries: Partial<ScheduleQuery>[]) => { queries });
-
-function CoursesPane(props: { calendarPane?: React.JSX.Element }) {
+export function CoursesPane(props: { includeCalendar: boolean }) {
+    const { includeCalendar } = props;
     const [activeTab, setActiveTab] = useState("search");
-    const [showResults, setShowResults] = useState(false);
-    const [searchResults, setSearchResults] = useState(new Array<Course>());
+    const displaySearchResults = useSelector(selectDisplayResults);
 
-    // React State hooks used for storing search queries.
-    const queriesState = useState([] as ScheduleQuery[])
-    const [lastQueries, setLastQueries] = useState([] as ScheduleQuery[]);
-    const [queries, setQueries] = queriesState;
-    const defaultScheduleQueryState = useState({ quarter: "Fall", year: "2024" } as ScheduleQuery);
-    const [defaultScheduleQuery] = defaultScheduleQueryState;
-    const [backQueries, setBackQueries] = useState([] as ScheduleQuery[][]);
-    const [forwardQueries, setForwardQueries] = useState([] as ScheduleQuery[][]);
-
-    // Functions related to searching.
-    const submitSearch = async (searchQueries = queries) => {
-        // If there are queries, search for them.
-        if (!searchQueries.length) return;
-        // Store last search if exists.
-        setQueries(searchQueries);      // Store current search.
-        setLastQueries(searchQueries);  // Store last search.
-        setActiveTab("search");         // Switch to search tab.
-        setSearchResults([]);           // Clear last results.
-        setShowResults(true);           // Show results component.
-        const courses = await requestSchedule(searchQueries);
-        setSearchResults(courses);      // Update results.
-    }
-    const resetSearch = () => {
-        setShowResults(false);  // Hide results component.
-        setLastQueries([]);     // Clear last search.
-        setQueries([]);         // Clear current search.
-        setBackQueries([]);     // Clear back searches.
-        setForwardQueries([]);  // Clear forward searches
-    }
-    const backSearch = () => {
-        if (!backQueries.length) return;
-        // Store last search if exists.
-        if (lastQueries.length)
-            setForwardQueries([...forwardQueries, lastQueries]);
-        // Search for most recent back ScheduleQuery.
-        const newQueries = backQueries.pop()!;
-        setQueries(newQueries);
-        submitSearch(newQueries);
-    }
-    const forwardSearch = () => {
-        if (!forwardQueries.length) return;
-        // Store last search if exists.
-        if (lastQueries.length)
-            setBackQueries([...backQueries, lastQueries]);
-        // Search for most recent forward ScheduleQuery.
-        const newQueries = forwardQueries.pop()!;
-        setQueries(newQueries);
-        submitSearch(newQueries);
-    }
-    const refreshSearch = () => {
-        // Re-search the last search.
-        submitSearch(lastQueries);
-        setQueries(lastQueries);
-        setLastQueries([...lastQueries]);
-    }
-    const search = (searchQueries: Partial<ScheduleQuery>[]) => {
-        // Store last search if exists.
-        if (lastQueries.length)
-            setBackQueries([...backQueries, lastQueries]);
-        // Search for new queries.
-        const newQueries = searchQueries.map(ScheduleQuery => ({ ...defaultScheduleQuery, ...ScheduleQuery }));
-        setQueries(newQueries);
-        submitSearch(newQueries);
-    }
-
-    if (activeTab === "calendar" && !props.calendarPane) {
+    // When switching to split screen, calendar tab won't exist in CoursesPane.
+    if (activeTab === "calendar" && !includeCalendar) {
         setActiveTab("search");
     }
-
-    const [multi, setMulti] = useState(false);
 
     return (
         <div className="m-1 flex flex-col h-full">
             <nav className="bg-tertiary h-12 grid grid-flow-col mb-2">
-                {navLinks.slice(props.calendarPane ? 0 : 1).map(({ id, title }) => (
-                    <button key={id} className={`h-full ${id === activeTab ? "border-b-4 border-primary" : "text-neutral-300"}`} onClick={() => setActiveTab(id)}>
+                {/** Generate nav buttons for Search, Added, Map, and Calendar if appropriate. */}
+                {navLinks.slice(includeCalendar ? 0 : 1).map(({ id, title }) => (
+                    <button
+                        key={id}
+                        className={`h-full ${id === activeTab ? "border-b-4 border-primary" : "text-neutral-300"}`}
+                        onClick={() => setActiveTab(id)}
+                    >
                         {title}
                     </button>
 
                 ))}
             </nav>
-            <SearchContext.Provider value={search}>
-                {(function getActiveTab() {
-                    // Return page components depending on the active tab.
-                    switch (activeTab) {
-                        case "calendar": return props.calendarPane;
-                        case "search": return showResults ? (
-                            <SearchResults
-                                multiState={[multi, setMulti]}
-                                courses={searchResults}
-                                queriesState={queriesState}
-                                defaultScheduleQuery={defaultScheduleQuery}
-                                lastQueries={lastQueries}
-                                searchFunctions={{ submitSearch, resetSearch, backSearch, forwardSearch, refreshSearch }}
-                            />
-                        ) : (
-                            <SearchForms multiState={[multi, setMulti]} queriesState={queriesState} defaultScheduleQueryState={defaultScheduleQueryState} submit={submitSearch} />
-                        );
-                        case "added": return <AddedTab />;
-                        case "map": return <MapTab />;
-                        default: return null;
-                    }
-                })()}
-            </SearchContext.Provider>
+            {/** Return page components depending on the active tab. */}
+            {(function getActiveTab() {
+                switch (activeTab) {
+                    case "calendar": return <CalendarPane />;
+                    case "search": return displaySearchResults ? <SearchResults /> : <SearchForms />;
+                    case "added": return <AddedTab />;
+                    case "map": return <MapTab />;
+                }
+            })()}
         </div>
     )
 }
-
-export { CoursesPane, SearchContext };
-

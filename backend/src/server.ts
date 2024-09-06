@@ -21,7 +21,7 @@ app.use(express.json());
 
 
 app.post('/api/saveUser', (req: Request, res: Response) => {
-    const {username, scheduleSetString, currentScheduleIndex}: {username: string, scheduleSetString: string, currentScheduleIndex: number} = req.body;
+    const { username, scheduleSetString, currentScheduleIndex }: { username: string, scheduleSetString: string, currentScheduleIndex: number } = req.body;
 
     const stmt = schedulesDB.prepare("INSERT OR REPLACE INTO schedules (user_id, schedule_set_string, selected_index) VALUES (?, ?, ?)");
     stmt.run(username, scheduleSetString, currentScheduleIndex, (err: Error | null) => {
@@ -42,7 +42,7 @@ app.get('/api/loadUser/:key', (req: Request, res: Response) => {
             console.log('Error retrieving user schedules.');
             console.log(err);
         } else {
-            res.status(200).json({ 
+            res.status(200).json({
                 scheduleSetString: row.schedule_set_string,
                 selectedIndex: row.selected_index
             });

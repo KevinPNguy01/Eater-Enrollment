@@ -1,13 +1,19 @@
+import { AppDispatch } from "app/store";
 import { SearchBox } from "features/search/components/SearchBox";
 import { TermDropDown } from "features/search/components/TermDropDown";
-import { ScheduleQuery } from "types/ScheduleQuery";
+import { useDispatch, useSelector } from "react-redux";
+import { selectSearchQuarter, selectSearchYear } from "stores/selectors/Search";
+import { setQuarter, setYear } from "stores/slices/Search";
 
-export function SearchForms(props: { queriesState: [ScheduleQuery[], (queries: ScheduleQuery[]) => void], multiState: [boolean, (_: boolean) => void], defaultScheduleQueryState: [ScheduleQuery, (queries: ScheduleQuery) => void], submit: (queries?: ScheduleQuery[]) => void }) {
-    const { multiState, submit } = props;
-    const [queries, setQueries] = props.queriesState;
-    const [defaultScheduleQuery, setDefaultScheduleQuery] = props.defaultScheduleQueryState;
-    const { quarter, year } = defaultScheduleQuery;
-    const setTerm = (quarter: string, year: string) => setDefaultScheduleQuery({ quarter, year });
+export function SearchForms() {
+    const dispatch = useDispatch<AppDispatch>();
+    const quarter = useSelector(selectSearchQuarter);
+    const year = useSelector(selectSearchYear);
+
+    const setTerm = (quarter: string, year: string) => {
+        dispatch(setQuarter(quarter));
+        dispatch(setYear(year));
+    };
 
     return (
         <form autoComplete="off" id="searchForm" className={`flex flex-col items-center`} onSubmit={e => e.preventDefault()}>
@@ -16,7 +22,7 @@ export function SearchForms(props: { queriesState: [ScheduleQuery[], (queries: S
             </div>
             <br></br>
             <div className="w-5/6">
-                <SearchBox queriesState={[queries, setQueries]} multiState={multiState} defaultScheduleQuery={defaultScheduleQuery} lastQueries={[]} submitQueries={submit} />
+                <SearchBox />
             </div>
         </form>
     )

@@ -1,5 +1,5 @@
-export function Tooltip(props: {className?: string, text: string}) {
+export function Tooltip(props: { className?: string, text: string }) {
     return (
-        <p className={`absolute ${props.className}`}>{props.text}</p>
+        <p className={`absolute z-[1000] ${props.className}`}>{props.text}</p>
     )
 }

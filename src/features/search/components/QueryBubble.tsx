@@ -6,11 +6,11 @@ const bubbleStyle = "flex items-center whitespace-nowrap border border-quaternar
  * @param query The query to display in this bubble.
  * @param removeFunction Called to remove this bubble and query.
  */
-export function QueryBubble(props: { query: ScheduleQuery, removeFunction: () => void }) {
-    const { query, removeFunction } = props;
+export function QueryBubble(props: { query: ScheduleQuery, onClick: () => void }) {
+    const { query, onClick } = props;
 
     return (
-        <div className={bubbleStyle} onClick={removeFunction}>
+        <div className={bubbleStyle} onClick={onClick}>
             {query.ge ? query.ge : query.department + (query.number ? ` ${query.number}` : "")}
             <div className="px-1 hidden group-hover:block">
                 <svg
