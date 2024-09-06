@@ -1,12 +1,13 @@
-import { IRootState } from "app/store";
+import { RootState } from "app/store";
 
-export const selectScheduleSet = (state: IRootState) => state.schedules.present.scheduleSet;
+export const selectScheduleSet = (state: RootState) => state.schedules.present.scheduleSet;
 
-export const selectSchedule = (index: number) => (state: IRootState) => state.schedules.present.scheduleSet[index];
+export const selectSchedule = (index: number) => (state: RootState) => state.schedules.present.scheduleSet[index];
 
-export const selectCurrentSchedule = (state: IRootState) => state.schedules.present.scheduleSet[state.schedules.present.selectedIndex];
+export const selectCurrentSchedule = (state: RootState) => state.schedules.present.scheduleSet[state.schedules.present.selectedIndex];
 
-export const selectCurrentScheduleIndex = (state: IRootState) => state.schedules.present.selectedIndex;
+export const selectCurrentScheduleIndex = (state: RootState) => state.schedules.present.selectedIndex;
 
-export const selectPrevState = (state: IRootState) => state.schedules.past[0];
-export const selectNextState = (state: IRootState) => state.schedules.future[0];
+export const selectPastSchedules = (state: RootState) => state.schedules.past[0];
+
+export const selectFutureSchedules = (state: RootState) => state.schedules.future[0];

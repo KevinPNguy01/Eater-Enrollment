@@ -12,7 +12,7 @@ import { sortCoursesByGPA, sortCoursesByName, sortCoursesByRMP, sortInstructorsB
  */
 export function filterCourses(courses: Course[], filterOptions: FilterOptions) {
     const { sectionTypes, statusTypes, dayTypes, restrictionTypes, levelTypes, timeRange } = filterOptions;
-    const filteredCourses = courses.map(course => ({ ...course }))
+    const filteredCourses = courses.map(course => ({ ...course, offerings: course.offerings.map(offering => ({ ...offering })) }))
         .filter(filterLevel(levelTypes));
 
     // Filter offerings of each course by options specified.
@@ -40,7 +40,7 @@ export function sortCourses(courses: Course[], sortOptions: SortOptions) {
     const defaultRmp = direction === Ascending ? 6 : -1;
 
     // Sort courses with appropriate sorting function.
-    courses.sort(
+    const sortedCourses = courses.toSorted(
         (() => {
             switch (sortBy) {
                 case GPA: return sortCoursesByGPA(defaultGpa);
@@ -49,13 +49,13 @@ export function sortCourses(courses: Course[], sortOptions: SortOptions) {
             }
         })()
     );
-    if (direction === Descending) courses.reverse();
-    if (!sortWithin) return;
+    if (direction === Descending) sortedCourses.reverse();
+    if (!sortWithin) return sortedCourses;
 
     // Sort offerings if necessary.
-    courses.forEach(({ offerings }) => {
+    sortedCourses.forEach(course => {
         // Sort course offerings with appropriate sorting function.
-        offerings.sort(
+        course.offerings = course.offerings.toSorted(
             (() => {
                 switch (sortBy) {
                     case GPA: return sortOfferingsByGPA(defaultGpa);
@@ -64,15 +64,16 @@ export function sortCourses(courses: Course[], sortOptions: SortOptions) {
                 }
             })()
         );
-        if (direction === Descending) offerings.reverse();
+        if (direction === Descending) course.offerings.reverse();
         if (sortBy !== RMP) return;
 
         // Sort instructors if necessary.
-        offerings.forEach(({ instructors }) => {
-            instructors.sort(sortInstructorsByRMP(defaultRmp))
-            if (direction === Descending) instructors.reverse()
+        course.offerings.forEach(offering => {
+            offering.instructors = offering.instructors.toSorted(sortInstructorsByRMP(defaultRmp))
+            if (direction === Descending) offering.instructors = offering.instructors.toReversed()
         });
     });
+    return sortedCourses;
 }
 
 /**
@@ -87,4 +88,24 @@ export function newFilterOptions() {
         levelTypes: new Set(["Lower Division", "Upper Division", "Graduate"]),
         timeRange: [480, 1320]
     } as FilterOptions;
+}
+
+/**
+ * @param courses 
+ * @returns Default filter options for the given courses.
+ */
+export function defaultFilterOptions(courses: Course[]) {
+    return {
+        ...newFilterOptions(),
+        sectionTypes: new Set(courses.map(({ offerings }) => offerings.map(({ section }) => section.type)).flat()),
+        restrictionTypes: new Set(
+            courses.map(
+                ({ offerings }) => offerings.map(
+                    ({ restrictions }) => restrictions.replace("or", "and").split(" and ")
+                ).flat()
+            ).flat().filter(s => s).map(
+                code => `${code}: ${restrictionCodes.get(code)}`
+            )
+        )
+    }
 }

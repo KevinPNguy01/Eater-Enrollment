@@ -1,4 +1,7 @@
-import { ScheduleQuery } from "types/ScheduleQuery";
+import { AppDispatch } from "app/store";
+import { useDispatch, useSelector } from "react-redux";
+import { selectSearchQuarter, selectSearchType, selectSearchYear } from "stores/selectors/Search";
+import { addQuery, fetchSchedule } from "stores/slices/Search";
 import { SearchSuggestion } from "../utils/FormHelpers";
 
 const departmentIcon = <svg fill="#bbb" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
@@ -18,16 +21,26 @@ const geIcon = <svg fill="#bbb" xmlns="http://www.w3.org/2000/svg" width="16" he
  * @param suggestions The array of search suggestions to display.
  * @param appendFunction Called when a search suggestion is selected to add a ScheduleQuery.
  */
-export function SearchList(props: { suggestions: SearchSuggestion[], appendFunction: (ScheduleQuery: ScheduleQuery) => void }) {
-    const { suggestions, appendFunction } = props;
+export function SearchList(props: { suggestions: SearchSuggestion[] }) {
+    const { suggestions } = props;
     const buttonStyle = "flex items-center gap-2 px-4 py-2 text-left border-quaternary hover:bg-tertiary last:rounded-b-[20px]";
+    const dispatch = useDispatch<AppDispatch>();
+    const searchType = useSelector(selectSearchType);
+    const quarter = useSelector(selectSearchQuarter);
+    const year = useSelector(selectSearchYear);
 
     return (
-        <div className="grid w-full max-h-[50vh] overflow-y-scroll hide-scroll rounded-b-[20px]">
+        <div className="absolute z-10 bg-secondary border-quaternary border border-t-0 -left-[1px] -right-[1px] top-full grid max-h-[50vh] overflow-y-scroll hide-scroll rounded-b-[1.25rem]">
             {suggestions.map(({ text, value }) => {
                 const [name, description] = text.split(":")
+                const query = { ...value, quarter, year };
                 return (
-                    <button key={text} className={buttonStyle} type="submit" onMouseDown={() => appendFunction(value)}>
+                    <button
+                        key={text}
+                        className={buttonStyle}
+                        onMouseDown={() => dispatch(searchType === "single" ? fetchSchedule([query]) : addQuery(query))}
+                    >
+                        {/** Use onMouseDown to trigger before onBlur in SearchBubble. */}
                         <div className="ml-0.5 mr-2.5">
                             {(function getIcon() {
                                 if (value.ge) return geIcon;

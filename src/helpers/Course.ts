@@ -3,6 +3,10 @@ import { offeringEquals } from "helpers/CourseOffering";
 import { Course } from "types/Course";
 import { CourseOffering } from "types/CourseOffering";
 import { newGradeDistributionCollection, updateGradesCollection } from "./GradeDistributionCollection";
+import coursesJson from "../../src/assets/allCourses.json";
+
+// Load all courses from JSON file.
+export const courseMap = new Map<string, Course>((coursesJson as { data: { allCourses: Course[] } }).data.allCourses.map(course => [course.id, course]));
 
 /**
  * @param course 

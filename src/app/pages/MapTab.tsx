@@ -6,7 +6,7 @@ import { selectCurrentSchedule } from 'stores/selectors/ScheduleSet';
 
 export function MapTab() {
     const schedule = useSelector(selectCurrentSchedule);
-    const [daysMask, setDaysMask] = useState(0b11111);
+    const [daysMask, setDaysMask] = useState(0b1111111);
     const courses = schedule.courses;
 
     const offerings = courses.map(({ offerings }) => offerings).flat();                                       // Flat list of course offerings.

@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { offeringEquals } from 'helpers/CourseOffering';
-import { scheduleAddOffering, scheduleRemoveOffering } from 'helpers/Schedule';
-import { scheduleSetAdd, scheduleSetReorder } from 'helpers/ScheduleSet';
+import { scheduleAddCustomEvent, scheduleAddOffering, scheduleClear, scheduleCopy, scheduleRemoveCustomEvent, scheduleRemoveOffering } from 'helpers/Schedule';
+import { scheduleSetAdd, scheduleSetRemove, scheduleSetReorder } from 'helpers/ScheduleSet';
 import { CourseOffering } from 'types/CourseOffering';
 import { CustomEvent } from 'types/CustomEvent';
 import { Schedule } from 'types/Schedule';
@@ -13,6 +13,9 @@ export const schedulesSlice = createSlice({
         selectedIndex: 0
     },
     reducers: {
+        setState: (state, action: PayloadAction<{ scheduleSet: Schedule[], selectedIndex: number }>) => {
+            Object.assign(state, action.payload);
+        },
         reorderScheduleSet: (state, action: PayloadAction<{ start: number, end: number }>) => {
             const { start, end } = action.payload;
             state.scheduleSet = scheduleSetReorder(state.scheduleSet, start, end);
@@ -24,19 +27,11 @@ export const schedulesSlice = createSlice({
             scheduleSetAdd(state.scheduleSet, action.payload);
         },
         removeSchedule: (state, action: PayloadAction<number>) => {
-            if (state.scheduleSet.length > 1) {
-                state.scheduleSet.splice(action.payload, 1);
-                state.selectedIndex = Math.min(state.selectedIndex, state.scheduleSet.length - 1);
-            }
+            scheduleSetRemove(state.scheduleSet, action.payload);
+            state.selectedIndex = Math.min(state.selectedIndex, state.scheduleSet.length - 1);
         },
         duplicateSchedule: (state, action: PayloadAction<number>) => {
-            const newSchedule = { ...state.scheduleSet[action.payload] };
-            newSchedule.courses = [...newSchedule.courses].map(course => {
-                const newCourse = { ...course };
-                newCourse.offerings = [...course.offerings];
-                return newCourse;
-            });
-            scheduleSetAdd(state.scheduleSet, newSchedule);
+            scheduleSetAdd(state.scheduleSet, scheduleCopy(state.scheduleSet[action.payload]));
         },
         renameSchedule: (state, action: PayloadAction<{ index: number, name: string }>) => {
             const { index, name } = action.payload;
@@ -44,6 +39,9 @@ export const schedulesSlice = createSlice({
         },
         setCurrentScheduleIndex: (state, action: PayloadAction<number>) => {
             state.selectedIndex = action.payload;
+        },
+        clearSchedule: (state, action: PayloadAction<number>) => {
+            scheduleClear(state.scheduleSet[action.payload]);
         },
         addOffering: (state, action: PayloadAction<{ offering: CourseOffering, index: number }>) => {
             const { offering, index } = action.payload;
@@ -70,21 +68,12 @@ export const schedulesSlice = createSlice({
         addCustomEvent: (state, action: PayloadAction<{ customEvent: CustomEvent, index: number }>) => {
             const { customEvent, index } = action.payload;
             const schedule = state.scheduleSet[index];
-            const ids = new Set(schedule.customEvents.map(({ id }) => id));
-            let id = customEvent.id;
-            if (id === -1) {
-                for (id = 0; ids.has(id); ++id);
-            }
-            if (ids.has(id)) {
-                return;
-            }
-            customEvent.id = id;
-            schedule.customEvents.push(customEvent);
+            scheduleAddCustomEvent(schedule, customEvent);
         },
         removeCustomEvent: (state, action: PayloadAction<{ customEvent: CustomEvent, index: number }>) => {
             const { customEvent, index } = action.payload;
             const schedule = state.scheduleSet[index];
-            schedule.customEvents = schedule.customEvents.filter(e => e.id !== customEvent.id);
+            scheduleRemoveCustomEvent(schedule, customEvent);
         },
         changeCustomEventColor: (state, action: PayloadAction<{ customEvent: CustomEvent, color: string, index: number }>) => {
             const { customEvent, color, index } = action.payload;
@@ -104,12 +93,14 @@ export const schedulesSlice = createSlice({
 })
 
 export const {
+    setState,
     reorderScheduleSet,
     clearScheduleSet,
     addSchedule,
     removeSchedule,
     duplicateSchedule,
     renameSchedule,
+    clearSchedule,
     setCurrentScheduleIndex,
     addOffering,
     removeOffering,

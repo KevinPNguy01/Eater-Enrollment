@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectCurrentScheduleIndex } from "stores/selectors/ScheduleSet";
 import { addCustomEvent, updateCustomEvent } from "stores/slices/ScheduleSet";
 import { CustomEvent } from "types/CustomEvent";
-import { getColorCustomEvent } from "utils/FullCalendar";
+import { stringColor } from 'utils/FullCalendar';
 
 export function CustomEventMenu(props: { event: CustomEvent, closeMenu: () => void }) {
     const dispatch = useDispatch();
@@ -120,7 +120,7 @@ export function CustomEventMenu(props: { event: CustomEvent, closeMenu: () => vo
                             days: days,
                         } as CustomEvent;
                         if (customEvent.id === -1) {
-                            customEvent.color = getColorCustomEvent(customEvent);
+                            customEvent.color = stringColor(title);
                         }
                         dispatch((event.id === -1 ? addCustomEvent : updateCustomEvent)({ customEvent, index: currentScheduleIndex }));
                     }}>

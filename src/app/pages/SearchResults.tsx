@@ -1,94 +1,46 @@
+import EastIcon from '@mui/icons-material/East'
+import WestIcon from '@mui/icons-material/West'
 import IconButton from "@mui/material/IconButton"
-import { restrictionCodes } from "constants/RestrictionCodes"
+import { AppDispatch } from "app/store"
+import { refreshIcon, homeIcon, sortIcon, filterIcon } from 'assets/icons'
 import { FilterMenu } from "features/refining/components/FilteringMenu"
 import { SortingMenu } from "features/refining/components/SortingMenu"
-import { FilterOptions, SortBy, SortDirection, SortOptions } from "features/refining/types/options"
-import { filterCourses, newFilterOptions, sortCourses } from "features/refining/utils"
+import { defaultSortOptions, FilterOptions, SortOptions } from "features/refining/types/options"
+import { defaultFilterOptions, filterCourses, sortCourses } from "features/refining/utils"
 import { ScheduleResults } from "features/results/components/ScheduleResult"
 import { SearchBox } from "features/search/components/SearchBox"
 import { useEffect, useState } from "react"
-import { Course } from "types/Course"
-import { ScheduleQuery } from "types/ScheduleQuery"
-import { SearchFunctions } from "./CoursesPane"
+import { useDispatch, useSelector } from "react-redux"
+import { selectFutureSearch, selectPastSearch, selectSearchPending, selectSearchResults } from "stores/selectors/Search"
+import { clearQueries, fetchSchedule, setDisplayResults, setSearchInput } from "stores/slices/Search"
 
-const homeIcon = <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 16 16">
-    <path stroke="#ddd" strokeWidth="0.5" fill="#ddd" d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4.5a.5.5 0 0 0 .5-.5v-4h2v4a.5.5 0 0 0 .5.5H14a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793zM2.5 14V7.707l5.5-5.5 5.5 5.5V14H10v-4a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5v4z" />
-</svg>;
+export function SearchResults() {
+    const searchResults = useSelector(selectSearchResults);
+    const pending = useSelector(selectSearchPending);
 
-const leftArrowIcon = <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 16 16">
-    <path stroke="#ddd" strokeWidth="0.5" fill="#ddd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8" />
-</svg>;
-
-const rightArrowIcon = <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16">
-    <path stroke="#ddd" strokeWidth="0.5" fill="#ddd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8" />
-</svg>;
-
-const refreshIcon = <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" transform="rotate(45)">
-    <path stroke="#ddd" strokeWidth="0.5" fill="#ddd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z" />
-    <path stroke="#ddd" strokeWidth="0.5" fill="#ddd" d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466" />
-</svg>;
-
-const sortIcon = <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16">
-    <path stroke="#ddd" strokeWidth="0.5" fill="#ddd" d="M11.5 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L11 2.707V14.5a.5.5 0 0 0 .5.5m-7-14a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L4 13.293V1.5a.5.5 0 0 1 .5-.5" />
-</svg>;
-
-const filterIcon = <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16">
-    <path stroke="#ddd" strokeWidth="0.5" fill="#ddd" d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5zm1 .5v1.308l4.372 4.858A.5.5 0 0 1 7 8.5v5.306l2-.666V8.5a.5.5 0 0 1 .128-.334L13.5 3.308V2z" />
-</svg>;
-
-export function SearchResults(props: {
-    courses: Course[],
-    multiState: [boolean, (_: boolean) => void]
-    queriesState: [ScheduleQuery[], (_: ScheduleQuery[]) => void],
-    defaultScheduleQuery: ScheduleQuery,
-    lastQueries: ScheduleQuery[],
-    searchFunctions: SearchFunctions
-}
-) {
-    const { courses, queriesState, defaultScheduleQuery, lastQueries, searchFunctions } = props;
-    const [sortOptions, setSortOptions] = useState({
-        sortBy: SortBy.Name,
-        direction: SortDirection.Ascending,
-        sortWithin: false,
-    } as SortOptions);
+    const [sortOptions, setSortOptions] = useState(defaultSortOptions);
     const [filterOptions, setFilterOptions] = useState(null as unknown as FilterOptions);
-
-    // Default filter options only include section and restriction types found in courses.
-    const defaultFilterOptions = {
-        ...newFilterOptions(),
-        sectionTypes: new Set(courses.map(({ offerings }) => offerings.map(({ section }) => section.type)).flat()),
-        restrictionTypes: new Set(
-            courses.map(
-                ({ offerings }) => offerings.map(
-                    ({ restrictions }) => restrictions.replace("or", "and").split(" and ")
-                ).flat()
-            ).flat().filter(s => s).map(
-                code => `${code}: ${restrictionCodes.get(code)}`
-            )
-        )
-    } as FilterOptions;
+    const [defaultFilter, setDefaultFilter] = useState(null as unknown as FilterOptions);
 
     // Reset filters when courses change.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    useEffect(() => setFilterOptions({ ...defaultFilterOptions }), [courses]);
+    useEffect(() => {
+        const filter = defaultFilterOptions(searchResults);
+        setFilterOptions(filter);
+        setDefaultFilter(filter);
+    }, [searchResults]);
 
     // Filter courses if the filter options have been defined. Always sort.
-    const filteredCourses = filterOptions ? filterCourses(courses, filterOptions) : courses;
-    sortCourses(filteredCourses, sortOptions);
+    const filteredCourses = filterOptions ? filterCourses(searchResults, filterOptions) : searchResults;
+    const sortedCourses = sortCourses(filteredCourses, sortOptions);
 
     return (
         <div className={`relative h-full flex flex-col`}>
             <SearchResultsNavBar
                 sortOptionsState={[sortOptions, setSortOptions]}
                 filterOptionsState={[filterOptions, setFilterOptions]}
-                defaultFilterOptions={defaultFilterOptions}
-                searchFunctions={searchFunctions}
-                queriesState={queriesState}
-                multiState={props.multiState}
-                defaultScheduleQuery={defaultScheduleQuery}
-                lastQueries={lastQueries}
+                defaultFilterOptions={defaultFilter}
             />
-            {filteredCourses.length ? <ScheduleResults courses={filteredCourses} /> : <LoadingSymbol />}
+            {pending ? <LoadingSymbol /> : searchResults.length ? <ScheduleResults courses={sortedCourses} /> : "No results found."}
         </div>
     )
 }
@@ -97,39 +49,73 @@ function SearchResultsNavBar(props: {
     sortOptionsState: [SortOptions, (options: SortOptions) => void],
     filterOptionsState: [FilterOptions, (options: FilterOptions) => void],
     defaultFilterOptions: FilterOptions,
-    searchFunctions: SearchFunctions,
-    queriesState: [ScheduleQuery[], (_: ScheduleQuery[]) => void],
-    defaultScheduleQuery: ScheduleQuery,
-    multiState: [boolean, (_: boolean) => void],
-    lastQueries: ScheduleQuery[]
 }
 ) {
-    const { queriesState, multiState, defaultScheduleQuery, lastQueries } = props;
-    const { submitSearch, resetSearch, backSearch, forwardSearch, refreshSearch } = props.searchFunctions;
+    const { sortOptionsState, filterOptionsState, defaultFilterOptions } = props;
     const [sortMenuVisible, setSortMenuVisible] = useState(false);
     const [filterMenuVisible, setFilterMenuVisible] = useState(false);
+    const pastSearch = useSelector(selectPastSearch);
+    const futureSearch = useSelector(selectFutureSearch);
+    const dispatch = useDispatch<AppDispatch>();
 
     return (
         <nav className="flex bg-tertiary border border-quaternary px-2 py-1 mb-4 rounded whitespace-pre text-center content-center items-center gap-1">
-            <IconButton color="info" onClick={backSearch}>{leftArrowIcon}</IconButton>
-            <IconButton color="info" onClick={forwardSearch}>{rightArrowIcon}</IconButton>
-            <IconButton color="info" onClick={refreshSearch}>{refreshIcon}</IconButton>
-            <IconButton color="info" onClick={resetSearch}>{homeIcon}</IconButton>
+            {/** Undo button. */}
+            <IconButton
+                color="white"
+                disabled={!pastSearch}
+                onClick={() => dispatch({ type: "search/undo" })}
+            >
+                <WestIcon />
+            </IconButton>
+            {/** Redo button. */}
+            <IconButton
+                color="white"
+                disabled={!futureSearch}
+                onClick={() => dispatch({ type: "search/redo" })}
+            >
+                <EastIcon />
+            </IconButton>
+            {/** Refresh button. */}
+            <IconButton
+                color="white"
+                onClick={() => dispatch(fetchSchedule([]))}
+            >
+                {refreshIcon}
+            </IconButton>
+            {/** Home button. */}
+            <IconButton
+                color="white"
+                onClick={() => {
+                    dispatch(setDisplayResults(false));
+                    dispatch(clearQueries());
+                    dispatch(setSearchInput(""));
+                    dispatch({ type: "search/clearHistory" });
+                }}
+            >
+                {homeIcon}
+            </IconButton>
+            {/** Search box will expand. */}
             <div className="flex-grow w-0">
-                <SearchBox multiState={multiState} queriesState={queriesState} defaultScheduleQuery={defaultScheduleQuery} lastQueries={lastQueries} submitQueries={submitSearch} />
+                <SearchBox />
             </div>
-            <div className="flex">
-                <IconButton onClick={() => setSortMenuVisible(true)}>{sortIcon}</IconButton>
-                {sortMenuVisible ? (
-                    <SortingMenu optionsState={props.sortOptionsState} close={() => setSortMenuVisible(false)} />
-                ) : null}
-            </div>
-            <div className="flex">
-                <IconButton onClick={() => setFilterMenuVisible(true)}>{filterIcon}</IconButton>
-                {filterMenuVisible ? (
-                    <FilterMenu optionsState={props.filterOptionsState} defaultOptions={props.defaultFilterOptions} close={() => setFilterMenuVisible(false)} />
-                ) : null}
-            </div>
+            {/** Sort button/menu. */}
+            <IconButton onClick={() => setSortMenuVisible(true)}>{sortIcon}</IconButton>
+            {sortMenuVisible && (
+                <SortingMenu
+                    optionsState={sortOptionsState}
+                    close={() => setSortMenuVisible(false)}
+                />
+            )}
+            {/** Filter button/menu. */}
+            <IconButton onClick={() => setFilterMenuVisible(true)}>{filterIcon}</IconButton>
+            {filterMenuVisible && (
+                <FilterMenu
+                    optionsState={filterOptionsState}
+                    defaultOptions={defaultFilterOptions}
+                    close={() => setFilterMenuVisible(false)}
+                />
+            )}
         </nav>
     )
 }

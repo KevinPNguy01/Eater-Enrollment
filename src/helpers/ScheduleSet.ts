@@ -7,10 +7,21 @@ import { Schedule } from "types/Schedule";
  */
 export function scheduleSetAdd(scheduleSet: Schedule[], schedule: Schedule) {
     let id = 0;
-    const ids = new Set(scheduleSet.map(({id}) => id));
+    const ids = new Set(scheduleSet.map(({ id }) => id));
     for (; ids.has(id); ++id);
     schedule.id = id;
     scheduleSet.push(schedule);
+}
+
+/**
+ * Remove a schedule from the schedule set.
+ * @param scheduleSet 
+ * @param index 
+ */
+export function scheduleSetRemove(scheduleSet: Schedule[], index: number) {
+    if (scheduleSet.length > 1) {
+        scheduleSet.splice(index, 1);
+    }
 }
 
 export function scheduleSetReorder(schedules: Schedule[], start: number, end: number) {
@@ -24,8 +35,8 @@ const reorderList = <T,>(l: T[], start: number, end: number) => {
 };
 const _reorderListForward = <T,>(l: T[], start: number, end: number) => {
     const temp = l[start];
-    for (let i=start; i<end; i++) {
-        l[i] = l[i+1];
+    for (let i = start; i < end; i++) {
+        l[i] = l[i + 1];
     }
     l[end - 1] = temp;
     return l;

@@ -3,6 +3,11 @@ import { CalendarEvent } from "types/CalendarEvent";
 import { CourseOffering } from "types/CourseOffering";
 import { CustomEvent } from "types/CustomEvent";
 
+/**
+ * Create event objects for the given custom events.
+ * @param customEvents 
+ * @returns An array of event objects that can be used by FullCalendar.
+ */
 export function createCustomEvents(customEvents: CustomEvent[]) {
     return customEvents.map(customEvent => {
         const events: CalendarEvent[] = [];
@@ -26,43 +31,46 @@ export function createCustomEvents(customEvents: CustomEvent[]) {
     }).flat();
 }
 
+/**
+ * Create event objects for the given course offerings.
+ * @param customEvents 
+ * @returns An array of event objects that can be used by FullCalendar.
+ */
 export function createEvents(offerings: CourseOffering[]) {
-    return offerings.filter(({ parsed_meetings }) => parsed_meetings[0].startTime).map(offering => {
-        // Add an event to the calendar for each meeting day.
+    return offerings.filter(({ parsed_meetings }) => parsed_meetings[0]).map(offering => {
         const events: CalendarEvent[] = [];
         for (let i = 0; i < 7; ++i) {
-            const day = offering.parsed_meetings[0].days & (1 << (6 - i));
-            if (!day) continue;
-            const startTime = moment(offering.parsed_meetings[0].startTime, "hh:mm A").weekday(i);
-            const endTime = moment(offering.parsed_meetings[0].endTime, "hh:mm A").weekday(i);
-            events.push({
-                title: `${offering.course.department} ${offering.course.number} ${offering.section.type}`,
-                start: startTime.toISOString(),
-                end: endTime.toISOString(),
-                id: `${offering.section.code}-${day}`,
-                backgroundColor: offering.color,
-                textColor: getTextColor(offering.color),
-                extendedProps: {
-                    type: "CourseOffering",
-                    source: offering
-                }
-            });
+            if (offering.parsed_meetings[0].days & (1 << (6 - i))) {
+                events.push({
+                    title: `${offering.course.department} ${offering.course.number} ${offering.section.type}`,
+                    start: moment(offering.parsed_meetings[0].startTime, "hh:mm A").weekday(i).toISOString(),
+                    end: moment(offering.parsed_meetings[0].endTime, "hh:mm A").weekday(i).toISOString(),
+                    id: `${offering.section.code}-${i}`,
+                    backgroundColor: offering.color,
+                    textColor: getTextColor(offering.color),
+                    extendedProps: {
+                        type: "CourseOffering",
+                        source: offering
+                    }
+                });
+            }
         }
         return events;
     }).flat();
 }
 
+/**
+ * Create event objects of the finals for the given course offerings.
+ * @param customEvents 
+ * @returns An array of event objects that can be used by FullCalendar.
+ */
 export function createFinalEvents(offerings: CourseOffering[]) {
-    return offerings.filter(({ final }) => final && final.time).map(offering => {
+    return offerings.filter(({ final }) => final).map(offering => {
         const final = offering.final!;
-        const [startDate, endDate] = [getDay(final.day), getDay(final.day)];
-        const [startTime, endTime] = final.time!.map(s => new Date(s));
-        startDate.setHours(startTime.getHours(), startTime.getMinutes());
-        endDate.setHours(endTime.getHours(), endTime.getMinutes());
         return {
             title: `${offering.course.department} ${offering.course.number} Final`,
-            start: startDate.toISOString(),
-            end: endDate.toISOString(),
+            start: moment(final.startTime, "hh:mm A").weekday(final.day).toISOString(),
+            end: moment(final.endTime, "hh:mm A").weekday(final.day).toISOString(),
             id: `${offering.section.code}-1`,
             backgroundColor: offering.color,
             textColor: getTextColor(offering.color),
@@ -74,19 +82,12 @@ export function createFinalEvents(offerings: CourseOffering[]) {
     });
 }
 
-export function getOfferingColor(offering: CourseOffering) {
-    const { course } = offering;
-
-    // Calculate color and luminance for event.
-    const hue = Math.abs(hashString(`${course.id}${offering.section.type}`)) % 360;
-    const saturation = 75;
-    const lightness = 50;
-    return hslToHex(hue, saturation, lightness);
-}
-
-export function getColorCustomEvent(customEvent: CustomEvent) {
-    // Calculate color and luminance for event.
-    const hue = Math.abs(hashString(customEvent.title)) % 360;
+/**
+ * @param s 
+ * @returns A hex color from the given string's hash. 
+ */
+export function stringColor(s: string) {
+    const hue = Math.abs(hashString(s) % 360);
     const saturation = 75;
     const lightness = 50;
     return hslToHex(hue, saturation, lightness);
@@ -102,16 +103,10 @@ function hashString(str: string) {
 }
 
 /**
- * @param
- * @returns A Date object representing a day on the calendar of the current week.
+ * Calculate what the text color should be given a hex color strubg.
+ * @param hex 
+ * @returns A hex color string.
  */
-function getDay(days: number) {
-    const d = new Date();
-    const day = d.getDay()
-    const diff = d.getDate() - day + days + 1;
-    return new Date(d.setDate(diff));
-}
-
 function getTextColor(hex: string) {
     const { r, g, b } = hexToRgb(hex);
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
