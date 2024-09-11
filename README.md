@@ -1,30 +1,33 @@
-# React + TypeScript + Vite
+<p align="center"><img src="./src/assets/anteater.png" alt="Logo" width="200"></p>
+<h1 align="center">Eater Enrollment</h1>
+<p>A course scheduler web app that allows students to search for courses and manage class schedules at UCI.</p>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<h2>Key Features</h2>
+<ul>
+  <li><strong>Course Lookup</strong>: Search for courses by department, course number, GE category, or by keyword.</li>
+  <li><strong>Search Refinement</strong>: Filter results by numerous criteria such as meeting times and availability.</li>
+  <li><strong>Multi-Search</strong>: Toggle multi-search and search for multiple courses at once in a single search.</li>
+  <li><strong>Visual Schedules</strong>: Use the integrated calendar to manage schedules that support both added courses and custom events.</li>
+  <li><strong>Intuitive Map</strong>: Find where added courses are located on the map with easy-to-read labelled markers.</li>
+  <li><strong>Embedded Reviews</strong>: Hover over instructor names to view their RateMyProfessors</li>
+  <li><strong>Embedded Grades</strong>: Hover over the GPA column to view average gpa and grades for a course.</li>
+</ul>
 
-Currently, two official plugins are available:
+<h2>Technologies Used</h2>
+<h3>Frontend</h3>
+<ul>
+  <li><strong>React</strong>: JavaScript UI framework.</li>
+  <li><strong>FullCalendar</strong>: React calendar component.</li>
+  <li><strong>Recharts</strong>: React chart component.</li>
+  <li><strong>MUI</strong>: React UI library.</li>
+  <li><strong>Leaflet</strong>: Interactive JavaScript map.</li>
+  <li><strong>Redux</strong>: State management.</li>
+</ul>
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
-
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+<h3>Backend</h3>
+<ul>
+  <li><strong>PeterPortal API</strong>: API for retrieving UCI course data.</li>
+  <li><strong>GraphQL</strong>: Efficient and precise query language.</li>
+  <li><strong>SQLite 3</strong>: Lightweight database library.</li>
+  <li><strong>Express.js</strong>: Framework for building RESTful APIs.</li>
+</ul>
