@@ -32,6 +32,17 @@
   <li><strong>Express.js</strong>: Framework for building RESTful APIs.</li>
 </ul>
 
+<h2>Cloning the Repository</h2>
+
+<p>To get started, first clone the repository to your local machine. Use the following command in your terminal:</p>
+
+<pre><code>git clone https://github.com/kevinpnguy01/Eater-Enrollment.git</code></pre>
+
+<p>Once the repository is cloned, navigate into the project directory:</p>
+
+<pre><code>cd Eater-Enrollment</code></pre>
+
+
 <h2>Starting the Backend Server</h2>
 
 <p>The backend server is responsible for handling several tasks, including:</p>
@@ -45,7 +56,7 @@
 <p>Before starting the server, you'll need to install the necessary dependencies. Follow these steps:</p>
 <ol>
   <li>Navigate to the <code>/backend/</code> directory in your terminal.</li>
-  <li>Run the following command to install all required dependencies:</li>
+  <li>Run the following command to install the required dependencies for the backend:</li>
 </ol>
 
 <pre><code>npm install</code></pre>
@@ -62,7 +73,7 @@
 <p>The frontend of the course scheduler web app is the interface where users interact with the website. To launch the frontend, follow these steps:</p>
 
 <h3>Installing Dependencies</h3>
-<p>Before starting the frontend, ensure that all required dependencies are installed. In the root directory, run the following command:</p>
+<p>Before starting the frontend, ensure that the required dependencies are installed. In the root directory, run the following command:</p>
 
 <pre><code>npm install</code></pre>
 
