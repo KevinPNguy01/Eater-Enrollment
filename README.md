@@ -31,3 +31,44 @@
   <li><strong>SQLite 3</strong>: Lightweight database library.</li>
   <li><strong>Express.js</strong>: Framework for building RESTful APIs.</li>
 </ul>
+
+<h2>Starting the Backend Server</h2>
+
+<p>The backend server is responsible for handling several tasks, including:</p>
+<ul>
+  <li>Fetching course and grades data</li>
+  <li>Saving and loading user schedules</li>
+  <li>Retrieving instructor reviews</li>
+</ul>
+
+<h3>Installing Dependencies</h3>
+<p>Before starting the server, you'll need to install the necessary dependencies. Follow these steps:</p>
+<ol>
+  <li>Navigate to the <code>/backend/</code> directory in your terminal.</li>
+  <li>Run the following command to install all required dependencies:</li>
+</ol>
+
+<pre><code>npm install</code></pre>
+
+<h3>Starting the Server</h3>
+<p>Once the dependencies are installed, you can start the backend server with the following command:</p>
+
+<pre><code>npm run start</code></pre>
+
+<p>With the server running, it will be ready to handle API requests for fetching and saving data.</p>
+
+<h2>Starting the Frontend</h2>
+
+<p>The frontend of the course scheduler web app is the interface where users interact with the website. To launch the frontend, follow these steps:</p>
+
+<h3>Installing Dependencies</h3>
+<p>Before starting the frontend, ensure that all required dependencies are installed. In the root directory, run the following command:</p>
+
+<pre><code>npm install</code></pre>
+
+<h3>Launching the Frontend</h3>
+<p>Once the dependencies are installed, you can launch the frontend with the following command:</p>
+
+<pre><code>npm run dev</code></pre>
+
+<p>By default, the website will be accessible at <code>http://localhost:5173</code>. Open this URL in your web browser to start using the application.</p>
