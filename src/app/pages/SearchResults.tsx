@@ -1,18 +1,27 @@
 import EastIcon from '@mui/icons-material/East'
 import WestIcon from '@mui/icons-material/West'
 import IconButton from "@mui/material/IconButton"
+import RefreshIcon from '@mui/icons-material/Refresh';
+import HomeIcon from '@mui/icons-material/Home';
+import { requestGrades, requestSchedule } from 'api/PeterPortalGraphQL'
 import { AppDispatch } from "app/store"
-import { refreshIcon, homeIcon, sortIcon, filterIcon } from 'assets/icons'
+import { filterIcon, sortIcon } from 'assets/icons'
 import { FilterMenu } from "features/refining/components/FilteringMenu"
 import { SortingMenu } from "features/refining/components/SortingMenu"
 import { defaultSortOptions, FilterOptions, SortOptions } from "features/refining/types/options"
 import { defaultFilterOptions, filterCourses, sortCourses } from "features/refining/utils"
 import { ScheduleResults } from "features/results/components/ScheduleResult"
 import { SearchBox } from "features/search/components/SearchBox"
+import { groupOfferings } from 'helpers/CourseOffering'
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { selectFutureSearch, selectPastSearch, selectSearchPending, selectSearchResults } from "stores/selectors/Search"
-import { clearQueries, fetchSchedule, setDisplayResults, setSearchInput } from "stores/slices/Search"
+import { selectGrades } from 'stores/selectors/Grades'
+import { selectFutureSearch, selectPastSearch, selectPrevQueries, selectSearchPending, selectSearchResults } from "stores/selectors/Search"
+import { addCourseGrades } from 'stores/slices/Grades'
+import { clearQueries, setDisplayResults, setSearchFulfilled, setSearchInput, setSearchPending } from "stores/slices/Search"
+import { addInstructorReview } from 'stores/slices/Reviews';
+import { searchProfessor } from 'utils/RateMyProfessors';
+import { selectReviews } from 'stores/selectors/Reviews';
 
 export function SearchResults() {
     const searchResults = useSelector(selectSearchResults);
@@ -24,9 +33,8 @@ export function SearchResults() {
 
     // Reset filters when courses change.
     useEffect(() => {
-        const filter = defaultFilterOptions(searchResults);
-        setFilterOptions(filter);
-        setDefaultFilter(filter);
+        setFilterOptions(defaultFilterOptions(searchResults));
+        setDefaultFilter(defaultFilterOptions(searchResults));
     }, [searchResults]);
 
     // Filter courses if the filter options have been defined. Always sort.
@@ -56,6 +64,10 @@ function SearchResultsNavBar(props: {
     const [filterMenuVisible, setFilterMenuVisible] = useState(false);
     const pastSearch = useSelector(selectPastSearch);
     const futureSearch = useSelector(selectFutureSearch);
+    const prevQueries = useSelector(selectPrevQueries);
+    const allGrades = useSelector(selectGrades);
+    const allReviews = useSelector(selectReviews);
+    const pending = useSelector(selectSearchPending);
     const dispatch = useDispatch<AppDispatch>();
 
     return (
@@ -63,7 +75,7 @@ function SearchResultsNavBar(props: {
             {/** Undo button. */}
             <IconButton
                 color="white"
-                disabled={!pastSearch}
+                disabled={!pastSearch || pending}
                 onClick={() => dispatch({ type: "search/undo" })}
             >
                 <WestIcon />
@@ -71,7 +83,7 @@ function SearchResultsNavBar(props: {
             {/** Redo button. */}
             <IconButton
                 color="white"
-                disabled={!futureSearch}
+                disabled={!futureSearch || pending}
                 onClick={() => dispatch({ type: "search/redo" })}
             >
                 <EastIcon />
@@ -79,13 +91,34 @@ function SearchResultsNavBar(props: {
             {/** Refresh button. */}
             <IconButton
                 color="white"
-                onClick={() => dispatch(fetchSchedule([]))}
+                disabled={pending}
+                onClick={async () => {
+                    dispatch(setSearchPending());
+                    const offerings = await requestSchedule(prevQueries);
+                    const courses = groupOfferings(offerings);
+                    dispatch(setSearchFulfilled({ queries: prevQueries, courses, refresh: true }))
+
+                    const grades = await requestGrades(courses.filter(({ department, number }) => !allGrades[`${department} ${number}`]));
+                    Object.keys(grades).forEach(courseName => dispatch(addCourseGrades({ courseName, grades: grades[courseName] })));
+
+                    const instructors = [...new Set(offerings.map(
+                        ({ instructors }) => instructors.map(
+                            ({ shortened_name }) => shortened_name
+                        )
+                    ).flat(4).filter(instructor => instructor !== "STAFF" && !(instructor in allReviews)))];
+
+                    for (const instructor of instructors) {
+                        const review = await searchProfessor(instructor);
+                        dispatch(addInstructorReview({ instructor, review }));
+                    }
+                }}
             >
-                {refreshIcon}
+                <RefreshIcon />
             </IconButton>
             {/** Home button. */}
             <IconButton
                 color="white"
+                disabled={pending}
                 onClick={() => {
                     dispatch(setDisplayResults(false));
                     dispatch(clearQueries());
@@ -93,7 +126,7 @@ function SearchResultsNavBar(props: {
                     dispatch({ type: "search/clearHistory" });
                 }}
             >
-                {homeIcon}
+                <HomeIcon />
             </IconButton>
             {/** Search box will expand. */}
             <div className="flex-grow w-0">

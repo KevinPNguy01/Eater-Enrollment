@@ -2,9 +2,16 @@ import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import { Course } from "types/Course";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "app/store";
-import { fetchSchedule, setSearchInput, setSearchType } from "stores/slices/Search";
+import { setSearchFulfilled, setSearchInput, setSearchPending, setSearchType } from "stores/slices/Search";
+import { groupOfferings } from "helpers/CourseOffering";
+import { requestGrades, requestSchedule } from "api/PeterPortalGraphQL";
+import { addCourseGrades } from "stores/slices/Grades";
+import { selectGrades } from "stores/selectors/Grades";
+import { addInstructorReview } from "stores/slices/Reviews";
+import { searchProfessor } from "utils/RateMyProfessors";
+import { selectReviews } from "stores/selectors/Reviews";
 
 const downArrowIcon = <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
     <path fill="#bbb" stroke="#bbb" strokeWidth="0.5" transform="translate(0,-1.5)" d="M8 9.8l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 10.293L8 9.8z" />
@@ -59,7 +66,8 @@ function GeInfo(props: { course: Course }) {
 
 function PrerequisiteInfo(props: { course: Course }) {
     const { course } = props;
-
+    const allGrades = useSelector(selectGrades);
+    const allReviews = useSelector(selectReviews);
     const dispatch = useDispatch<AppDispatch>();
 
     // Combine course department and numbers into ids.
@@ -97,10 +105,29 @@ function PrerequisiteInfo(props: { course: Course }) {
                             <a
                                 key={index}
                                 className="text-sky-500 hover:cursor-pointer"
-                                onClick={() => {
-                                    dispatch(fetchSchedule([{ quarter, year, department, number }]));
+                                onClick={async () => {
                                     dispatch(setSearchInput(`${department} ${number}`));
                                     dispatch(setSearchType("single"));
+
+                                    dispatch(setSearchPending());
+                                    const queries = [{ quarter, year, department, number }];
+                                    const offerings = await requestSchedule(queries);
+                                    const courses = groupOfferings(offerings);
+                                    dispatch(setSearchFulfilled({ queries, courses, refresh: false }))
+
+                                    const grades = await requestGrades(courses.filter(({ department, number }) => !allGrades[`${department} ${number}`]));
+                                    Object.keys(grades).forEach(courseName => dispatch(addCourseGrades({ courseName, grades: grades[courseName] })));
+
+                                    const instructors = [...new Set(offerings.map(
+                                        ({ instructors }) => instructors.map(
+                                            ({ shortened_name }) => shortened_name
+                                        )
+                                    ).flat(4).filter(instructor => instructor !== "STAFF" && !(instructor in allReviews)))];
+
+                                    for (const instructor of instructors) {
+                                        const review = await searchProfessor(instructor);
+                                        dispatch(addInstructorReview({ instructor, review }));
+                                    }
                                 }}
                             >
                                 {`${department} ${number} `}
@@ -117,6 +144,8 @@ function PrerequisiteInfo(props: { course: Course }) {
 
 function PrerequisiteFor(props: { course: Course }) {
     const { course } = props;
+    const allGrades = useSelector(selectGrades);
+    const allReviews = useSelector(selectReviews);
 
     const prerequisites = new Map<string, string[]>();
     course.prerequisite_for.map(({ department, number }) => {
@@ -141,10 +170,29 @@ function PrerequisiteFor(props: { course: Course }) {
                             <a
                                 key={number}
                                 className="text-nowrap text-sky-500 hover:cursor-pointer"
-                                onClick={() => {
-                                    dispatch(fetchSchedule([{ quarter, year, department, number }]))
+                                onClick={async () => {
                                     dispatch(setSearchInput(`${department} ${number}`));
                                     dispatch(setSearchType("single"));
+
+                                    dispatch(setSearchPending());
+                                    const queries = [{ quarter, year, department, number }];
+                                    const offerings = await requestSchedule(queries);
+                                    const courses = groupOfferings(offerings);
+                                    dispatch(setSearchFulfilled({ queries, courses, refresh: false }))
+
+                                    const grades = await requestGrades(courses.filter(({ department, number }) => !allGrades[`${department} ${number}`]));
+                                    Object.keys(grades).forEach(courseName => dispatch(addCourseGrades({ courseName, grades: grades[courseName] })));
+
+                                    const instructors = [...new Set(offerings.map(
+                                        ({ instructors }) => instructors.map(
+                                            ({ shortened_name }) => shortened_name
+                                        )
+                                    ).flat(4).filter(instructor => instructor !== "STAFF" && !(instructor in allReviews)))];
+
+                                    for (const instructor of instructors) {
+                                        const review = await searchProfessor(instructor);
+                                        dispatch(addInstructorReview({ instructor, review }));
+                                    }
                                 }}
                             >
                                 {`${department} ${number}`}

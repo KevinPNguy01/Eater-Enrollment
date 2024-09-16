@@ -6,7 +6,7 @@ export function newCustomEvent(): CustomEvent {
         title: "",
         days: 0,
         startTime: "10:10 AM",
-        endTime: "2:50 AM",
+        endTime: "2:50 PM",
         location: "",
         description: ""
     } as CustomEvent;

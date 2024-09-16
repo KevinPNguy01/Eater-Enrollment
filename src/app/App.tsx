@@ -6,11 +6,17 @@ import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
+import { requestGrades } from "api/PeterPortalGraphQL";
 import { SnackbarProvider } from "notistack";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { selectGrades } from "stores/selectors/Grades";
+import { selectReviews } from "stores/selectors/Reviews";
 import { selectCurrentScheduleIndex, selectScheduleSet } from "stores/selectors/ScheduleSet";
+import { addCourseGrades } from "stores/slices/Grades";
+import { addInstructorReview } from "stores/slices/Reviews";
 import { setState } from "stores/slices/ScheduleSet";
+import { searchProfessor } from "utils/RateMyProfessors";
 import { loadUser as loadUser2, saveUser } from "utils/SaveLoad";
 import useWindowDimensions from "utils/WindowDimensions";
 import { anteater } from "../assets";
@@ -22,6 +28,8 @@ import { themeOptions } from "./theme";
 export function App() {
 	const scheduleSet = useSelector(selectScheduleSet);
 	const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
+	const allReviews = useSelector(selectReviews);
+	const allGrades = useSelector(selectGrades);
 	const dispatch = useDispatch();
 
 	const { height, width } = useWindowDimensions();
@@ -32,6 +40,21 @@ export function App() {
 		if (state) {
 			dispatch(setState(state));
 			dispatch({ type: "schedules/clearHistory" })
+			const grades = await requestGrades(state.scheduleSet.map(({ courses }) => courses).flat().filter(({ department, number }) => !(`${department} ${number}` in allGrades)));
+			Object.keys(grades).forEach(courseName => dispatch(addCourseGrades({ courseName, grades: grades[courseName] })))
+			const instructors = [...new Set(state.scheduleSet.map(
+				({ courses }) => courses.map(
+					({ offerings }) => offerings.map(
+						({ instructors }) => instructors.map(
+							({ shortened_name }) => shortened_name
+						)
+					)
+				)
+			).flat(4).filter(instructor => instructor !== "STAFF" && !(instructor in allReviews)))];
+			for (const instructor of instructors) {
+				const review = await searchProfessor(instructor);
+				dispatch(addInstructorReview({ instructor, review }));
+			}
 		}
 
 	};
@@ -61,14 +84,15 @@ function NavBar(props: { save: (_: string) => void, load: (_: string) => void })
 	const { save, load } = props;
 	const [saveMenuOpen, setSaveMenuOpen] = useState(false);
 	const [loadMenuOpen, setLoadMenuOpen] = useState(false);
+	const { width, height } = useWindowDimensions();
 
 	return (
 		<nav className="bg-primary flex justify-between items-center">
 			<div className="flex items-center">
 				<img src={anteater} alt="Anteater Logo" className="w-[96px] h-[48px" />
-				<h1 className="text-nowrap">
+				{width >= height && <h1 className="text-nowrap">
 					Eater Enrollment
-				</h1>
+				</h1>}
 			</div>
 			<div className="flex gap-2 mr-8">
 				<Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={() => setSaveMenuOpen(!saveMenuOpen)}>

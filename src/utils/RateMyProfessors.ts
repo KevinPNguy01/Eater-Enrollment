@@ -1,32 +1,15 @@
-import { Course } from "types/Course";
-import { CourseOffering } from "types/CourseOffering";
 import { Review } from "types/Review";
 
-export async function populateReviews(courses: Course[]) {
-    // Map of instructor names to offerings they teach.
-    const instructorOfferings = new Map<string, CourseOffering[]>();
-    for (const course of courses) {
-        for (const offering of course.offerings) {
-            for (const instructor of offering.instructors) {
-                const name = instructor.shortened_name;
-                if (name === "STAFF") continue;
-                if (!instructorOfferings.has(instructor.shortened_name)) {
-                    instructorOfferings.set(instructor.shortened_name, []);
-                }
-                instructorOfferings.get(instructor.shortened_name)!.push(offering);
-            }
+export async function requestReviews(instructors: string[]) {
+    const reviews = {} as Record<string, Review>;
+    for (const instructor of instructors) {
+        const review = await searchProfessor(instructor);
+        if (review) {
+            reviews[instructor] = review;
         }
-    }
-
-    for (const [instructor, offerings] of instructorOfferings) {
-        (async () => {
-            const review = await searchProfessor(instructor);
-            if (review) {
-                offerings.forEach(offering => offering.instructors.filter(({ shortened_name }) => shortened_name === instructor).forEach(instructor => instructor.review = review));
-            }
-        })();
         await new Promise(r => setTimeout(r, 500));
     }
+    return reviews;
 }
 
 export async function searchProfessor(shortened_name: string) {
