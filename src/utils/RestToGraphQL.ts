@@ -110,6 +110,5 @@ export function restToGraphQL(data: { schools: _School[] }, year: string, quarte
             )
         )
     );
-    console.log(offerings)
     return offerings;
 }

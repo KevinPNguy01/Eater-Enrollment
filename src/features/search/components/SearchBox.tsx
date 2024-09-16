@@ -3,10 +3,17 @@ import { Tooltip } from "components/Tooltip";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectScheduleQueries, selectSearchInput, selectSearchQuarter, selectSearchType, selectSearchYear } from "stores/selectors/Search";
-import { addQuery, clearQueries, fetchSchedule, removeQuery, setDisplayResults, setSearchInput, toggleSearchType } from "stores/slices/Search";
+import { addQuery, clearQueries, removeQuery, setDisplayResults, setSearchFulfilled, setSearchInput, setSearchPending, toggleSearchType } from "stores/slices/Search";
 import { getSuggestions, SearchSuggestion } from "../utils/FormHelpers";
 import { QueryBubble } from "./QueryBubble";
 import { SearchList } from "./SearchList";
+import { requestGrades, requestSchedule } from "api/PeterPortalGraphQL";
+import { groupOfferings } from "helpers/CourseOffering";
+import { addCourseGrades } from "stores/slices/Grades";
+import { selectGrades } from "stores/selectors/Grades";
+import { selectReviews } from "stores/selectors/Reviews";
+import { addInstructorReview } from "stores/slices/Reviews";
+import { searchProfessor } from "utils/RateMyProfessors";
 
 const searchIcon = (
     <svg focusable="false" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -31,25 +38,62 @@ export function SearchBox() {
     const quarter = useSelector(selectSearchQuarter);
     const year = useSelector(selectSearchYear);
     const input = useSelector(selectSearchInput);
+    const allGrades = useSelector(selectGrades);
+    const allReviews = useSelector(selectReviews);
 
     const [searchSuggestions, setSearchSuggestions] = useState([] as SearchSuggestion[])
     useEffect(() => setSearchSuggestions(getSuggestions(input)), [input]);
 
-    const keyHandler = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const keyHandler = async (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key !== "Enter") return;
         // If the user presses enter
         if (searchType === "single") {
             if (searchSuggestions.length) {           // Add the first search suggestion and clear the search box.
-                dispatch(setDisplayResults(true));
-                dispatch(fetchSchedule([{ ...searchSuggestions[0].value, quarter, year }]))
                 e.currentTarget.blur();
+                dispatch(setDisplayResults(true));
+                const queries = [{ ...searchSuggestions[0].value, quarter, year }];
+                dispatch(setSearchPending());
+                const offerings = await requestSchedule(queries);
+                const courses = groupOfferings(offerings);
+                dispatch(setSearchFulfilled({ queries, courses, refresh: false }))
+
+                const grades = await requestGrades(courses.filter(({ department, number }) => !allGrades[`${department} ${number}`]));
+                Object.keys(grades).forEach(courseName => dispatch(addCourseGrades({ courseName, grades: grades[courseName] })))
+
+                const instructors = [...new Set(offerings.map(
+                    ({ instructors }) => instructors.map(
+                        ({ shortened_name }) => shortened_name
+                    )
+                ).flat(4).filter(instructor => instructor !== "STAFF" && !(instructor in allReviews)))];
+
+                for (const instructor of instructors) {
+                    const review = await searchProfessor(instructor);
+                    dispatch(addInstructorReview({ instructor, review }));
+                }
             }
         } else {
             if (searchSuggestions.length) {           // Add the first search suggestion and clear the search box.
                 dispatch(addQuery({ ...searchSuggestions[0].value, quarter, year }));
             } else if (!input.length && searchQueries.length) {     // Submit search if the box is empty.
-                dispatch(fetchSchedule(searchQueries));
                 e.currentTarget.blur();
+                dispatch(setSearchPending());
+                const offerings = await requestSchedule(searchQueries);
+                const courses = groupOfferings(offerings);
+                dispatch(setSearchFulfilled({ queries: searchQueries, courses, refresh: false }))
+
+                const grades = await requestGrades(courses.filter(({ department, number }) => !allGrades[`${department} ${number}`]));
+                Object.keys(grades).forEach(courseName => dispatch(addCourseGrades({ courseName, grades: grades[courseName] })));
+
+                const instructors = [...new Set(offerings.map(
+                    ({ instructors }) => instructors.map(
+                        ({ shortened_name }) => shortened_name
+                    )
+                ).flat(4).filter(instructor => instructor !== "STAFF" && !(instructor in allReviews)))];
+
+                for (const instructor of instructors) {
+                    const review = await searchProfessor(instructor);
+                    dispatch(addInstructorReview({ instructor, review }));
+                }
             }
         }
     };

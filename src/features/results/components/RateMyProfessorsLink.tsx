@@ -1,5 +1,7 @@
 import Card from "@mui/material/Card";
 import { useState } from "react";
+import { useSelector } from "react-redux";
+import { selectReviews } from "stores/selectors/Reviews";
 import { Instructor } from "types/Instructor";
 import { Review } from "types/Review";
 
@@ -9,8 +11,10 @@ import { Review } from "types/Review";
  * @param instructor The instructor to render the RateMyProfessors data for.
  */
 export function RateMyProfessorsLink(props: { instructor: Instructor }) {
+    const { shortened_name } = props.instructor;
     const [reviewVisible, setReviewVisible] = useState(false);
-    const { shortened_name, review } = props.instructor;
+    const allReviews = useSelector(selectReviews);
+    const review = allReviews[shortened_name];
 
     // If the instructor is STAFF, return regular text.
     if (shortened_name === "STAFF") {

@@ -1,7 +1,11 @@
 import Card from "@mui/material/Card";
+import { newGradeDistributionCollection, updateGradesCollection } from "helpers/GradeDistributionCollection";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { selectGrades } from "stores/selectors/Grades";
 import { CourseOffering } from "types/CourseOffering";
+import { GradeDistributionCollection } from "types/GradeDistributionCollection";
 
 /**
  * Zotistics link tag for the GradeDistributionCollectionAggregate.
@@ -10,13 +14,33 @@ import { CourseOffering } from "types/CourseOffering";
  */
 export function ZotisticsLink(props: { offering: CourseOffering }) {
     const [gradesVisible, setGradesVisible] = useState(false);
+    const allGrades = useSelector(selectGrades);
     const { offering } = props;
-    const { grades, course } = offering;
+    const { course } = offering;
     const { department, number } = course;
-    // Return null if grades don't exist.
-    if (!grades || !grades.aggregate.average_gpa) {
-        return null;
+
+    const courseGrades = allGrades[`${department} ${number}`];
+    if (!courseGrades) {
+        return;
     }
+
+    // Combine grades for when there are multiple instructors teaching a single course offering.
+    const combinedGrades = newGradeDistributionCollection();
+    for (const instructor of offering.instructors) {
+        const instructorGrades = courseGrades[instructor.shortened_name.toUpperCase()];
+        if (instructorGrades && instructor.shortened_name !== "STAFF") {
+            updateGradesCollection(combinedGrades, instructorGrades);
+            combinedGrades.instructors.push(instructor.shortened_name)
+        }
+    }
+
+    // Use average grades from all instructors if the instructor is unspecified or has no grades records.
+    const staffGrades = courseGrades["STAFF"];
+    if (staffGrades && !combinedGrades.instructors.length) {
+        updateGradesCollection(combinedGrades, staffGrades);
+    }
+
+    const grades = combinedGrades.instructors.length ? combinedGrades : staffGrades;
 
     const zotisticsLink = `https://zotistics.com/?&selectQuarter=&selectYear=&selectDep=${encodeURIComponent(department)}&classNum=${number}&code=&submit=Submit`;
     return (
@@ -35,7 +59,7 @@ export function ZotisticsLink(props: { offering: CourseOffering }) {
             </a>
 
             {/** Display Zotistics graph if gpa is hovered over. */}
-            {gradesVisible ? <ZotisticsGraph offering={props.offering} /> : null}
+            {gradesVisible ? <ZotisticsGraph offering={props.offering} grades={grades} /> : null}
         </div>
     );
 }
@@ -44,9 +68,8 @@ export function ZotisticsLink(props: { offering: CourseOffering }) {
  * Graph for a grades distribution.
  * @param offering The offering to display a graph for.
  */
-function ZotisticsGraph(props: { offering: CourseOffering }) {
-    const { offering } = props;
-    const { grades } = offering;
+function ZotisticsGraph(props: { offering: CourseOffering, grades: GradeDistributionCollection }) {
+    const { offering, grades } = props;
     const { aggregate } = grades;
 
     const letterGrades = new Map([

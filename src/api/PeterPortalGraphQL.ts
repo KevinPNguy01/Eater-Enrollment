@@ -100,7 +100,7 @@ export async function requestSchedule(queries: ScheduleQuery[]): Promise<CourseO
 
 /**
  * Requests grades from the PeterPortal GraphQL API for the given courses.
- * @returns A map of "<department> <number> <instructor>" to GradeDistributions.
+ * @returns
  */
 export async function requestGrades(courses: Course[]) {
     // The fields to select on GradeDistributionCollection.

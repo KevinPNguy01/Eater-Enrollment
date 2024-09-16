@@ -48,32 +48,37 @@ export const updateGradesCollection = (grades1: GradeDistributionCollection, gra
 }
 
 /**
- * Aggregate all the GradeDistributions into a Map with unique department+number+instructor keys.
+ * Aggregate all the GradeDistributions into an object.
  * @param grades 
- * @returns A map of "<department> <number> <instructor>" to GradeDistributions.
+ * @returns
  */
 export function aggregatedGrades(grades: GradeDistributionCollection) {
-    // A map of "<department> <number> <instructor>" to GradeDistributions.
-    const grouped = new Map<string, GradeDistributionCollection>();
+    const grouped = {} as Record<string, Record<string, GradeDistributionCollection>>;
 
     // Go through every instructor of every grade distribution.
     grades.grade_distributions.forEach((distribution) => {
         const offering = distribution.course_offering;
         const course = offering.course;
+
+        // Create Record of grades for each course.
+        const courseKey = `${course.department} ${course.number}`;
+        if (!grouped[courseKey]) {
+            grouped[courseKey] = {} as Record<string, GradeDistributionCollection>;
+        }
+        const courseGrades = grouped[courseKey];
+
         offering.instructors.forEach(({ shortened_name: instructor }) => {
             // Update grades for instructor.
-            const key = `${course.department} ${course.number} ${instructor}`
-            if (!grouped.has(key)) {
-                grouped.set(key, newGradeDistributionCollection());
+            if (!courseGrades[instructor]) {
+                courseGrades[instructor] = newGradeDistributionCollection();
             }
-            updateGrades(grouped.get(key)!, distribution);
+            updateGrades(courseGrades[instructor], distribution);
 
             // Update grades for average/unspecified instructor.
-            const staffKey = `${course.department} ${course.number} STAFF`;
-            if (!grouped.has(staffKey)) {
-                grouped.set(staffKey, newGradeDistributionCollection());
+            if (!courseGrades["STAFF"]) {
+                courseGrades["STAFF"] = newGradeDistributionCollection();
             }
-            updateGrades(grouped.get(staffKey)!, distribution);
+            updateGrades(courseGrades["STAFF"], distribution);
         });
     });
 

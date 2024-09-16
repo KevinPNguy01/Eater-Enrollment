@@ -45,7 +45,7 @@ export function createEvents(offerings: CourseOffering[]) {
                     title: `${offering.course.department} ${offering.course.number} ${offering.section.type}`,
                     start: moment(offering.parsed_meetings[0].startTime, "hh:mm A").weekday(i).toISOString(),
                     end: moment(offering.parsed_meetings[0].endTime, "hh:mm A").weekday(i).toISOString(),
-                    id: `${offering.section.code}-${i}`,
+                    id: `${offering.quarter}-${offering.year}-${offering.section.code}-${i}`,
                     backgroundColor: offering.color,
                     textColor: getTextColor(offering.color),
                     extendedProps: {

@@ -21,3 +21,5 @@ export const selectSearchInput = (state: RootState) => state.searchResults.prese
 export const selectPastSearch = (state: RootState) => state.searchResults.past[0];
 
 export const selectFutureSearch = (state: RootState) => state.searchResults.future[0];
+
+export const selectPrevQueries = (state: RootState) => state.searchResults.present.prevQueries;
