@@ -28,7 +28,7 @@ body {
 
 /* Reduce margin between columns */
 .fc-timegrid-col-events {
-  margin: 0px 2px 0px 2px !important;
+  margin: 0px 0px 0px 0px !important;
 }
 
 /* Remove white border around events */
@@ -37,6 +37,10 @@ body {
   border-width: 2px;
   border-radius: 8px;
   font-weight: 500;
+}
+
+.event-smaller .fc-event {
+  border-width: 1.5px;
 }
 
 .fc-event:hover {
@@ -210,4 +214,56 @@ fieldset {
 .hide-scroll::-webkit-scrollbar {
   display: none;
   /* Safari and Chrome */
+}
+
+.event-small .fc-event-title {
+  font-size: 75% !important;
+  line-height: 110% !important;
+}
+
+.event-small .fc-event-time {
+  line-height: 110% !important;
+  font-size: 65% !important;
+}
+
+.event-small .fc-timegrid-slot-label {
+  font-size: 70% !important;
+}
+
+.event-small col {
+  width: 11% !important;
+}
+
+.event-smaller .fc-timegrid-slot-label {
+  font-size: 60% !important;
+}
+
+.event-smaller .fc-event-title {
+  font-size: 60% !important;
+  line-height: 110% !important;
+}
+
+.event-smaller .fc-event-time {
+  line-height: 110% !important;
+  font-size: 57.5% !important;
+}
+
+.event-smaller col {
+  width: 9% !important;
+}
+
+.event-smaller .fc-event-time {
+  letter-spacing: -0.75px;
+}
+
+.fc .fc-scrollgrid-section th {
+  background-color: unset;
+}
+
+.clip-timegrid-start .fc-timegrid-slots tbody tr:first-child {
+  display: none;
+}
+
+.clip-timegrid-end .fc-timegrid-slots tbody tr:last-child {
+  display: none;
 }
