@@ -82,7 +82,7 @@ function CourseCheckBox(props: { offering: CourseOffering }) {
             type="checkbox"
             onChange={handleCheckBoxChange}
             className={`${isMobile ? "w-3" : ""} checkbox-${offering.course.id}-${offering.section.code}`}
-            defaultChecked={scheduleContainsOffering(currentSchedule, offering)}
+            checked={scheduleContainsOffering(currentSchedule, offering)}
         />
     );
 }
