@@ -16,6 +16,8 @@
     "@types/node": "^22.0.0",
     "@types/request": "^2.48.12",
     "@types/sqlite3": "^3.1.11",
+    "axios": "^1.7.7",
+    "firebase-tools": "^13.17.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
   },
@@ -24,5 +26,9 @@
   },
   "devDependencies": {
     "tsx": "^4.16.2"
-  }
+  },
+  "files": [
+    "src/server.ts",
+    "schedules.sqlite3"
+  ]
 }

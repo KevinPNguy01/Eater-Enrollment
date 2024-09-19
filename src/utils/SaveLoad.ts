@@ -8,6 +8,9 @@ import { CourseOffering } from "types/CourseOffering";
 import { Schedule } from "types/Schedule";
 import { ScheduleQuery } from "types/ScheduleQuery";
 
+const saveUserUrl = "https://saveuser-htn7okprja-uc.a.run.app";
+const loadUserUrl = "https://loaduser-htn7okprja-uc.a.run.app";
+
 /**
  * Convert the session data into a string and send it to the backend to store in the database.
  * @param username 
@@ -35,7 +38,7 @@ export async function saveUser(username: string, scheduleSet: Schedule[], curren
     }).join("\n");
 
     // Send data to the backend.
-    const response = await fetch('/api/saveUser', {
+    const response = await fetch(saveUserUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -58,7 +61,7 @@ export async function saveUser(username: string, scheduleSet: Schedule[], curren
  * @returns A state object containing the schedule set and index, or undefined if the user data couldn't be fetched. 
  */
 export async function loadUser(userId: string) {
-    const response = await fetch(`/api/loadUser/${userId}`);
+    const response = await fetch(`${loadUserUrl}/${userId}`);
 
     // Send error message if the backend returned an error.
     if (!response.ok) {

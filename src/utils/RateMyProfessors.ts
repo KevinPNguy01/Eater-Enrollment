@@ -1,5 +1,7 @@
 import { Review } from "types/Review";
 
+const professorsUrl = "https://professors-htn7okprja-uc.a.run.app";
+
 export async function requestReviews(instructors: string[]) {
     const reviews = {} as Record<string, Review>;
     for (const instructor of instructors) {
@@ -16,7 +18,7 @@ export async function searchProfessor(shortened_name: string) {
     const name = shortened_name;
     const [lastName, firstInitial] = name.toLowerCase().split(", ");
     let instructorReview = null as unknown as Review;
-    await fetch(`/api/professors?q=${name.replace(/,/g, '').replace(/\./g, '')}`)
+    await fetch(`${professorsUrl}?q="${name.replace(/,/g, '').replace(/\./g, '')}"`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok ' + response.statusText);
