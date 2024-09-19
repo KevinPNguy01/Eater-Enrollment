@@ -26,6 +26,7 @@
     "dayjs": "^1.11.13",
     "downloadjs": "^1.4.7",
     "express": "^4.19.2",
+    "firebase": "^10.13.2",
     "fullcalendar": "^6.1.10",
     "graphql": "^16.8.1",
     "html-to-image": "^1.11.11",
