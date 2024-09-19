@@ -35,7 +35,7 @@ export function MapBody(props: { offerings: CourseOffering[], customEvents: Cust
         <MapContainer center={[33.64606888579674, -117.84275910500428]} zoom={17} className="h-full">
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://d32w28pcyzk3qf.cloudfront.net/{z}/{x}/{y}{r}.png"
+                url="https://d32w28pcyzk3qf.cloudfront.net/{z}/{x}/{y}.png"
                 tileSize={512}
                 maxZoom={21}
                 minZoom={15}

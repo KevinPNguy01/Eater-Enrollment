@@ -8,19 +8,22 @@ import { scheduleContainsOffering } from "../../../helpers/Schedule";
 import { BuildingLink } from "./BuildingLink";
 import { RateMyProfessorsLink } from "./RateMyProfessorsLink";
 import { ZotisticsLink } from "./ZotisticsLink";
+import useWindowDimensions from "utils/WindowDimensions";
 
 /**
  * Component for displaying a course result as a tr, to be used in CourseResult.
  */
 export function OfferingResult(props: { offering: CourseOffering }) {
     const { offering } = props;
+    const { height, width } = useWindowDimensions();
+    const isMobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) || (width > height && 1.33 * width / 2 < height);
 
     return (
-        <tr className="course-result odd:bg-quaternary even:bg-tertiary" key={offering.section.code}>
+        <tr className={`course-result odd:bg-quaternary even:bg-tertiary ${isMobile ? "text-2xs" : "text-xs"}`} key={offering.section.code}>
             <td>
                 <CourseCheckBox offering={offering} />
             </td>
-            <td>
+            <td className="!pl-0">
                 {offering.section.code}
             </td>
             <td>
@@ -66,6 +69,8 @@ function CourseCheckBox(props: { offering: CourseOffering }) {
     const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
     const dispatch = useDispatch();
     const { offering } = props;
+    const { height, width } = useWindowDimensions();
+    const isMobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) || (width > height && 1.33 * width / 2 < height);
 
     // Add or remove offering depending on the box was checked or unchecked.
     const handleCheckBoxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,7 +81,7 @@ function CourseCheckBox(props: { offering: CourseOffering }) {
         <input
             type="checkbox"
             onChange={handleCheckBoxChange}
-            className={`checkbox-${offering.course.id}-${offering.section.code}`}
+            className={`${isMobile ? "w-3" : ""} checkbox-${offering.course.id}-${offering.section.code}`}
             defaultChecked={scheduleContainsOffering(currentSchedule, offering)}
         />
     );

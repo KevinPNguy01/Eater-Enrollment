@@ -22,6 +22,7 @@ import { clearQueries, setDisplayResults, setSearchFulfilled, setSearchInput, se
 import { addInstructorReview } from 'stores/slices/Reviews';
 import { searchProfessor } from 'utils/RateMyProfessors';
 import { selectReviews } from 'stores/selectors/Reviews';
+import useWindowDimensions from 'utils/WindowDimensions';
 
 export function SearchResults() {
     const searchResults = useSelector(selectSearchResults);
@@ -70,10 +71,18 @@ function SearchResultsNavBar(props: {
     const pending = useSelector(selectSearchPending);
     const dispatch = useDispatch<AppDispatch>();
 
+    const { height, width } = useWindowDimensions();
+    const isMobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) || (width > height && 1.33 * width / 2 < height);
+    const [searching, setSearching] = useState(false);
+
+    const buttonClass = `${(isMobile && searching) ? "max-w-0 opacity-0 !p-0" : "max-w-full"}`;
+
     return (
-        <nav className="flex bg-tertiary border border-quaternary px-2 py-1 mb-4 rounded whitespace-pre text-center content-center items-center gap-1">
+        <nav className={`flex flex-nowrap bg-tertiary border border-quaternary ${isMobile ? "px-1" : "px-2"} py-1 mb-4 rounded whitespace-pre text-center content-center items-center ${searching ? "gap-[0.25px]}" : ""}`}>
             {/** Undo button. */}
             <IconButton
+                className={buttonClass}
+                size={isMobile ? "small" : "medium"}
                 color="white"
                 disabled={!pastSearch || pending}
                 onClick={() => dispatch({ type: "search/undo" })}
@@ -82,6 +91,8 @@ function SearchResultsNavBar(props: {
             </IconButton>
             {/** Redo button. */}
             <IconButton
+                className={buttonClass}
+                size={isMobile ? "small" : "medium"}
                 color="white"
                 disabled={!futureSearch || pending}
                 onClick={() => dispatch({ type: "search/redo" })}
@@ -90,6 +101,8 @@ function SearchResultsNavBar(props: {
             </IconButton>
             {/** Refresh button. */}
             <IconButton
+                className={buttonClass}
+                size={isMobile ? "small" : "medium"}
                 color="white"
                 disabled={pending}
                 onClick={async () => {
@@ -117,6 +130,8 @@ function SearchResultsNavBar(props: {
             </IconButton>
             {/** Home button. */}
             <IconButton
+                className={buttonClass}
+                size={isMobile ? "small" : "medium"}
                 color="white"
                 disabled={pending}
                 onClick={() => {
@@ -129,11 +144,22 @@ function SearchResultsNavBar(props: {
                 <HomeIcon />
             </IconButton>
             {/** Search box will expand. */}
-            <div className="flex-grow w-0">
+            <div
+                className={`relative w-0 flex-grow ${isMobile ? "text-sm" : "text-base"}`}
+                onTouchStart={() => setSearching(true)}
+                onBlur={() => setSearching(false)}
+            >
                 <SearchBox />
             </div>
             {/** Sort button/menu. */}
-            <IconButton onClick={() => setSortMenuVisible(true)}>{sortIcon}</IconButton>
+            <IconButton
+                className={buttonClass}
+                size={isMobile ? "small" : "medium"}
+                color="white"
+                onClick={() => setSortMenuVisible(true)}
+            >
+                {sortIcon}
+            </IconButton>
             {sortMenuVisible && (
                 <SortingMenu
                     optionsState={sortOptionsState}
@@ -141,7 +167,14 @@ function SearchResultsNavBar(props: {
                 />
             )}
             {/** Filter button/menu. */}
-            <IconButton onClick={() => setFilterMenuVisible(true)}>{filterIcon}</IconButton>
+            <IconButton
+                className={buttonClass}
+                size={isMobile ? "small" : "medium"}
+                color="white"
+                onClick={() => setFilterMenuVisible(true)}
+            >
+                {filterIcon}
+            </IconButton>
             {filterMenuVisible && (
                 <FilterMenu
                     optionsState={filterOptionsState}
