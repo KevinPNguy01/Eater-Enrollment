@@ -1,6 +1,9 @@
 import { Course } from "types/Course";
 import { CourseOffering } from "types/CourseOffering";
+import { GradeDistributionCollection } from "types/GradeDistributionCollection";
 import { Instructor } from "types/Instructor";
+import { Review } from "types/Review";
+import { getOfferingGrades } from "utils/GradeDistributionCollection";
 
 /**
  * Sorts two courses by their department and court number.
@@ -26,66 +29,71 @@ export function sortCoursesByName(a: Course, b: Course) {
 
 /**
  * @param defaultGpa The default GPA to give to course offerings with null grades.
+ * @param grades A Record of course ids to Records of instructor names to GradeDistributionCollections.
  * @returns A sorting function to sort two course offerings by GPA.
  */
-export function sortOfferingsByGPA(defaultGpa: number) {
+export function sortOfferingsByGPA(defaultGpa: number, grades: Record<string, Record<string, GradeDistributionCollection>>) {
     return (a: CourseOffering, b: CourseOffering) => {
-        const gpaA = a.grades?.aggregate?.average_gpa || defaultGpa;
-        const gpaB = b.grades?.aggregate?.average_gpa || defaultGpa;
+        const gpaA = getOfferingGrades(grades, a)?.aggregate.average_gpa || defaultGpa;
+        const gpaB = getOfferingGrades(grades, b)?.aggregate.average_gpa || defaultGpa;
         return gpaA - gpaB;
     }
 }
 
 /**
  * @param defaultGpa The default GPA to give to course offerings with null grades.
+ * @param grades A Record of course ids to Records of instructor names to GradeDistributionCollections.
  * @returns A sorting function to sort two courses by GPA.
  */
-export function sortCoursesByGPA(defaultGpa: number) {
+export function sortCoursesByGPA(defaultGpa: number, grades: Record<string, Record<string, GradeDistributionCollection>>) {
     return (a: Course, b: Course) => {
         // Find the offering to represent the given course when comparing GPA.
         const getOffering = (course: Course) => {
-            return course.offerings.reduce((a, b) => sortOfferingsByGPA(defaultGpa)(a, b) < 0 ? a : b);
+            return course.offerings.reduce((a, b) => sortOfferingsByGPA(defaultGpa, grades)(a, b) < 0 ? a : b);
         }
-        return sortOfferingsByGPA(defaultGpa)(getOffering(a), getOffering(b));
+        return sortOfferingsByGPA(defaultGpa, grades)(getOffering(a), getOffering(b));
     }
-} 
+}
 
 /**
  * @param defaultRmp The default rating to give to instructors with no reviews.
+ * @param reviews A record of instructor names to Reviews.
  * @returns A sorting function to sort two instructors by their average rating.
  */
-export function sortInstructorsByRMP(defaultRmp: number) {
+export function sortInstructorsByRMP(defaultRmp: number, reviews: Record<string, Review>) {
     return (a: Instructor, b: Instructor) => {
-        const rmpA = a.review?.avgRating || defaultRmp;
-        const rmpB = b.review?.avgRating || defaultRmp;
+        const rmpA = reviews[a.shortened_name]?.avgRating || defaultRmp;
+        const rmpB = reviews[b.shortened_name]?.avgRating || defaultRmp;
         return rmpA < rmpB ? -1 : 1;
     }
-} 
+}
 
 /**
  * @param defaultRmp The default rating to give to instructors with no reviews.
+ * @param reviews A record of instructor names to Reviews.
  * @returns A sorting function to sort course offerings by their instructors' ratings.
  */
-export function sortOfferingsByRMP(defaultRmp: number) {
+export function sortOfferingsByRMP(defaultRmp: number, reviews: Record<string, Review>) {
     return (a: CourseOffering, b: CourseOffering) => {
         // Find the instructor to represent the given course offering when comparing RMP.
         const getInstructor = (offering: CourseOffering) => {
-            return offering.instructors.reduce((a, b) => sortInstructorsByRMP(defaultRmp)(a, b) < 0 ? a : b);
+            return offering.instructors.reduce((a, b) => sortInstructorsByRMP(defaultRmp, reviews)(a, b) < 0 ? a : b);
         }
-        return sortInstructorsByRMP(defaultRmp)(getInstructor(a), getInstructor(b));
+        return sortInstructorsByRMP(defaultRmp, reviews)(getInstructor(a), getInstructor(b));
     }
-} 
+}
 
 /**
  * @param defaultRmp The default rating to give to instructors with no reviews.
+ * @param reviews A record of instructor names to Reviews.
  * @returns A sorting function to sort courses by their instructors' ratings.
  */
-export function sortCoursesByRMP(defaultRmp: number) {
+export function sortCoursesByRMP(defaultRmp: number, reviews: Record<string, Review>) {
     return (a: Course, b: Course) => {
         // Find the offering to represent the given course when comparing RMP.
         const getOffering = (course: Course) => {
-            return course.offerings.reduce((a, b) => sortOfferingsByRMP(defaultRmp)(a, b) < 0 ? a : b);
+            return course.offerings.reduce((a, b) => sortOfferingsByRMP(defaultRmp, reviews)(a, b) < 0 ? a : b);
         }
-        return sortOfferingsByRMP(defaultRmp)(getOffering(a), getOffering(b));
+        return sortOfferingsByRMP(defaultRmp, reviews)(getOffering(a), getOffering(b));
     }
 } 

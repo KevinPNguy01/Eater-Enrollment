@@ -4,6 +4,8 @@ import { Course } from "types/Course";
 import { FilterOptions, SortBy, SortDirection, SortOptions } from "../types/options";
 import { filterDays, filterLevel, filterRestrictions, filterSectionTypes, filterStatus, filterTime } from "./FilterFunctions";
 import { sortCoursesByGPA, sortCoursesByName, sortCoursesByRMP, sortInstructorsByRMP, sortOfferingsByGPA, sortOfferingsByRMP } from "./SortFunctions";
+import { GradeDistributionCollection } from "types/GradeDistributionCollection";
+import { Review } from "types/Review";
 
 /**
  * @param courses The courses to filter.
@@ -30,9 +32,11 @@ export function filterCourses(courses: Course[], filterOptions: FilterOptions) {
 /**
  * @param courses The courses to sort.
  * @param sortOptions An object containg the options to sort by.
+ * @param grades A Record of course ids to Records of instructor names to GradeDistributionCollections.
+ * @param reviews A record of instructor names to Reviews.
  * Sorts the array of courses in place.
  */
-export function sortCourses(courses: Course[], sortOptions: SortOptions) {
+export function sortCourses(courses: Course[], sortOptions: SortOptions, grades: Record<string, Record<string, GradeDistributionCollection>>, reviews: Record<string, Review>) {
     const { GPA, RMP } = SortBy;
     const { Ascending, Descending } = SortDirection;
     const { sortBy, direction, sortWithin } = sortOptions;
@@ -43,8 +47,8 @@ export function sortCourses(courses: Course[], sortOptions: SortOptions) {
     const sortedCourses = courses.toSorted(
         (() => {
             switch (sortBy) {
-                case GPA: return sortCoursesByGPA(defaultGpa);
-                case RMP: return sortCoursesByRMP(defaultRmp);
+                case GPA: return sortCoursesByGPA(defaultGpa, grades);
+                case RMP: return sortCoursesByRMP(defaultRmp, reviews);
                 default: return sortCoursesByName;
             }
         })()
@@ -58,8 +62,8 @@ export function sortCourses(courses: Course[], sortOptions: SortOptions) {
         course.offerings = course.offerings.toSorted(
             (() => {
                 switch (sortBy) {
-                    case GPA: return sortOfferingsByGPA(defaultGpa);
-                    case RMP: return sortOfferingsByRMP(defaultRmp);
+                    case GPA: return sortOfferingsByGPA(defaultGpa, grades);
+                    case RMP: return sortOfferingsByRMP(defaultRmp, reviews);
                     default: return () => 0;
                 }
             })()
@@ -69,7 +73,7 @@ export function sortCourses(courses: Course[], sortOptions: SortOptions) {
 
         // Sort instructors if necessary.
         course.offerings.forEach(offering => {
-            offering.instructors = offering.instructors.toSorted(sortInstructorsByRMP(defaultRmp))
+            offering.instructors = offering.instructors.toSorted(sortInstructorsByRMP(defaultRmp, reviews))
             if (direction === Descending) offering.instructors = offering.instructors.toReversed()
         });
     });
