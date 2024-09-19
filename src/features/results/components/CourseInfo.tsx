@@ -12,6 +12,7 @@ import { selectGrades } from "stores/selectors/Grades";
 import { addInstructorReview } from "stores/slices/Reviews";
 import { searchProfessor } from "utils/RateMyProfessors";
 import { selectReviews } from "stores/selectors/Reviews";
+import useWindowDimensions from "utils/WindowDimensions";
 
 const downArrowIcon = <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
     <path fill="#bbb" stroke="#bbb" strokeWidth="0.5" transform="translate(0,-1.5)" d="M8 9.8l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 10.293L8 9.8z" />
@@ -20,17 +21,22 @@ const downArrowIcon = <svg xmlns="http://www.w3.org/2000/svg" width="24" height=
 
 export function CourseInfo(props: { course: Course }) {
     const { course } = props;
+    const { height, width } = useWindowDimensions();
+    const isMobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) || (width > height && 1.33 * width / 2 < height);
     return (
-        <Accordion>
+        <Accordion sx={{ maxWidth: "calc(100vw - 10px)" }}>
             <AccordionSummary
                 expandIcon={downArrowIcon}
                 aria-controls="panel1-content"
                 id="panel1-header"
+                className="[&>*]:!m-0 [&>*]:!my-3 !min-h-fit"
             >
-                <span className="text-base font-semibold">{`${course.department} ${course.number}: ${course.title}`}</span>
+                <span className={`${isMobile ? "!text-xs" : "text-base"} font-semibold w-full text-left`}>
+                    {`${course.department} ${course.number}: ${course.title}`}
+                </span>
             </AccordionSummary>
             <AccordionDetails className="text-left text-base">
-                <div className="flex flex-col gap-4">
+                <div className={`flex flex-col gap-4 ${isMobile ? "!text-xs" : "text-base"}`}>
                     {course.description ? <CourseDescription course={course} /> : null}
                     {course.ge_list.length ? <GeInfo course={course} /> : null}
                     {course.prerequisite_text ? <PrerequisiteInfo course={course} /> : null}

@@ -98,7 +98,8 @@ export function SearchBox() {
         }
     };
 
-    const toggleSearchTypeHandler = () => {
+    const toggleSearchTypeHandler: React.MouseEventHandler<HTMLDivElement> = e => {
+        e.preventDefault();
         dispatch(toggleSearchType());
         // If state is now single-search, there are queries, and the user isn't typing
         if (searchType === "multi" && searchQueries.length && !input.length) {
@@ -123,10 +124,10 @@ export function SearchBox() {
 
     return (
         <div
-            className={`relative h-10 bg-secondary flex px-2 items-center border-quaternary border ${searchSuggestions.length && focus ? "rounded-t-[1.25rem] border-b-0" : "rounded-[1.25rem]"}`}
+            className={`w-full relative h-full bg-secondary flex px-2 items-center border-quaternary border ${searchSuggestions.length && focus ? "rounded-t-[1.125rem] border-b-0" : "rounded-[1.125rem]"}`}
         >
             {/** Magnifying glass icon to toggle mutli-search. */}
-            <div className="relative group hover:cursor-pointer" onClick={toggleSearchTypeHandler}>
+            <div id="toggle-multi-search" className="relative group hover:cursor-pointer" onMouseDown={toggleSearchTypeHandler}>
                 {searchType === "multi" ? multiSearchIcon : searchIcon}
                 <Tooltip className="select-none left-1/2 -translate-x-1/2 text-nowrap text-xs mt-1 bg-tertiary border border-neutral-500 p-1.5 text-neutral-300 hidden group-hover:block" text="Toggle multi-search" />
             </div>
@@ -152,9 +153,7 @@ export function SearchBox() {
                         dispatch(setSearchInput(target.value));
                     }}
                     onKeyDown={keyHandler}
-                    onFocus={() => {
-                        setFocus(true);
-                    }}
+                    onFocus={() => setFocus(true)}
                     onBlur={() => setFocus(false)}
                 />
             </div>
@@ -169,7 +168,7 @@ export function SearchBox() {
                         xmlns="http://www.w3.org/2000/svg"
                         width={24}
                         height={24}
-                        onClick={() => {
+                        onMouseDown={() => {
                             dispatch(setSearchInput(""));
                             dispatch(clearQueries());
                         }}
@@ -178,7 +177,6 @@ export function SearchBox() {
                     </svg>
                 </div>
             ) : null}
-
             {focus && searchSuggestions.length > 0 && <SearchList suggestions={searchSuggestions} />}
         </div>
     );
