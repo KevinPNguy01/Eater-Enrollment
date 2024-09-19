@@ -1,11 +1,11 @@
 import Card from "@mui/material/Card";
-import { newGradeDistributionCollection, updateGradesCollection } from "helpers/GradeDistributionCollection";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { selectGrades } from "stores/selectors/Grades";
 import { CourseOffering } from "types/CourseOffering";
 import { GradeDistributionCollection } from "types/GradeDistributionCollection";
+import { getOfferingGrades } from "utils/GradeDistributionCollection";
 
 /**
  * Zotistics link tag for the GradeDistributionCollectionAggregate.
@@ -24,23 +24,10 @@ export function ZotisticsLink(props: { offering: CourseOffering }) {
         return;
     }
 
-    // Combine grades for when there are multiple instructors teaching a single course offering.
-    const combinedGrades = newGradeDistributionCollection();
-    for (const instructor of offering.instructors) {
-        const instructorGrades = courseGrades[instructor.shortened_name.toUpperCase()];
-        if (instructorGrades && instructor.shortened_name !== "STAFF") {
-            updateGradesCollection(combinedGrades, instructorGrades);
-            combinedGrades.instructors.push(instructor.shortened_name)
-        }
+    const grades = getOfferingGrades(allGrades, offering);
+    if (!grades) {
+        return;
     }
-
-    // Use average grades from all instructors if the instructor is unspecified or has no grades records.
-    const staffGrades = courseGrades["STAFF"];
-    if (staffGrades && !combinedGrades.instructors.length) {
-        updateGradesCollection(combinedGrades, staffGrades);
-    }
-
-    const grades = combinedGrades.instructors.length ? combinedGrades : staffGrades;
 
     const zotisticsLink = `https://zotistics.com/?&selectQuarter=&selectYear=&selectDep=${encodeURIComponent(department)}&classNum=${number}&code=&submit=Submit`;
     return (

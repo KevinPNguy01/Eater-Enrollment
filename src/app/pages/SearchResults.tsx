@@ -27,6 +27,8 @@ import useWindowDimensions from 'utils/WindowDimensions';
 export function SearchResults() {
     const searchResults = useSelector(selectSearchResults);
     const pending = useSelector(selectSearchPending);
+    const allGrades = useSelector(selectGrades);
+    const allReviews = useSelector(selectReviews);
 
     const [sortOptions, setSortOptions] = useState(defaultSortOptions);
     const [filterOptions, setFilterOptions] = useState(null as unknown as FilterOptions);
@@ -40,7 +42,7 @@ export function SearchResults() {
 
     // Filter courses if the filter options have been defined. Always sort.
     const filteredCourses = filterOptions ? filterCourses(searchResults, filterOptions) : searchResults;
-    const sortedCourses = sortCourses(filteredCourses, sortOptions);
+    const sortedCourses = sortCourses(filteredCourses, sortOptions, allGrades, allReviews);
 
     return (
         <div className={`relative h-full flex flex-col`}>
@@ -78,7 +80,7 @@ function SearchResultsNavBar(props: {
     const buttonClass = `${(isMobile && searching) ? "max-w-0 opacity-0 !p-0" : "max-w-full"}`;
 
     return (
-        <nav className={`flex flex-nowrap bg-tertiary border border-quaternary ${isMobile ? "px-1" : "px-2"} py-1 mb-4 rounded whitespace-pre text-center content-center items-center ${searching ? "gap-[0.25px]}" : ""}`}>
+        <nav className={`flex flex-nowrap bg-tertiary border border-quaternary ${isMobile ? "px-1" : "px-2"} py-1 mb-4 rounded whitespace-pre text-center content-center items-center ${isMobile ? "gap-px" : "gap-1"}`}>
             {/** Undo button. */}
             <IconButton
                 className={buttonClass}
