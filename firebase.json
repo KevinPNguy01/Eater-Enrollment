@@ -14,9 +14,9 @@
     ]
   },
   "emulators": {
-    "firestore": {
-      "host": "localhost",
-      "port": "8091"
+    "hosting": {
+      "host": "0.0.0.0",
+      "port": "5000"
     }
   },
   "firestore": {
