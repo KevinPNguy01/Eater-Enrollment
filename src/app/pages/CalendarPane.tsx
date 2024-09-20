@@ -195,18 +195,26 @@ function CalendarNavBar(props: { showingFinals: boolean, setShowingFinals: (_: b
 						setMaxTime(end.format("HH:mm"));
 						await new Promise(r => setTimeout(r, 0));
 						htmlToImage.toPng(calendar as HTMLElement)
-							.then(function (dataUrl) {
-								const link = document.createElement('a');
-								link.href = dataUrl;
-								link.download = 'schedule.png';
-								const event = new MouseEvent('click');
-								link.dispatchEvent(event);
-
+							.then(async function (dataUrl) {
 								setContentHeight("100%");
 								setMinTime("07:00");
 								setMaxTime("22:00");
 								calendar.classList.remove("clip-timegrid-start");
 								calendar.classList.remove("clip-timegrid-end");
+
+								if ((/iPhone|iPad|iPod/i.test(navigator.userAgent))) {
+									// Use webshare to download on iOS devices.
+									const blob = await fetch(dataUrl).then(r => r.blob());
+									const file = new File([blob], 'schedule.png', { type: blob.type });
+									navigator.share({ files: [file] });
+								} else {
+									// Use anchor tag to download on all other devices.
+									const link = document.createElement('a');
+									link.href = dataUrl;
+									link.download = 'schedule.png';
+									const event = new MouseEvent('click');
+									link.dispatchEvent(event);
+								}
 							});
 					}}
 				>
