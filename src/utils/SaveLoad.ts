@@ -9,10 +9,11 @@ import { CourseOffering } from "types/CourseOffering";
 import { Schedule } from "types/Schedule";
 import { ScheduleQuery } from "types/ScheduleQuery";
 import superjson from "superjson";
-import { AntAlmanac } from "types/AntAlmanac";
+import { AntAlmanac, AntAlmanacUser } from "types/AntAlmanac";
 import moment from "moment";
 import { CustomEvent } from "types/CustomEvent";
 import { AppRouter } from "api/routers";
+import { buildingIds } from "constants/BuildingIds";
 
 const saveUserUrl = "https://saveuser-htn7okprja-uc.a.run.app";
 const loadUserUrl = "https://loaduser-htn7okprja-uc.a.run.app";
@@ -147,12 +148,13 @@ export async function loadUser(userId: string) {
 }
 
 export async function importUser(userId: string) {
-    const data = (await trpc.users.getUserData.query({ userId })) as AntAlmanac;
+    let data = (await trpc.users.getUserData.query({ userId }));
     // Send error message if the backend returned an error.
     if (!data) {
         enqueueSnackbar(`No schedule found for "${userId}"`, { variant: "error" });
         return;
     }
+    data = "userData" in data ? (data as AntAlmanacUser).userData : data as AntAlmanac;
 
     // Flatten courses from schedules into on array.
     const courses = data.schedules.map(({ courses }) => courses.map(courses => courses)).flat();
@@ -198,14 +200,22 @@ export async function importUser(userId: string) {
         }).filter(o => o) as CourseOffering[]);
 
         schedule.customEvents.forEach(antEvent => {
+            let days = 0;
+            antEvent.days.forEach((day, index) => {
+                if (day) {
+                    days += Math.pow(2, 6 - index);
+                }
+            });
+            const location = antEvent.building ? Object.keys(buildingIds).find(key => `${buildingIds[key]}` === antEvent.building) : "";
             const customEvent = {
                 id: -1,
                 title: antEvent.title,
                 description: "",
-                location: "",
                 startTime: moment(antEvent.start, "HH:mm").format("hh:mm A"),
                 endTime: moment(antEvent.end, "HH:mm").format("hh:mm A"),
-                color: antEvent.color
+                color: antEvent.color,
+                days,
+                location
             } as CustomEvent;
             scheduleAddCustomEvent(newSchedule, customEvent);
         });
