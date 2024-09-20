@@ -69,7 +69,32 @@ export function SearchList(props: { suggestions: SearchSuggestion[] }) {
                                     dispatch(addInstructorReview({ instructor, review }));
                                 }
                             } else {
-                                addQuery(query);
+                                dispatch(addQuery(query));
+                            }
+                        }}
+                        onClick={async () => {
+                            if (searchType === "single") {
+                                dispatch(setSearchPending());
+                                const queries = [{ ...query, year, quarter }];
+                                const offerings = await requestSchedule(queries);
+                                const courses = groupOfferings(offerings);
+                                dispatch(setSearchFulfilled({ queries, courses, refresh: false }))
+
+                                const grades = await requestGrades(courses.filter(({ department, number }) => !allGrades[`${department} ${number}`]));
+                                Object.keys(grades).forEach(courseName => dispatch(addCourseGrades({ courseName, grades: grades[courseName] })));
+
+                                const instructors = [...new Set(offerings.map(
+                                    ({ instructors }) => instructors.map(
+                                        ({ shortened_name }) => shortened_name
+                                    )
+                                ).flat(4).filter(instructor => instructor !== "STAFF" && !(instructor in allReviews)))];
+
+                                for (const instructor of instructors) {
+                                    const review = await searchProfessor(instructor);
+                                    dispatch(addInstructorReview({ instructor, review }));
+                                }
+                            } else {
+                                dispatch(addQuery(query));
                             }
                         }}
                     >

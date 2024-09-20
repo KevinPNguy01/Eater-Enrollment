@@ -17,12 +17,13 @@ import { addCourseGrades } from "stores/slices/Grades";
 import { addInstructorReview } from "stores/slices/Reviews";
 import { setState } from "stores/slices/ScheduleSet";
 import { searchProfessor } from "utils/RateMyProfessors";
-import { loadUser as loadUser2, saveUser } from "utils/SaveLoad";
+import { importUser, loadUser as loadUser2, saveUser } from "utils/SaveLoad";
 import useWindowDimensions from "utils/WindowDimensions";
 import { anteater } from "../assets";
 import { CalendarPane } from "./pages/CalendarPane";
 import { CoursesPane } from "./pages/CoursesPane";
 import { themeOptions } from "./theme";
+import DriveFileMoveIcon from '@mui/icons-material/DriveFileMove';
 
 // Navigation bar with calendar on the left, and everything else on the right.
 export function App() {
@@ -84,7 +85,17 @@ function NavBar(props: { save: (_: string) => void, load: (_: string) => void })
 	const { save, load } = props;
 	const [saveMenuOpen, setSaveMenuOpen] = useState(false);
 	const [loadMenuOpen, setLoadMenuOpen] = useState(false);
+	const [importMenuOpen, setImportMenuOpen] = useState(false);
 	const { width, height } = useWindowDimensions();
+	const dispatch = useDispatch();
+
+	const importUserId = async (userId: string) => {
+		const state = await importUser(userId);
+		if (state) {
+			dispatch(setState(state));
+			dispatch({ type: "schedules/clearHistory" })
+		}
+	}
 
 	return (
 		<nav className="bg-primary flex justify-between items-center">
@@ -101,10 +112,14 @@ function NavBar(props: { save: (_: string) => void, load: (_: string) => void })
 				<Button variant="contained" color="primary" startIcon={<CloudDownloadIcon />} onClick={() => setLoadMenuOpen(!loadMenuOpen)}>
 					Load
 				</Button>
+				<Button variant="contained" color="primary" startIcon={<DriveFileMoveIcon />} onClick={() => setImportMenuOpen(!importMenuOpen)}>
+					Import
+				</Button>
 			</div>
 
 			{saveMenuOpen ? <SaveLoadMenu name="Save" submit={save} cancel={() => setSaveMenuOpen(false)} /> : null}
 			{loadMenuOpen ? <SaveLoadMenu name="Load" submit={load} cancel={() => setLoadMenuOpen(false)} /> : null}
+			{importMenuOpen ? <SaveLoadMenu name="Import" submit={importUserId} cancel={() => setImportMenuOpen(false)} /> : null}
 		</nav>
 	)
 }
