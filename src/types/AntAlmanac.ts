@@ -12,8 +12,14 @@ export type AntAlmanac = {
             days: [boolean, boolean, boolean, boolean, boolean, boolean, boolean]
             end: string
             title: string
+            building?: string
         }[],
         scheduleName: string
         scheduleNote: string
     }[]
+}
+
+export type AntAlmanacUser = {
+    id: string
+    userData: AntAlmanac
 }
