@@ -267,3 +267,7 @@ fieldset {
 .clip-timegrid-end .fc-timegrid-slots tbody tr:last-child {
   display: none;
 }
+
+.MuiInputBase-root::before {
+  border-bottom-color: white !important;
+}
