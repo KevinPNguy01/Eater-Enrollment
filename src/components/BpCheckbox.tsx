@@ -1,10 +1,14 @@
 import Checkbox, { CheckboxProps } from "@mui/material/Checkbox";
 import { styled } from "@mui/material/styles";
 
-const BpIcon = styled('span')(({ theme }) => ({
+interface BpCheckboxProps extends CheckboxProps {
+    checkBoxSize?: number; // size prop to control the size of the checkbox
+}
+
+const BpIcon = styled('span')<{ checkBoxSize: number }>(({ checkBoxSize, theme }) => ({
     borderRadius: 3,
-    width: 20,
-    height: 20,
+    width: checkBoxSize,
+    height: checkBoxSize,
     boxShadow: 'inset 0 0 0 1px rgba(16,22,26,.2), inset 0 -1px 0 rgba(16,22,26,.1)',
     border: "2px solid #888",
     '.Mui-focusVisible &': {
@@ -25,14 +29,14 @@ const BpIcon = styled('span')(({ theme }) => ({
     }),
 }));
 
-const BpCheckedIcon = styled(BpIcon)({
+const BpCheckedIcon = styled(BpIcon)<{ checkBoxSize: number }>(({ checkBoxSize }) => ({
     backgroundColor: '#080',
     backgroundImage: 'linear-gradient(180deg,hsla(0,0%,100%,.1),hsla(0,0%,100%,0))',
     border: "0px solid #888",
     '&::before': {
         display: 'block',
-        width: 20,
-        height: 20,
+        width: checkBoxSize,
+        height: checkBoxSize,
         backgroundImage:
             "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath" +
             " fill-rule='evenodd' clip-rule='evenodd' d='M12 5c-.28 0-.53.11-.71.29L7 9.59l-2.29-2.3a1.003 " +
@@ -42,17 +46,17 @@ const BpCheckedIcon = styled(BpIcon)({
     'input:hover ~ &': {
         backgroundColor: '#080',
     },
-});
+}));
 
-// Inspired by blueprintjs
-export function BpCheckbox(props: CheckboxProps) {
+export function BpCheckbox(props: BpCheckboxProps) {
+    const { checkBoxSize = 20, ...rest } = props; // Default size is 20
     return (
         <Checkbox
             sx={{ '&:hover': { bgcolor: 'transparent' } }}
             color="default"
-            checkedIcon={<BpCheckedIcon />}
-            icon={<BpIcon />}
-            {...props}
+            checkedIcon={<BpCheckedIcon checkBoxSize={checkBoxSize} />}
+            icon={<BpIcon checkBoxSize={checkBoxSize} />}
+            {...rest}
         />
     );
 }

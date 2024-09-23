@@ -9,6 +9,7 @@ import { BuildingLink } from "./BuildingLink";
 import { RateMyProfessorsLink } from "./RateMyProfessorsLink";
 import { ZotisticsLink } from "./ZotisticsLink";
 import useWindowDimensions from "utils/WindowDimensions";
+import { BpCheckbox } from "components/BpCheckbox";
 
 /**
  * Component for displaying a course result as a tr, to be used in CourseResult.
@@ -20,7 +21,7 @@ export function OfferingResult(props: { offering: CourseOffering }) {
 
     return (
         <tr className={`course-result odd:bg-quaternary even:bg-tertiary ${isMobile ? "text-2xs" : "text-xs"}`} key={offering.section.code}>
-            <td>
+            <td className="!p-0">
                 <CourseCheckBox offering={offering} />
             </td>
             <td className="!pl-0">
@@ -78,11 +79,6 @@ function CourseCheckBox(props: { offering: CourseOffering }) {
     };
 
     return (
-        <input
-            type="checkbox"
-            onChange={handleCheckBoxChange}
-            className={`${isMobile ? "w-3" : ""} checkbox-${offering.course.id}-${offering.section.code}`}
-            checked={scheduleContainsOffering(currentSchedule, offering)}
-        />
+        <BpCheckbox checkBoxSize={isMobile ? 16 : 20} onChange={handleCheckBoxChange} checked={scheduleContainsOffering(currentSchedule, offering)} />
     );
 }
