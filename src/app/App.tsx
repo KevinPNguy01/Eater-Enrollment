@@ -7,18 +7,13 @@ import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
-import { requestGrades } from "api/PeterPortalGraphQL";
+import { LoadMenu } from "features/schedule-storage/components/LoadMenu";
 import { SaveMenu } from "features/schedule-storage/components/SaveMenu";
-import { importUser, loadUser as loadUser2 } from "features/schedule-storage/utils/SaveLoad";
+import { importUser } from "features/schedule-storage/utils/SaveLoad";
 import { SnackbarProvider } from "notistack";
-import { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { selectGrades } from "stores/selectors/Grades";
-import { selectReviews } from "stores/selectors/Reviews";
-import { addCourseGrades } from "stores/slices/Grades";
-import { addInstructorReview } from "stores/slices/Reviews";
+import { useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 import { setState } from "stores/slices/ScheduleSet";
-import { searchProfessor } from "utils/RateMyProfessors";
 import useWindowDimensions from "utils/WindowDimensions";
 import { anteater } from "../assets";
 import { CalendarPane } from "./pages/CalendarPane";
@@ -27,47 +22,16 @@ import { themeOptions } from "./theme";
 
 // Navigation bar with calendar on the left, and everything else on the right.
 export function App() {
-	const allReviews = useSelector(selectReviews);
-	const allGrades = useSelector(selectGrades);
-	const dispatch = useDispatch();
-
 	const { height, width } = useWindowDimensions();
 	const aspect = width / height;
 
-	const loadUser = async (userId: string) => {
-		const state = await loadUser2(userId);
-		if (state) {
-			dispatch(setState(state));
-			dispatch({ type: "schedules/clearHistory" })
-			const grades = await requestGrades(state.scheduleSet.map(({ courses }) => courses).flat().filter(({ department, number }) => !(`${department} ${number}` in allGrades)));
-			Object.keys(grades).forEach(courseName => dispatch(addCourseGrades({ courseName, grades: grades[courseName] })))
-			const instructors = [...new Set(state.scheduleSet.map(
-				({ courses }) => courses.map(
-					({ offerings }) => offerings.map(
-						({ instructors }) => instructors.map(
-							({ shortened_name }) => shortened_name
-						)
-					)
-				)
-			).flat(4).filter(instructor => instructor !== "STAFF" && !(instructor in allReviews)))];
-			for (const instructor of instructors) {
-				const review = await searchProfessor(instructor);
-				dispatch(addInstructorReview({ instructor, review }));
-			}
-		}
 
-	};
-
-	useEffect(() => {
-		const userID = localStorage.getItem("userID");
-		if (userID) loadUser(userID);
-	}, []);
 
 	return (
 		<LocalizationProvider dateAdapter={AdapterMoment}>
 			<ThemeProvider theme={themeOptions}>
 				<div className="relative h-[100dvh] flex text-white flex-col overflow-y-hidden overflow-x-hidden">
-					<NavBar load={loadUser} />
+					<NavBar />
 					<div id="main" className={`h-1 grow bg-secondary grid ${aspect >= 1 ? "grid-cols-2" : "grid-cols-1"}`}>
 						{aspect >= 1 ? <CalendarPane /> : null}
 						<CoursesPane includeCalendar={aspect < 1} />
@@ -79,11 +43,11 @@ export function App() {
 	)
 }
 
-function NavBar(props: { load: (_: string) => void }) {
-	const { load } = props;
+function NavBar() {
 	const saveMenuState = useState(false);
-	const [loadMenuOpen, setLoadMenuOpen] = useState(false);
+	const loadMenuState = useState(false);
 	const [importMenuOpen, setImportMenuOpen] = useState(false);
+	const rememberMeState = useState(true);
 	const { width, height } = useWindowDimensions();
 	const dispatch = useDispatch();
 
@@ -107,7 +71,7 @@ function NavBar(props: { load: (_: string) => void }) {
 				<Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={() => saveMenuState[1](true)}>
 					Save
 				</Button>
-				<Button variant="contained" color="primary" startIcon={<CloudDownloadIcon />} onClick={() => setLoadMenuOpen(!loadMenuOpen)}>
+				<Button variant="contained" color="primary" startIcon={<CloudDownloadIcon />} onClick={() => loadMenuState[1](true)}>
 					Load
 				</Button>
 				<Button variant="contained" color="primary" startIcon={<DriveFileMoveIcon />} onClick={() => setImportMenuOpen(!importMenuOpen)}>
@@ -115,8 +79,8 @@ function NavBar(props: { load: (_: string) => void }) {
 				</Button>
 			</div>
 
-			<SaveMenu openState={saveMenuState} />
-			{loadMenuOpen ? <SaveLoadMenu name="Load" submit={load} cancel={() => setLoadMenuOpen(false)} /> : null}
+			<SaveMenu openState={saveMenuState} rememberMeState={rememberMeState} />
+			<LoadMenu openState={loadMenuState} rememberMeState={rememberMeState} />
 			{importMenuOpen ? <SaveLoadMenu name="Import" submit={importUserId} cancel={() => setImportMenuOpen(false)} /> : null}
 		</nav>
 	)
