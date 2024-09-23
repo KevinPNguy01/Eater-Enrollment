@@ -64,7 +64,6 @@ export async function saveUser(username: string, scheduleSet: Schedule[], curren
     // Show status message to user depending on the response.
     if (response.ok) {
         enqueueSnackbar(`Scheduled saved under "${username}"`, { variant: "success" });
-        localStorage.setItem("userID", username);
     } else {
         enqueueSnackbar(`Error saving schedule "${username}"`, { variant: "error" });
     }

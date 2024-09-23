@@ -1,5 +1,6 @@
 import { ThemeProvider } from "@emotion/react";
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import DriveFileMoveIcon from '@mui/icons-material/DriveFileMove';
 import SaveIcon from '@mui/icons-material/Save';
 import Backdrop from "@mui/material/Backdrop";
 import Button from "@mui/material/Button";
@@ -7,28 +8,25 @@ import Card from "@mui/material/Card";
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { requestGrades } from "api/PeterPortalGraphQL";
+import { SaveMenu } from "features/schedule-storage/components/SaveMenu";
+import { importUser, loadUser as loadUser2 } from "features/schedule-storage/utils/SaveLoad";
 import { SnackbarProvider } from "notistack";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectGrades } from "stores/selectors/Grades";
 import { selectReviews } from "stores/selectors/Reviews";
-import { selectCurrentScheduleIndex, selectScheduleSet } from "stores/selectors/ScheduleSet";
 import { addCourseGrades } from "stores/slices/Grades";
 import { addInstructorReview } from "stores/slices/Reviews";
 import { setState } from "stores/slices/ScheduleSet";
 import { searchProfessor } from "utils/RateMyProfessors";
-import { importUser, loadUser as loadUser2, saveUser } from "utils/SaveLoad";
 import useWindowDimensions from "utils/WindowDimensions";
 import { anteater } from "../assets";
 import { CalendarPane } from "./pages/CalendarPane";
 import { CoursesPane } from "./pages/CoursesPane";
 import { themeOptions } from "./theme";
-import DriveFileMoveIcon from '@mui/icons-material/DriveFileMove';
 
 // Navigation bar with calendar on the left, and everything else on the right.
 export function App() {
-	const scheduleSet = useSelector(selectScheduleSet);
-	const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
 	const allReviews = useSelector(selectReviews);
 	const allGrades = useSelector(selectGrades);
 	const dispatch = useDispatch();
@@ -69,7 +67,7 @@ export function App() {
 		<LocalizationProvider dateAdapter={AdapterMoment}>
 			<ThemeProvider theme={themeOptions}>
 				<div className="relative h-[100dvh] flex text-white flex-col overflow-y-hidden overflow-x-hidden">
-					<NavBar save={(userId) => saveUser(userId, scheduleSet, currentScheduleIndex)} load={loadUser} />
+					<NavBar load={loadUser} />
 					<div id="main" className={`h-1 grow bg-secondary grid ${aspect >= 1 ? "grid-cols-2" : "grid-cols-1"}`}>
 						{aspect >= 1 ? <CalendarPane /> : null}
 						<CoursesPane includeCalendar={aspect < 1} />
@@ -81,9 +79,9 @@ export function App() {
 	)
 }
 
-function NavBar(props: { save: (_: string) => void, load: (_: string) => void }) {
-	const { save, load } = props;
-	const [saveMenuOpen, setSaveMenuOpen] = useState(false);
+function NavBar(props: { load: (_: string) => void }) {
+	const { load } = props;
+	const saveMenuState = useState(false);
 	const [loadMenuOpen, setLoadMenuOpen] = useState(false);
 	const [importMenuOpen, setImportMenuOpen] = useState(false);
 	const { width, height } = useWindowDimensions();
@@ -106,7 +104,7 @@ function NavBar(props: { save: (_: string) => void, load: (_: string) => void })
 				</h1>}
 			</div>
 			<div className="flex gap-2 mr-8">
-				<Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={() => setSaveMenuOpen(!saveMenuOpen)}>
+				<Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={() => saveMenuState[1](true)}>
 					Save
 				</Button>
 				<Button variant="contained" color="primary" startIcon={<CloudDownloadIcon />} onClick={() => setLoadMenuOpen(!loadMenuOpen)}>
@@ -117,7 +115,7 @@ function NavBar(props: { save: (_: string) => void, load: (_: string) => void })
 				</Button>
 			</div>
 
-			{saveMenuOpen ? <SaveLoadMenu name="Save" submit={save} cancel={() => setSaveMenuOpen(false)} /> : null}
+			<SaveMenu openState={saveMenuState} />
 			{loadMenuOpen ? <SaveLoadMenu name="Load" submit={load} cancel={() => setLoadMenuOpen(false)} /> : null}
 			{importMenuOpen ? <SaveLoadMenu name="Import" submit={importUserId} cancel={() => setImportMenuOpen(false)} /> : null}
 		</nav>
