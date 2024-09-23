@@ -79,10 +79,15 @@ export async function loadUser(userId: string) {
 
     // Send error message if the backend returned an error.
     if (!response.ok) {
-        enqueueSnackbar(`No schedule found for "${userId}"`, { variant: "error" });
+        enqueueSnackbar(`Unable to load schedule for "${userId}"`, { variant: "error" });
         return;
     }
     const { scheduleSetString, selectedIndex }: { scheduleSetString: string, selectedIndex: number } = await response.json();
+    // Send error message if the schedule doesn't exist.
+    if (!scheduleSetString) {
+        enqueueSnackbar(`No schedule found for "${userId}"`, { variant: "error" });
+        return;
+    }
 
     // Flatten course offering strings from schedule set string.
     const offeringsStrings = scheduleSetString.split("\n").map(
