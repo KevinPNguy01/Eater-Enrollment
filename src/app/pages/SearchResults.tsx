@@ -63,7 +63,7 @@ function SearchResultsNavBar(props: {
 }
 ) {
     const { sortOptionsState, filterOptionsState, defaultFilterOptions } = props;
-    const [sortMenuVisible, setSortMenuVisible] = useState(false);
+    const sortMenuState = useState(false);
     const [filterMenuVisible, setFilterMenuVisible] = useState(false);
     const pastSearch = useSelector(selectPastSearch);
     const futureSearch = useSelector(selectFutureSearch);
@@ -158,16 +158,14 @@ function SearchResultsNavBar(props: {
                 className={buttonClass}
                 size={isMobile ? "small" : "medium"}
                 color="white"
-                onClick={() => setSortMenuVisible(true)}
+                onClick={() => sortMenuState[1](true)}
             >
                 {sortIcon}
             </IconButton>
-            {sortMenuVisible && (
-                <SortingMenu
-                    optionsState={sortOptionsState}
-                    close={() => setSortMenuVisible(false)}
-                />
-            )}
+            <SortingMenu
+                optionsState={sortOptionsState}
+                openState={sortMenuState}
+            />
             {/** Filter button/menu. */}
             <IconButton
                 className={buttonClass}
