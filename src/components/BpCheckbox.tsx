@@ -25,13 +25,11 @@ const BpIcon = styled('span')<{ checkBoxSize: number }>(({ checkBoxSize, theme }
     ...theme.applyStyles('dark', {
         boxShadow: '0 0 0 1px rgb(16 22 26 / 40%)',
         backgroundColor: '#394b59',
-        backgroundImage: 'linear-gradient(180deg,hsla(0,0%,100%,.05),hsla(0,0%,100%,0))',
     }),
 }));
 
 const BpCheckedIcon = styled(BpIcon)<{ checkBoxSize: number }>(({ checkBoxSize }) => ({
     backgroundColor: '#080',
-    backgroundImage: 'linear-gradient(180deg,hsla(0,0%,100%,.1),hsla(0,0%,100%,0))',
     border: "0px solid #888",
     '&::before': {
         display: 'block',
