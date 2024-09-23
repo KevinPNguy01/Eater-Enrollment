@@ -27,7 +27,7 @@ export function SaveMenu(props: { openState: [boolean, (val: boolean) => void], 
 				<h1 className="px-2">Save</h1>
 				<p className="px-2 text-neutral-300 font-semibold">Enter a unique user id to save your schedules under.</p>
 				<div className="p-2">
-					<TextField id="standard-basic" label="User ID" variant="standard" color="primary" className="w-full" value={input} onChange={e => setInput(e.currentTarget.value)} />
+					<TextField label="User ID" variant="standard" color="primary" className="w-full" value={input} onChange={e => setInput(e.currentTarget.value)} />
 				</div>
 				<div className="flex items-center">
 					<BpCheckbox checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} />

@@ -2,7 +2,7 @@ import NotesIcon from '@mui/icons-material/Notes';
 import PlaceIcon from '@mui/icons-material/Place';
 import Autocomplete from "@mui/material/Autocomplete";
 import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
+import Dialog from '@mui/material/Dialog';
 import Divider from "@mui/material/Divider";
 import TextField from "@mui/material/TextField";
 import { TimePicker } from "@mui/x-date-pickers";
@@ -26,14 +26,15 @@ export function CustomEventMenu(props: { event: CustomEvent, closeMenu: () => vo
     const [title, setTitle] = useState(event.title);
     const [description, setDescription] = useState(event.description);
     const [location, setLocation] = useState(event.location);
+    const [startOpen, setStartOpen] = useState(false);
+    const [endOpen, setEndOpen] = useState(false);
 
     return (
-        <Card className="w-3/4 h-fit p-4 flex flex-col content-center" elevation={3} onClick={e => e.stopPropagation()}>
-            <h1>{event.id === -1 ? "Add" : "Update"} Custom Event</h1>
-            <div className="flex flex-col p-2 gap-4">
-                <input className="border-b-0 text-xl font-semibold" placeholder="Event Title" value={title} onChange={e => setTitle(e.currentTarget.value)} />
-                <Divider color="#808080" />
-                <div className="flex justify-around">
+        <Dialog open>
+            <div className="p-6 gap-4 flex flex-col content-center" onClick={e => e.stopPropagation()}>
+                <h1>{event.id === -1 ? "Add" : "Update"} Custom Event</h1>
+                <TextField label="Event Title" variant="standard" color="primary" value={title} onChange={e => setTitle(e.currentTarget.value)} />
+                <div className="flex justify-around py-1">
                     {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
                         <Button
                             color="white"
@@ -57,6 +58,20 @@ export function CustomEventMenu(props: { event: CustomEvent, closeMenu: () => vo
                                 setStart(val);
                             }
                         }}
+                        sx={{
+                            "& .MuiButtonBase-root": {
+                                color: "white !important"
+                            },
+                            "& .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "gray"
+                            }
+                        }}
+                        open={startOpen}
+                        onOpen={() => {
+                            setStartOpen(true);
+                            setEndOpen(false)
+                        }}
+                        onClose={() => setStartOpen(false)}
                     />
                     <TimePicker
                         label="End Time"
@@ -66,15 +81,29 @@ export function CustomEventMenu(props: { event: CustomEvent, closeMenu: () => vo
                                 setEnd(val);
                             }
                         }}
+                        sx={{
+                            "& .MuiButtonBase-root": {
+                                color: "white !important"
+                            },
+                            "& .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "gray"
+                            }
+                        }}
+                        open={endOpen}
+                        onOpen={() => {
+                            setEndOpen(true);
+                            setStartOpen(false)
+                        }}
+                        onClose={() => setEndOpen(false)}
                     />
                 </div>
                 <Divider color="#808080" />
                 <div className="flex gap-4 items-center">
                     <PlaceIcon />
                     <Autocomplete
-                        color="warning"
+                        color="primary"
                         className="flex-grow"
-                        renderInput={(params) => <TextField {...params} label="Add location" />}
+                        renderInput={(params) => <TextField {...params} variant="standard" label="Add location" sx={{ "& .MuiButtonBase-root": { color: "white !important" } }} />}
                         value={{ code: location, label: buildingIds[location] ? buildings[buildingIds[location]].name : location }}
                         options={Object.keys(buildingIds).map((code) => {
                             const id = buildingIds[code];
@@ -96,19 +125,22 @@ export function CustomEventMenu(props: { event: CustomEvent, closeMenu: () => vo
                             }
                         )}
                         onChange={(_, val) => setLocation(val?.code || "")}
+                        sx={{
+                            "& .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "gray"
+                            }
+                        }}
                     />
                 </div>
-                <Divider color="#808080" />
                 <div className="flex gap-4 items-center">
                     <NotesIcon />
-                    <input className="border-b-0 flex-grow text-base" placeholder="Add description" value={description} onChange={e => setDescription(e.currentTarget.value)} />
+                    <TextField className="w-full" variant="standard" label="Add description" value={description} onChange={e => setDescription(e.currentTarget.value)} />
                 </div>
-                <Divider color="#808080" />
-                <div className="w-full flex justify-end gap-2">
-                    <Button variant="contained" color="info" onClick={closeMenu}>
+                <div className="flex justify-end gap-4 px-2">
+                    <button className="font-semibold" color="white" onClick={closeMenu}>
                         Cancel
-                    </Button>
-                    <Button variant="contained" onClick={() => {
+                    </button>
+                    <button className="font-semibold" color="white" onClick={() => {
                         closeMenu();
                         const customEvent = {
                             id: event.id,
@@ -124,10 +156,11 @@ export function CustomEventMenu(props: { event: CustomEvent, closeMenu: () => vo
                         }
                         dispatch((event.id === -1 ? addCustomEvent : updateCustomEvent)({ customEvent, index: currentScheduleIndex }));
                     }}>
-                        {event.id === -1 ? "Add" : "Update"} Event
-                    </Button>
+                        Save
+                    </button>
                 </div>
             </div>
-        </Card>
+        </Dialog>
+
     );
 }

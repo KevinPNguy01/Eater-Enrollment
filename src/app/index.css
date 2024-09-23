@@ -269,5 +269,5 @@ fieldset {
 }
 
 .MuiInputBase-root::before {
-  border-bottom-color: white !important;
+  border-bottom-color: gray !important;
 }
