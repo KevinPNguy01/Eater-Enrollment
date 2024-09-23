@@ -52,6 +52,7 @@ export function LoadMenu(props: { openState: [boolean, (val: boolean) => void], 
     useEffect(() => {
         const userID = localStorage.getItem("userID");
         if (userID) loadUser(userID);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
