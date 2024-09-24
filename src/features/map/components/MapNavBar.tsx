@@ -12,7 +12,7 @@ export function MapNavBar(props: { activeDayState: [number, (_: number) => void]
     return (
         <div className="w-3/4 grid grid-cols-6 absolute z-[1000] h-fit left-1/2 -translate-x-1/2 mt-4 bg-tertiary border border-quaternary rounded font-bold">
             {days.map(([day, mask]) =>
-                <button className={`py-2 border-primary ${mask === daysMask ? "border-b-4" : ""}`} onClick={() => setDaysMask(mask)}>{day}</button>
+                <button key={day} className={`py-2 border-primary ${mask === daysMask ? "border-b-4" : ""}`} onClick={() => setDaysMask(mask)}>{day}</button>
             )}
         </div>
     )

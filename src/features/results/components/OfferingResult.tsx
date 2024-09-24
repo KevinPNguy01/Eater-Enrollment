@@ -79,6 +79,6 @@ function CourseCheckBox(props: { offering: CourseOffering }) {
     };
 
     return (
-        <BpCheckbox checkBoxSize={isMobile ? 16 : 20} onChange={handleCheckBoxChange} checked={scheduleContainsOffering(currentSchedule, offering)} />
+        <BpCheckbox checkboxsize={isMobile ? 16 : 20} onChange={handleCheckBoxChange} checked={scheduleContainsOffering(currentSchedule, offering)} />
     );
 }

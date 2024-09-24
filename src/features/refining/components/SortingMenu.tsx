@@ -29,13 +29,13 @@ export function SortingMenu(props: { optionsState: [SortOptions, (options: SortO
                 <div className="flex flex-col gap-1 items-start">
                     <span className="w-full font-semibold border-b border-quaternary pb-1 mb-1">{"Sort By"}</span>
                     {Object.values(SortBy).map(option =>
-                        <button className={option === sortBy ? "font-bold" : ""} onClick={setSortBy(option)}>{option}</button>
+                        <button key={option} className={option === sortBy ? "font-bold" : ""} onClick={setSortBy(option)}>{option}</button>
                     )}
                 </div>
                 <div className="flex flex-col gap-1 items-start w-fit">
                     <span className="w-fit font-semibold border-b border-quaternary pb-1 mb-1">{"Sort Direction"}</span>
                     {Object.values(SortDirection).map(option =>
-                        <button className={option === direction ? "font-bold" : ""} onClick={setDirection(option)}>{option}</button>
+                        <button key={option} className={option === direction ? "font-bold" : ""} onClick={setDirection(option)}>{option}</button>
                     )}
                 </div>
             </div>
