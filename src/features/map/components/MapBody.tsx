@@ -26,9 +26,27 @@ export function MapBody(props: { offerings: CourseOffering[], customEvents: Cust
     });
     // Create markers for each of the offerings.
     const markers = [...buildingEvents.entries()].filter(([id,]) => buildings[id]).map(([, events]) =>
-        events.map((event, index) =>
-            <EventMarker type={"course" in event ? "CourseOffering" : "CustomEvent"} event={"course" in event ? event as CourseOffering : event as CustomEvent} translate_y={events.length - index - 1} color={event.color} />
-        )
+        events.map((event, index) => {
+            if ("course" in event) {
+                const offering = event as CourseOffering;
+                return <EventMarker
+                    key={`${offering.quarter} ${offering.year} ${offering.section.code}`}
+                    type={"CourseOffering"}
+                    event={offering}
+                    translate_y={events.length - index - 1}
+                    color={event.color}
+                />
+            } else {
+                const customEvent = event as CustomEvent;
+                return <EventMarker
+                    key={customEvent.id}
+                    type={"CustomEvent"}
+                    event={customEvent}
+                    translate_y={events.length - index - 1}
+                    color={event.color}
+                />
+            }
+        })
     ).flat();
 
     return (

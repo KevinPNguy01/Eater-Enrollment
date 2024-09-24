@@ -2,13 +2,13 @@ import Checkbox, { CheckboxProps } from "@mui/material/Checkbox";
 import { styled } from "@mui/material/styles";
 
 interface BpCheckboxProps extends CheckboxProps {
-    checkBoxSize?: number; // size prop to control the size of the checkbox
+    checkboxsize?: number; // size prop to control the size of the checkbox
 }
 
-const BpIcon = styled('span')<{ checkBoxSize: number }>(({ checkBoxSize, theme }) => ({
+const BpIcon = styled('span')<{ checkboxsize: number }>(({ checkboxsize, theme }) => ({
     borderRadius: 3,
-    width: checkBoxSize,
-    height: checkBoxSize,
+    width: checkboxsize,
+    height: checkboxsize,
     boxShadow: 'inset 0 0 0 1px rgba(16,22,26,.2), inset 0 -1px 0 rgba(16,22,26,.1)',
     border: "2px solid #888",
     '.Mui-focusVisible &': {
@@ -28,13 +28,13 @@ const BpIcon = styled('span')<{ checkBoxSize: number }>(({ checkBoxSize, theme }
     }),
 }));
 
-const BpCheckedIcon = styled(BpIcon)<{ checkBoxSize: number }>(({ checkBoxSize }) => ({
+const BpCheckedIcon = styled(BpIcon)<{ checkboxsize: number }>(({ checkboxsize }) => ({
     backgroundColor: '#080',
     border: "0px solid #888",
     '&::before': {
         display: 'block',
-        width: checkBoxSize,
-        height: checkBoxSize,
+        width: checkboxsize,
+        height: checkboxsize,
         backgroundImage:
             "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath" +
             " fill-rule='evenodd' clip-rule='evenodd' d='M12 5c-.28 0-.53.11-.71.29L7 9.59l-2.29-2.3a1.003 " +
@@ -46,13 +46,13 @@ const BpCheckedIcon = styled(BpIcon)<{ checkBoxSize: number }>(({ checkBoxSize }
     },
 }));
 
-const BpIndeterminateIcon = styled(BpIcon)<{ checkBoxSize: number }>(({ checkBoxSize }) => ({
+const BpIndeterminateIcon = styled(BpIcon)<{ checkboxsize: number }>(({ checkboxsize }) => ({
     backgroundColor: '#888',
     border: "0px solid #888",
     '&::before': {
         display: 'block',
-        width: checkBoxSize,
-        height: checkBoxSize,
+        width: checkboxsize,
+        height: checkboxsize,
         backgroundImage:
             "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath" +
             " fill-rule='evenodd' clip-rule='evenodd' d='M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8' stroke='%23fff' stroke-width='1.5' fill='%23fff'/%3E%3C/svg%3E\")",
@@ -61,14 +61,14 @@ const BpIndeterminateIcon = styled(BpIcon)<{ checkBoxSize: number }>(({ checkBox
 }));
 
 export function BpCheckbox(props: BpCheckboxProps) {
-    const { checkBoxSize = 20, ...rest } = props; // Default size is 20
+    const { checkboxsize = 20, ...rest } = props; // Default size is 20
     return (
         <Checkbox
             sx={{ '&:hover': { bgcolor: 'transparent' } }}
             color="default"
-            checkedIcon={<BpCheckedIcon checkBoxSize={checkBoxSize} />}
-            indeterminateIcon={<BpIndeterminateIcon checkBoxSize={checkBoxSize} />}
-            icon={<BpIcon checkBoxSize={checkBoxSize} />}
+            checkedIcon={<BpCheckedIcon checkboxsize={checkboxsize} />}
+            indeterminateIcon={<BpIndeterminateIcon checkboxsize={checkboxsize} />}
+            icon={<BpIcon checkboxsize={checkboxsize} />}
             {...rest}
         />
     );

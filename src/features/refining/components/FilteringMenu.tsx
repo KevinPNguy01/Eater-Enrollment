@@ -24,6 +24,7 @@ export function FilterMenu(props: { optionsState: [FilterOptions, (options: Filt
     return (
         <Dialog
             open={open}
+            onClose={() => setOpen(false)}
         >
             <div className="flex items-center justify-between text-xl whitespace-pre border-b border-quaternary px-4 mt-2">
                 {"Search Filters"}
@@ -136,11 +137,10 @@ function OptionList(props: { className?: string, options: Set<string>, defaultOp
 
     return (
         <div className={className}>
-            {Array.from(defaultOptions).map((option, index) => (
-                <div className="flex items-center">
+            {Array.from(defaultOptions).map(option => (
+                <div key={option} className="flex items-center">
                     <BpCheckbox
-                        key={index}
-                        checkBoxSize={16}
+                        checkboxsize={16}
                         color="secondary"
                         name={option}
                         checked={options.has(option)}
