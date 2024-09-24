@@ -174,25 +174,27 @@ function CalendarNavBar(props: { showingFinals: boolean, setShowingFinals: (_: b
 							showingFinals ? createFinalEvents(currentSchedule.courses.map(({ offerings }) => offerings).flat()) :
 								createEvents(currentSchedule.courses.map(({ offerings }) => offerings).flat()).concat(createCustomEvents(currentSchedule.customEvents))
 						);
-						const times = events.map(event => {
-							const start = moment(event.start);
-							const end = moment(event.end);
-							const startTime = 60 * start.hours() + start.minutes();
-							const endTime = 60 * end.hours() + end.minutes();
-							return [startTime, endTime];
-						}).flat();
-						const start = moment("00:00", "HH:mm");
-						const end = moment("00:00", "HH:mm");
-						const minTime = Math.min(...times);
-						const maxTime = Math.max(...times);
-						const roundedMin = Math.floor((minTime - 1) / 60) * 60;
-						const roundedMax = Math.ceil((maxTime + 1) / 60) * 60;
-						start.set("minutes", roundedMin);
-						end.set("minutes", roundedMax);
-						if (minTime - roundedMin > 30) calendar.classList.add("clip-timegrid-start");
-						if (roundedMax - maxTime > 30) calendar.classList.add("clip-timegrid-end");
-						setMinTime(start.format("HH:mm"));
-						setMaxTime(end.format("HH:mm"));
+						if (events.length) {
+							const times = events.map(event => {
+								const start = moment(event.start);
+								const end = moment(event.end);
+								const startTime = 60 * start.hours() + start.minutes();
+								const endTime = 60 * end.hours() + end.minutes();
+								return [startTime, endTime];
+							}).flat();
+							const start = moment("00:00", "HH:mm");
+							const end = moment("00:00", "HH:mm");
+							const minTime = Math.min(...times);
+							const maxTime = Math.max(...times);
+							const roundedMin = Math.floor((minTime - 1) / 60) * 60;
+							const roundedMax = Math.ceil((maxTime + 1) / 60) * 60;
+							start.set("minutes", roundedMin);
+							end.set("minutes", roundedMax);
+							if (minTime - roundedMin > 30) calendar.classList.add("clip-timegrid-start");
+							if (roundedMax - maxTime > 30) calendar.classList.add("clip-timegrid-end");
+							setMinTime(start.format("HH:mm"));
+							setMaxTime(end.format("HH:mm"));
+						}
 						await new Promise(r => setTimeout(r, 0));
 						htmlToImage.toPng(calendar as HTMLElement)
 							.then(async function (dataUrl) {
