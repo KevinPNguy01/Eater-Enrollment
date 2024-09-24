@@ -9,7 +9,6 @@ import { BuildingLink } from "./BuildingLink";
 import { RateMyProfessorsLink } from "./RateMyProfessorsLink";
 import { ZotisticsLink } from "./ZotisticsLink";
 import useWindowDimensions from "utils/WindowDimensions";
-import { BpCheckbox } from "components/BpCheckbox";
 
 /**
  * Component for displaying a course result as a tr, to be used in CourseResult.
@@ -21,7 +20,7 @@ export function OfferingResult(props: { offering: CourseOffering }) {
 
     return (
         <tr className={`course-result odd:bg-quaternary even:bg-tertiary ${isMobile ? "text-2xs" : "text-xs"}`} key={offering.section.code}>
-            <td className="!p-0">
+            <td className="!p-2">
                 <CourseCheckBox offering={offering} />
             </td>
             <td className="!pl-0">
@@ -70,8 +69,6 @@ function CourseCheckBox(props: { offering: CourseOffering }) {
     const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
     const dispatch = useDispatch();
     const { offering } = props;
-    const { height, width } = useWindowDimensions();
-    const isMobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) || (width > height && 1.33 * width / 2 < height);
 
     // Add or remove offering depending on the box was checked or unchecked.
     const handleCheckBoxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,6 +76,6 @@ function CourseCheckBox(props: { offering: CourseOffering }) {
     };
 
     return (
-        <BpCheckbox checkboxsize={isMobile ? 16 : 20} onChange={handleCheckBoxChange} checked={scheduleContainsOffering(currentSchedule, offering)} />
+        <input type="checkbox" onChange={handleCheckBoxChange} checked={scheduleContainsOffering(currentSchedule, offering)} />
     );
 }
