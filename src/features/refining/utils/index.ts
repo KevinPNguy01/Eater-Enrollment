@@ -90,7 +90,7 @@ export function newFilterOptions() {
         dayTypes: new Set(["M", "Tu", "W", "Th", "F"]),
         restrictionTypes: new Set([...restrictionCodes.keys()].map(code => `${code}: ${restrictionCodes.get(code)}`)),
         levelTypes: new Set(["Lower Division", "Upper Division", "Graduate"]),
-        timeRange: [480, 1320]
+        timeRange: [480, 1440]
     } as FilterOptions;
 }
 

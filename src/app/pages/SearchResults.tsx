@@ -9,7 +9,7 @@ import { filterIcon, sortIcon } from 'assets/icons'
 import { FilterMenu } from "features/refining/components/FilteringMenu"
 import { SortingMenu } from "features/refining/components/SortingMenu"
 import { defaultSortOptions, FilterOptions, SortOptions } from "features/refining/types/options"
-import { defaultFilterOptions, filterCourses, sortCourses } from "features/refining/utils"
+import { defaultFilterOptions, filterCourses, newFilterOptions, sortCourses } from "features/refining/utils"
 import { ScheduleResults } from "features/results/components/ScheduleResult"
 import { SearchBox } from "features/search/components/SearchBox"
 import { groupOfferings } from 'helpers/CourseOffering'
@@ -31,8 +31,8 @@ export function SearchResults() {
     const allReviews = useSelector(selectReviews);
 
     const [sortOptions, setSortOptions] = useState(defaultSortOptions);
-    const [filterOptions, setFilterOptions] = useState(null as unknown as FilterOptions);
-    const [defaultFilter, setDefaultFilter] = useState(null as unknown as FilterOptions);
+    const [filterOptions, setFilterOptions] = useState(newFilterOptions());
+    const [defaultFilter, setDefaultFilter] = useState(newFilterOptions());
 
     // Reset filters when courses change.
     useEffect(() => {
@@ -64,7 +64,7 @@ function SearchResultsNavBar(props: {
 ) {
     const { sortOptionsState, filterOptionsState, defaultFilterOptions } = props;
     const sortMenuState = useState(false);
-    const [filterMenuVisible, setFilterMenuVisible] = useState(false);
+    const filterMenuState = useState(false);
     const pastSearch = useSelector(selectPastSearch);
     const futureSearch = useSelector(selectFutureSearch);
     const prevQueries = useSelector(selectPrevQueries);
@@ -171,17 +171,15 @@ function SearchResultsNavBar(props: {
                 className={buttonClass}
                 size={isMobile ? "small" : "medium"}
                 color="white"
-                onClick={() => setFilterMenuVisible(true)}
+                onClick={() => filterMenuState[1](true)}
             >
                 {filterIcon}
             </IconButton>
-            {filterMenuVisible && (
-                <FilterMenu
-                    optionsState={filterOptionsState}
-                    defaultOptions={defaultFilterOptions}
-                    close={() => setFilterMenuVisible(false)}
-                />
-            )}
+            <FilterMenu
+                optionsState={filterOptionsState}
+                defaultOptions={defaultFilterOptions}
+                openState={filterMenuState}
+            />
         </nav>
     )
 }
