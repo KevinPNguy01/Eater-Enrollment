@@ -18,12 +18,24 @@ export function SaveMenu(props: { openState: [boolean, (val: boolean) => void], 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [open])
 
+	const submitHandler = (e: React.FormEvent | React.MouseEvent) => {
+		e.preventDefault();
+		(document.activeElement as HTMLElement)?.blur();
+		if (input) {
+			saveUser(input, scheduleSet, currentScheduleIndex);
+			if (rememberMe) {
+				localStorage.setItem("userID", input);
+			}
+		}
+		setOpen(false);
+	}
+
 	return (
 		<Dialog
 			open={open}
 			onClose={() => setOpen(false)}
 		>
-			<div className="p-4">
+			<form className="p-4" onSubmit={submitHandler}>
 				<h1 className="px-2">Save</h1>
 				<p className="px-2 text-neutral-300 font-semibold">Enter a unique user id to save your schedules under.</p>
 				<div className="p-2">
@@ -35,19 +47,11 @@ export function SaveMenu(props: { openState: [boolean, (val: boolean) => void], 
 				</div>
 				<div className="flex justify-end gap-4 px-2">
 					<button className="font-semibold" onClick={() => setOpen(false)}>Cancel</button>
-					<button className="font-semibold" onClick={() => {
-						if (input) {
-							saveUser(input, scheduleSet, currentScheduleIndex);
-							if (rememberMe) {
-								localStorage.setItem("userID", input);
-							}
-						}
-						setOpen(false);
-					}}>
+					<button className="font-semibold" onClick={submitHandler}>
 						Save
 					</button>
 				</div>
-			</div>
+			</form>
 		</Dialog>
 	)
 }
