@@ -46,6 +46,20 @@ const BpCheckedIcon = styled(BpIcon)<{ checkBoxSize: number }>(({ checkBoxSize }
     },
 }));
 
+const BpIndeterminateIcon = styled(BpIcon)<{ checkBoxSize: number }>(({ checkBoxSize }) => ({
+    backgroundColor: '#888',
+    border: "0px solid #888",
+    '&::before': {
+        display: 'block',
+        width: checkBoxSize,
+        height: checkBoxSize,
+        backgroundImage:
+            "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath" +
+            " fill-rule='evenodd' clip-rule='evenodd' d='M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8' stroke='%23fff' stroke-width='1.5' fill='%23fff'/%3E%3C/svg%3E\")",
+        content: '""',
+    }
+}));
+
 export function BpCheckbox(props: BpCheckboxProps) {
     const { checkBoxSize = 20, ...rest } = props; // Default size is 20
     return (
@@ -53,6 +67,7 @@ export function BpCheckbox(props: BpCheckboxProps) {
             sx={{ '&:hover': { bgcolor: 'transparent' } }}
             color="default"
             checkedIcon={<BpCheckedIcon checkBoxSize={checkBoxSize} />}
+            indeterminateIcon={<BpIndeterminateIcon checkBoxSize={checkBoxSize} />}
             icon={<BpIcon checkBoxSize={checkBoxSize} />}
             {...rest}
         />
