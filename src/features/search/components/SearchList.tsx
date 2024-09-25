@@ -3,13 +3,14 @@ import { AppDispatch } from "app/store";
 import { groupOfferings } from "helpers/CourseOffering";
 import { useDispatch, useSelector } from "react-redux";
 import { selectGrades } from "stores/selectors/Grades";
+import { selectReviews } from "stores/selectors/Reviews";
 import { selectSearchQuarter, selectSearchType, selectSearchYear } from "stores/selectors/Search";
 import { addCourseGrades } from "stores/slices/Grades";
-import { addQuery, setSearchFulfilled, setSearchPending } from "stores/slices/Search";
-import { SearchSuggestion } from "../utils/FormHelpers";
 import { addInstructorReview } from "stores/slices/Reviews";
+import { addQuery, setSearchFulfilled, setSearchPending } from "stores/slices/Search";
+import { ScheduleQuery } from "types/ScheduleQuery";
 import { searchProfessor } from "utils/RateMyProfessors";
-import { selectReviews } from "stores/selectors/Reviews";
+import { SearchSuggestion } from "../utils/FormHelpers";
 
 const departmentIcon = <svg fill="#bbb" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
     <path d="M4 2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zM7.5 5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm2.5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zM4.5 8a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm2.5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5z" />
@@ -30,13 +31,39 @@ const geIcon = <svg fill="#bbb" xmlns="http://www.w3.org/2000/svg" width="16" he
  */
 export function SearchList(props: { suggestions: SearchSuggestion[] }) {
     const { suggestions } = props;
-    const buttonStyle = "flex items-center gap-2 px-4 py-2 text-left border-quaternary hover:bg-tertiary last:rounded-b-[20px]";
+    const buttonStyle = "flex items-center gap-2 px-4 py-2 text-left border-quaternary hover:bg-tertiary last:rounded-b-[20px] ";
     const dispatch = useDispatch<AppDispatch>();
     const searchType = useSelector(selectSearchType);
     const quarter = useSelector(selectSearchQuarter);
     const year = useSelector(selectSearchYear);
     const allGrades = useSelector(selectGrades);
     const allReviews = useSelector(selectReviews);
+
+    const clickHandler = (query: ScheduleQuery) => async () => {
+        if (searchType === "single") {
+            dispatch(setSearchPending());
+            const queries = [{ ...query, year, quarter }];
+            const offerings = await requestSchedule(queries);
+            const courses = groupOfferings(offerings);
+            dispatch(setSearchFulfilled({ queries, courses, refresh: false }))
+
+            const grades = await requestGrades(courses.filter(({ department, number }) => !allGrades[`${department} ${number}`]));
+            Object.keys(grades).forEach(courseName => dispatch(addCourseGrades({ courseName, grades: grades[courseName] })));
+
+            const instructors = [...new Set(offerings.map(
+                ({ instructors }) => instructors.map(
+                    ({ shortened_name }) => shortened_name
+                )
+            ).flat(4).filter(instructor => instructor !== "STAFF" && !(instructor in allReviews)))];
+
+            for (const instructor of instructors) {
+                const review = await searchProfessor(instructor);
+                dispatch(addInstructorReview({ instructor, review }));
+            }
+        } else {
+            dispatch(addQuery(query));
+        }
+    }
 
     return (
         <div className="absolute z-10 bg-secondary border-quaternary border border-t-0 -left-[1px] -right-[1px] top-full grid max-h-[50vh] overflow-y-scroll hide-scroll rounded-b-[1.25rem]">
@@ -46,59 +73,10 @@ export function SearchList(props: { suggestions: SearchSuggestion[] }) {
                 return (
                     <button
                         key={text}
-                        className={buttonStyle}
-                        onMouseDown={async () => {
-                            if (searchType === "single") {
-                                dispatch(setSearchPending());
-                                const queries = [{ ...query, year, quarter }];
-                                const offerings = await requestSchedule(queries);
-                                const courses = groupOfferings(offerings);
-                                dispatch(setSearchFulfilled({ queries, courses, refresh: false }))
-
-                                const grades = await requestGrades(courses.filter(({ department, number }) => !allGrades[`${department} ${number}`]));
-                                Object.keys(grades).forEach(courseName => dispatch(addCourseGrades({ courseName, grades: grades[courseName] })));
-
-                                const instructors = [...new Set(offerings.map(
-                                    ({ instructors }) => instructors.map(
-                                        ({ shortened_name }) => shortened_name
-                                    )
-                                ).flat(4).filter(instructor => instructor !== "STAFF" && !(instructor in allReviews)))];
-
-                                for (const instructor of instructors) {
-                                    const review = await searchProfessor(instructor);
-                                    dispatch(addInstructorReview({ instructor, review }));
-                                }
-                            } else {
-                                dispatch(addQuery(query));
-                            }
-                        }}
-                        onClick={async () => {
-                            if (searchType === "single") {
-                                dispatch(setSearchPending());
-                                const queries = [{ ...query, year, quarter }];
-                                const offerings = await requestSchedule(queries);
-                                const courses = groupOfferings(offerings);
-                                dispatch(setSearchFulfilled({ queries, courses, refresh: false }))
-
-                                const grades = await requestGrades(courses.filter(({ department, number }) => !allGrades[`${department} ${number}`]));
-                                Object.keys(grades).forEach(courseName => dispatch(addCourseGrades({ courseName, grades: grades[courseName] })));
-
-                                const instructors = [...new Set(offerings.map(
-                                    ({ instructors }) => instructors.map(
-                                        ({ shortened_name }) => shortened_name
-                                    )
-                                ).flat(4).filter(instructor => instructor !== "STAFF" && !(instructor in allReviews)))];
-
-                                for (const instructor of instructors) {
-                                    const review = await searchProfessor(instructor);
-                                    dispatch(addInstructorReview({ instructor, review }));
-                                }
-                            } else {
-                                dispatch(addQuery(query));
-                            }
-                        }}
+                        className={buttonStyle + "search-suggestion"}
+                        onMouseDown={clickHandler(query)}
+                        onTouchStart={clickHandler(query)}
                     >
-                        {/** Use onMouseDown to trigger before onBlur in SearchBubble. */}
                         <div className="ml-0.5 mr-2.5">
                             {(function getIcon() {
                                 if (value.ge) return geIcon;

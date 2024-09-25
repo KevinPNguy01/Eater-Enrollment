@@ -146,13 +146,14 @@ function SearchResultsNavBar(props: {
                 <HomeIcon />
             </IconButton>
             {/** Search box will expand. */}
-            <div
+            <form
                 className={`relative w-0 flex-grow ${isMobile ? "text-sm" : "text-base"}`}
-                onTouchStart={() => setSearching(true)}
+                onSubmit={e => e.preventDefault()}
+                onFocus={() => setSearching(true)}
                 onBlur={() => setSearching(false)}
             >
                 <SearchBox />
-            </div>
+            </form>
             {/** Sort button/menu. */}
             <IconButton
                 className={buttonClass}
