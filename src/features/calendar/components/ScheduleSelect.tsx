@@ -129,20 +129,22 @@ export function ScheduleSelect() {
                     </AccordionSummary>
                     <AccordionDetails className="text-left text-base !p-2 !pt-0">
                         {dragged !== null && <DropZone index={-1} dropZone={dropZone} />}
-                        {scheduleSet.map(({ name }, index) => (
-                            <React.Fragment key={index}>
-                                <ScheduleOption
-                                    className={`${width < height ? "text-sm" : "text-base"} transition-[height] transition-linear transition-200 ${dragged === index ? "hidden" : ""}`}
-                                    key={`schedule-option-${index}`}
-                                    name={name}
-                                    index={index}
-                                    setMenu={setActionMenu}
-                                    onMouseDown={mouseTouchDownHandler(index)}
-                                    onTouchStart={mouseTouchDownHandler(index)}
-                                />
-                                {dragged !== index && dragged !== null && <DropZone key={`drop-zone-${index}`} index={index} dropZone={dropZone} />}
-                            </React.Fragment>
-                        ))}
+                        <div onClick={e => e.stopPropagation()}>
+                            {scheduleSet.map(({ name }, index) => (
+                                <React.Fragment key={index}>
+                                    <ScheduleOption
+                                        className={`${width < height ? "text-sm" : "text-base"} transition-[height] transition-linear transition-200 ${dragged === index ? "hidden" : ""}`}
+                                        key={`schedule-option-${index}`}
+                                        name={name}
+                                        index={index}
+                                        setMenu={setActionMenu}
+                                        onMouseDown={mouseTouchDownHandler(index)}
+                                        onTouchStart={mouseTouchDownHandler(index)}
+                                    />
+                                    {dragged !== index && dragged !== null && <DropZone key={`drop-zone-${index}`} index={index} dropZone={dropZone} />}
+                                </React.Fragment>
+                            ))}
+                        </div>
                         {/** Add new schedule button. */}
                         <Button
                             color="white"

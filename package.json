@@ -23,6 +23,7 @@
     "@reduxjs/toolkit": "^2.2.7",
     "@trpc/client": "^11.0.0-rc.502",
     "@trpc/server": "^11.0.0-rc.502",
+    "bootstrap-icons": "^1.11.3",
     "core-js": "^3.37.1",
     "firebase": "^10.13.2",
     "fullcalendar": "^6.1.10",
