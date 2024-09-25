@@ -1,19 +1,19 @@
+import { requestGrades, requestSchedule } from "api/PeterPortalGraphQL";
 import { AppDispatch } from "app/store";
 import { Tooltip } from "components/Tooltip";
-import { useEffect, useRef, useState } from "react";
+import { groupOfferings } from "helpers/CourseOffering";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { selectGrades } from "stores/selectors/Grades";
+import { selectReviews } from "stores/selectors/Reviews";
 import { selectScheduleQueries, selectSearchInput, selectSearchQuarter, selectSearchType, selectSearchYear } from "stores/selectors/Search";
+import { addCourseGrades } from "stores/slices/Grades";
+import { addInstructorReview } from "stores/slices/Reviews";
 import { addQuery, clearQueries, removeQuery, setDisplayResults, setSearchFulfilled, setSearchInput, setSearchPending, toggleSearchType } from "stores/slices/Search";
+import { searchProfessor } from "utils/RateMyProfessors";
 import { getSuggestions, SearchSuggestion } from "../utils/FormHelpers";
 import { QueryBubble } from "./QueryBubble";
 import { SearchList } from "./SearchList";
-import { requestGrades, requestSchedule } from "api/PeterPortalGraphQL";
-import { groupOfferings } from "helpers/CourseOffering";
-import { addCourseGrades } from "stores/slices/Grades";
-import { selectGrades } from "stores/selectors/Grades";
-import { selectReviews } from "stores/selectors/Reviews";
-import { addInstructorReview } from "stores/slices/Reviews";
-import { searchProfessor } from "utils/RateMyProfessors";
 
 const searchIcon = (
     <svg focusable="false" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -41,8 +41,54 @@ export function SearchBox() {
     const allGrades = useSelector(selectGrades);
     const allReviews = useSelector(selectReviews);
 
+    const toggleSearchTypeHandler = useCallback(() => {
+        dispatch(toggleSearchType());
+        // If state is now single-search, there are queries, and the user isn't typing
+        if (searchType === "multi" && searchQueries.length && !input.length) {
+            const query = searchQueries[searchQueries.length - 1]
+            const { ge, department, number } = query;
+            const text = ge ? ge : department + (number ? ` ${number}` : "");
+            dispatch(setSearchInput(text));
+            dispatch(clearQueries());
+        }
+    }, [dispatch, input.length, searchQueries, searchType]);
+
+    const inputRef = useRef<HTMLInputElement>(null);
+
     const [searchSuggestions, setSearchSuggestions] = useState([] as SearchSuggestion[])
     useEffect(() => setSearchSuggestions(getSuggestions(input)), [input]);
+
+    const listRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const handler = (e: TouchEvent) => {
+            e.preventDefault();
+        }
+        const list = listRef.current;
+        if (list) {
+            list.addEventListener("touchstart", handler)
+            return () => {
+                list!.removeEventListener("touchstart", handler)
+            }
+        }
+    }, [listRef, searchSuggestions])
+
+    const searchToggleRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const handler = (e: TouchEvent | MouseEvent) => {
+            console.log(123)
+            e.preventDefault();
+            toggleSearchTypeHandler();
+        }
+        const searchToggle = searchToggleRef.current;
+        if (searchToggle) {
+            searchToggle.addEventListener("touchstart", handler)
+            searchToggle.addEventListener("mousedown", handler)
+            return () => {
+                searchToggle.removeEventListener("touchstart", handler)
+                searchToggle.removeEventListener("mousedown", handler)
+            }
+        }
+    }, [listRef, searchSuggestions, toggleSearchTypeHandler])
 
     const keyHandler = async (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key !== "Enter") return;
@@ -70,6 +116,8 @@ export function SearchBox() {
                     const review = await searchProfessor(instructor);
                     dispatch(addInstructorReview({ instructor, review }));
                 }
+            } else {
+                (document.activeElement as HTMLElement)?.blur();
             }
         } else {
             if (searchSuggestions.length) {           // Add the first search suggestion and clear the search box.
@@ -96,22 +144,7 @@ export function SearchBox() {
                 }
             }
         }
-    };
-
-    const toggleSearchTypeHandler: React.MouseEventHandler<HTMLDivElement> = e => {
-        e.preventDefault();
-        dispatch(toggleSearchType());
-        // If state is now single-search, there are queries, and the user isn't typing
-        if (searchType === "multi" && searchQueries.length && !input.length) {
-            const query = searchQueries[searchQueries.length - 1]
-            const { ge, department, number } = query;
-            const text = ge ? ge : department + (number ? ` ${number}` : "");
-            dispatch(setSearchInput(text));
-            dispatch(clearQueries());
-        }
-    };
-
-
+    }
 
     // Update scroll position when the number of queries changes, or if toggling multi-search.
     useEffect(() => {
@@ -127,7 +160,7 @@ export function SearchBox() {
             className={`w-full relative h-full bg-secondary flex px-2 items-center border-quaternary border ${searchSuggestions.length && focus ? "rounded-t-[1.125rem] border-b-0" : "rounded-[1.125rem]"}`}
         >
             {/** Magnifying glass icon to toggle mutli-search. */}
-            <div id="toggle-multi-search" className="relative group hover:cursor-pointer" onMouseDown={toggleSearchTypeHandler}>
+            <div ref={searchToggleRef} id="toggle-multi-search" className="relative group hover:cursor-pointer">
                 {searchType === "multi" ? multiSearchIcon : searchIcon}
                 <Tooltip className="select-none left-1/2 -translate-x-1/2 text-nowrap text-xs mt-1 bg-tertiary border border-neutral-500 p-1.5 text-neutral-300 hidden group-hover:block" text="Toggle multi-search" />
             </div>
@@ -145,6 +178,7 @@ export function SearchBox() {
 
                 {/** Generate search suggestions as the user types. */}
                 <input
+                    ref={inputRef}
                     className="m-1 h-1/2 min-w-[75%] flex-grow border-0"
                     placeholder="Search"
                     type="text"
@@ -154,7 +188,9 @@ export function SearchBox() {
                     }}
                     onKeyDown={keyHandler}
                     onFocus={() => setFocus(true)}
-                    onBlur={() => setFocus(false)}
+                    onBlur={e => {
+                        searchType === "multi" && e.relatedTarget?.classList.contains("search-suggestion") ? inputRef.current?.focus() : setFocus(false);
+                    }}
                 />
             </div>
 
@@ -168,7 +204,15 @@ export function SearchBox() {
                         xmlns="http://www.w3.org/2000/svg"
                         width={24}
                         height={24}
-                        onMouseDown={() => {
+                        onMouseDown={e => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            dispatch(setSearchInput(""));
+                            dispatch(clearQueries());
+                        }}
+                        onTouchEnd={e => {
+                            e.preventDefault();
+                            e.stopPropagation();
                             dispatch(setSearchInput(""));
                             dispatch(clearQueries());
                         }}
@@ -177,7 +221,11 @@ export function SearchBox() {
                     </svg>
                 </div>
             ) : null}
-            {focus && searchSuggestions.length > 0 && <SearchList suggestions={searchSuggestions} />}
+            {focus && searchSuggestions.length > 0 && (
+                <div ref={listRef}>
+                    <SearchList suggestions={searchSuggestions} />
+                </div>
+            )}
         </div>
     );
 }

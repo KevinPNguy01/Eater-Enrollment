@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { ScheduleQuery } from "types/ScheduleQuery";
 
 const bubbleStyle = "flex items-center whitespace-nowrap border border-quaternary bg-tertiary px-4 rounded-full group hover:pr-0 hover:bg-red-500 hover:cursor-pointer";
@@ -8,9 +9,21 @@ const bubbleStyle = "flex items-center whitespace-nowrap border border-quaternar
  */
 export function QueryBubble(props: { query: ScheduleQuery, onClick: () => void }) {
     const { query, onClick } = props;
+    const ref = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const handler = (e: TouchEvent) => {
+            e.preventDefault()
+            onClick();
+        };
+        const bubble = ref.current;
+        if (bubble) {
+            bubble.addEventListener("touchstart", handler);
+            return () => bubble.removeEventListener("touchstart", handler);
+        }
+    }, [onClick, ref]);
 
     return (
-        <div className={bubbleStyle} onClick={onClick}>
+        <div ref={ref} className={bubbleStyle} onClick={onClick}>
             {query.ge ? query.ge : query.department + (query.number ? ` ${query.number}` : "")}
             <div className="px-1 hidden group-hover:block">
                 <svg
