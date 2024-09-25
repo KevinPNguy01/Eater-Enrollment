@@ -46,7 +46,7 @@ export function SaveMenu(props: { openState: [boolean, (val: boolean) => void], 
 					<span className="text-neutral-300 font-semibold">Remember Me</span>
 				</div>
 				<div className="flex justify-end gap-4 px-2">
-					<button className="font-semibold" onClick={() => setOpen(false)}>Cancel</button>
+					<button className="font-semibold" onClick={e => { e.preventDefault(); setOpen(false) }}>Cancel</button>
 					<button className="font-semibold" onClick={submitHandler}>
 						Save
 					</button>
