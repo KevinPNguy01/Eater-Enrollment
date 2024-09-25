@@ -3,6 +3,9 @@
 <span>A course scheduler web app that allows students to search for courses and manage class schedules at UCI.</span>
 <br/>
 <span>The website is currently hosted on Firebase and can be accessed at <a href="https://eaterenrollment.web.app">eaterenrollment.web.app</a></span>
+<br/>
+<br/>
+<img src="./src/assets/demo.png" alt="Logo">
 
 <h2>Key Features</h2>
 <ul>
