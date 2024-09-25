@@ -27,7 +27,7 @@ export function ImportMenu(props: { openState: [boolean, (val: boolean) => void]
 
     const submitHandler = (e: React.FormEvent | React.MouseEvent) => {
         e.preventDefault();
-        (document.activeElement as HTMLElement)?.blur();
+        setTimeout(() => (document.activeElement as HTMLElement)?.blur(), 0)
         if (input) {
             importUserId(input);
             if (rememberMe) {
@@ -53,8 +53,8 @@ export function ImportMenu(props: { openState: [boolean, (val: boolean) => void]
                     <span className="text-neutral-300 font-semibold">Remember Me</span>
                 </div>
                 <div className="flex justify-end gap-4 px-2">
-                    <button className="font-semibold" onClick={e => { e.preventDefault(); setOpen(false) }}>Cancel</button>
-                    <button className="font-semibold" onClick={submitHandler}>
+                    <button type="button" className="font-semibold" onClick={e => { e.preventDefault(); setOpen(false) }}>Cancel</button>
+                    <button type="submit" className="font-semibold" onClick={submitHandler}>
                         Import
                     </button>
                 </div>
