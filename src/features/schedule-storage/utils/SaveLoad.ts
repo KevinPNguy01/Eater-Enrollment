@@ -226,7 +226,7 @@ export async function importUser(userId: string) {
     });
 
     // Send success and save the user id if everything went well.
-    enqueueSnackbar(`Loaded schedule for "${userId}"`, { variant: "success" });
+    enqueueSnackbar(`Imported schedule for "${userId}"`, { variant: "success" });
     localStorage.setItem("userID", userId);
     return state;
 }
