@@ -17,15 +17,24 @@ export function ScheduleSelect() {
     const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
     const dispatch = useDispatch();
 
-    const [draggedWidth, setDraggedWidth] = useState(0);                // Size of the dragged schedule option.
-    const [dragged, setDragged] = useState<number | null>(null);        // Index of dragged schedule option.
-    const [dropZone, setDropZone] = useState(0);                        // Index of nearest drop zone.
+    const [draggedWidth, setDraggedWidth] = useState(0);                            // Size of the dragged schedule option.
+    const [dragged, setDragged] = useState<number | null>(null);                    // Index of dragged schedule option.
+    const [dropZone, setDropZone] = useState(0);                                    // Index of nearest drop zone.
     const [actionMenu, setActionMenu] = useState<React.JSX.Element | null>(null);   // Action menu for schedule option.
 
     const [mouse, setMouse] = useState({ x: 0, y: 0 });           // Mouse/touch position.
     const [relative, setRelative] = useState({ dx: 0, dy: 0 });   // Mouse/touch distance from drag handle.
 
+    const [expanded, setExpanded] = useState(false);     // Whether the select list is open.
+
     const { height, width } = useWindowDimensions();
+
+    // Add event listener to close the select list when the document is clicked elsewhere.
+    useEffect(() => {
+        const closeSelectListHandler = () => setExpanded(false);
+        document.addEventListener("click", closeSelectListHandler);
+        return () => document.removeEventListener("click", closeSelectListHandler);
+    }, []);
 
     // Add event listener for when mouse/touch moves.
     useEffect(() => {
@@ -39,7 +48,6 @@ export function ScheduleSelect() {
             document.removeEventListener("touchmove", mouseTouchMoveHandler);
         };
     }, [dragged]);
-
 
     // Add event listener to rearrange list of schedule options and adjust schedule index if needed.
     useEffect(() => {
@@ -110,9 +118,9 @@ export function ScheduleSelect() {
     return (
         <>
             {/** The actual drop down displaying the list of schedules. */}
-            <div className="relative touch-none">
+            <div className="relative touch-none" onClick={e => { e.stopPropagation(); setExpanded(!expanded) }}>
                 {dropDownPlaceHolder}
-                <Accordion className="!bg-secondary !border !border-quaternary !rounded w-full left-0 top-0 !absolute z-10" disableGutters={true}>
+                <Accordion className="!bg-secondary !border !border-quaternary !rounded w-full left-0 top-0 !absolute z-10" disableGutters={true} expanded={expanded}>
                     <AccordionSummary
                         className='*:!m-0 !min-h-0 !p-1 !pl-2'
                         expandIcon={<ExpandMoreIcon style={{ color: "white" }} />}
