@@ -35,6 +35,6 @@
   <li><strong>GraphQL</strong>: Efficient and precise query language.</li>
   <li><strong>Firebase</strong>: Hosting platform for the web app.</li>
   <li><strong>Firestore</strong>: Cloud-based NoSQL database for storing user schedules.</li>
-  <li><strong>Firebase Cloud Functions</strong>: Serverless functions used for building APIs.</li>
+  <li><strong>Google Cloud Functions</strong>: Serverless functions used for building APIs.</li>
   <li><strong>tRPC</strong>: End-to-end typesafe API layer.</li>
 </ul>
