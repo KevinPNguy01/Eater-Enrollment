@@ -6,8 +6,8 @@ import { ScheduleQuery } from "types/ScheduleQuery";
 export const searchSlice = createSlice({
     name: "search",
     initialState: {
-        quarter: "Fall",
-        year: "2024",
+        quarter: "Winter",
+        year: "2025",
         prevInput: "",
         input: "",
         prevQueries: [] as ScheduleQuery[],
