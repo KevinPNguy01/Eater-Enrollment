@@ -12,11 +12,11 @@ const quarterOptions: Record<string, string> = {
 const quarterKeys = Object.keys(quarterOptions);
 
 // Current year and quarter
-const currentYear = new Date().getFullYear();
-const currentQuarter = "Fall";
+const currentYear = 2024;
+const currentQuarter = "Winter";
 
 // Range of years from 2015-Current Year.
-const yearOptions = Array.from({ length: currentYear - 2015 + 1}, (_, index) => (currentYear - index - 1));
+const yearOptions = Array.from({ length: currentYear - 2015 + 1 }, (_, index) => (currentYear - index - 1));
 
 // Determine quarters for current year.
 const endQuarterIndex = 1 + quarterKeys.findIndex(q => q === currentQuarter);
@@ -28,19 +28,19 @@ const pastQuarters = yearOptions.map(year => [year, quarterKeys] as [number, str
 // Group current and past quarters.
 const termGroups: [number, string[]][] = [[currentYear, currentQuarters], ...pastQuarters]
 
-export function TermDropDown(props: {defaultTerm: {quarter: string, year: string}, setTerm: (quarter: string, year: string) => void}) {
-    const {defaultTerm, setTerm} = props;
+export function TermDropDown(props: { defaultTerm: { quarter: string, year: string }, setTerm: (quarter: string, year: string) => void }) {
+    const { setTerm } = props;
 
     // React state hook for displaying the current term in the select box.
-    const [termLabel, setTermLabel] = useState(`${defaultTerm.quarter} ${defaultTerm.year}-${parseInt(defaultTerm.year) % 100 + 1}`);
+    const [termLabel, setTermLabel] = useState(`${currentQuarter} ${currentYear}-${currentYear % 100 + 1}`);
 
     return (
         <div className="grid mx-1">
             <label className="text-neutral-300 text-xs">Term</label>
-            <select 
-                className="bg-secondary" 
+            <select
+                className="bg-secondary"
                 value="display"
-                onChange={({target}) => {
+                onChange={({ target }) => {
                     const [quarter, year] = target.value.split(",");
                     setTerm(quarter, (parseInt(year) + (quarter === "Fall" ? 0 : 1)).toString());
                     setTermLabel(`${quarterOptions[quarter]} ${year}-${parseInt(year) % 100 + 1}`)
@@ -49,7 +49,7 @@ export function TermDropDown(props: {defaultTerm: {quarter: string, year: string
                 {/** Hidden option used for displaying the current term. */}
                 <option hidden={true} value="display">{termLabel}</option>
                 {termGroups.map(([year, quarters]) => (
-                    <optgroup key={year} label={`${year}-${(year+1)%100}`}>
+                    <optgroup key={year} label={`${year}-${(year + 1) % 100}`}>
                         {/** Group options by year. */}
                         {quarters.map(quarter => (
                             <option className={``} key={quarter} value={`${quarter},${year}`}>
@@ -59,6 +59,6 @@ export function TermDropDown(props: {defaultTerm: {quarter: string, year: string
                     </optgroup>
                 ))}
             </select>
-        </div> 
+        </div>
     )
 }
