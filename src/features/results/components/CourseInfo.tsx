@@ -24,7 +24,7 @@ export function CourseInfo(props: { course: Course }) {
     const { height, width } = useWindowDimensions();
     const isMobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) || (width > height && 1.33 * width / 2 < height);
     return (
-        <Accordion sx={{ maxWidth: "calc(100vw - 10px)" }} slotProps={{ transition: { unmountOnExit: true } }}>
+        <Accordion className="border border-quaternary" sx={{ maxWidth: "calc(100vw - 10px)" }} slotProps={{ transition: { unmountOnExit: true } }}>
             <AccordionSummary
                 expandIcon={downArrowIcon}
                 aria-controls="panel1-content"
