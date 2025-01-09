@@ -1,4 +1,4 @@
-import { navLinks } from "constants/Links";
+import { navLinks } from "constants/links";
 import { AddedTab } from "./AddedTab";
 import { MapTab } from "./MapTab";
 import { SearchForms } from "./SearchForms";
