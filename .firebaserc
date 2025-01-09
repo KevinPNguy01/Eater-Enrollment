@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "eater-enrollment"
-  }
+    "default": "eater-enrollment",
+    "eater-enrollment": "eaterenrollment"
+  },
+  "targets": {},
+  "etags": {}
 }
