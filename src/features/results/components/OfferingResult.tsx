@@ -9,6 +9,8 @@ import { BuildingLink } from "./BuildingLink";
 import { RateMyProfessorsLink } from "./RateMyProfessorsLink";
 import { ZotisticsLink } from "./ZotisticsLink";
 import useWindowDimensions from "utils/WindowDimensions";
+import { enqueueSnackbar } from "notistack";
+
 
 /**
  * Component for displaying a course result as a tr, to be used in CourseResult.
@@ -23,8 +25,13 @@ export function OfferingResult(props: { offering: CourseOffering }) {
             <td className="!p-2">
                 <CourseCheckBox offering={offering} />
             </td>
-            <td className="!pl-0">
-                {offering.section.code}
+            <td>
+                <span className="!pl-0 cursor-pointer hover:bg-[#666] rounded-full py-0.5 flex justify-center" onClick={() => {
+                    navigator.clipboard.writeText(`${offering.section.code}`);
+                    enqueueSnackbar(`Copied to clipboard!`, { variant: "info" });
+                }}>
+                    {offering.section.code}
+                </span>
             </td>
             <td>
                 <div>
