@@ -25,8 +25,8 @@ export function OfferingResult(props: { offering: CourseOffering }) {
             <td className="!p-2">
                 <CourseCheckBox offering={offering} />
             </td>
-            <td>
-                <span className="!pl-0 cursor-pointer hover:bg-[#666] rounded-full py-0.5 flex justify-center" onClick={() => {
+            <td className="flex justify-center items-center h-full">
+                <span className="cursor-pointer hover:bg-[#666] rounded-full py-1 px-2 w-fit flex justify-center" onClick={() => {
                     navigator.clipboard.writeText(`${offering.section.code}`);
                     enqueueSnackbar(`Copied to clipboard!`, { variant: "info" });
                 }}>
