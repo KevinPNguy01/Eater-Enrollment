@@ -114,3 +114,33 @@ export const loadUser = onRequest(async (req, res) => {
         }
     }
 });
+
+export const importUser = onRequest(async (req, res) => {
+    res.set("Access-Control-Allow-Origin", "*");
+
+    if (req.method === "OPTIONS") {
+        // Send response to OPTIONS requests
+        res.set("Access-Control-Allow-Methods", "GET");
+        res.set("Access-Control-Allow-Headers", "Content-Type");
+        res.set("Access-Control-Max-Age", "3600");
+        res.status(204).send("");
+    } else {
+        const key = req.params["0"];
+        try {
+            const userDocRef = doc(db, "users", key);
+            const userDoc = await getDoc(userDocRef);
+            if (!userDoc.exists) {
+                res.status(404).send(`User "${key}" not found.`);
+            } else {
+                const data = userDoc.data();
+                res.status(200).json({
+                    scheduleSetString: data?.schedule_set_string,
+                    selectedIndex: data?.selected_index,
+                });
+            }
+        } catch (error) {
+            console.error("Error retrieving user schedules:", error);
+            res.status(500).send(`Error loading schedules for "${key}".`);
+        }
+    }
+});
