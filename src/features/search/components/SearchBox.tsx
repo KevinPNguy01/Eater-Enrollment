@@ -75,7 +75,6 @@ export function SearchBox() {
     const searchToggleRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         const handler = (e: TouchEvent | MouseEvent) => {
-            console.log(123)
             e.preventDefault();
             toggleSearchTypeHandler();
         }

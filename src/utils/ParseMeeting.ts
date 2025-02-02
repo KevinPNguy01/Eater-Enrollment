@@ -25,6 +25,7 @@ export function parseFinal(final: string): Final | null {
     const day = days[dayString];
     const time = parseTime(timeString);
     if (!time) return null;
+    console.log({day, startTime: time[0], endTime: time[1]})
     return {
         day,
         startTime: time[0],
@@ -40,7 +41,7 @@ function parseTime(time: string): [string, string] | null {
     if (!time || time === "TBA") return null;    // Account for asynchronous meeting times.
 
     time = time.replace(/\s+/g, "").replace("am", "").replace("pm", "p")    // Normalize string.
-    const pm = time[time.length - 1] === "p" ? true : false;                  // The time ends past 12 if the string ends in 'p'.
+    const pm = time[time.length - 1] === "p" ? true : false;                // The time ends past 12 if the string ends in 'p'.
     const timeArray = time.replace("p", "").split("-");                     // Drop the p and split by '-' into two separate times.
 
     // Isolate the start/end hours and minutes.
