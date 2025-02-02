@@ -90,3 +90,32 @@ export type HourMinute = {
     hour: number
     minute: number
 }
+
+export type RawGrade = {
+    averageGPA: number
+    courseNumber: string
+    coourseNumeric: number
+    department: string
+    geCategories: string[]
+    gradeACount: number
+    gradeBCount: number
+    gradeCCount: number
+    gradeDCount: number
+    gradeFCount: number
+    gradeNPCount: number
+    gradePCount: number
+    gradeWCount: number
+    instructors: string[]
+    quarter: Term
+    sectionCode: string
+    year: string
+}
+
+export enum Term {
+    Fall = "Fall",
+    Spring = "Spring",
+    Summer1 = "Summer1",
+    Summer10wk = "Summer10wk",
+    Summer2 = "Summer2",
+    Winter = "Winter"
+}
