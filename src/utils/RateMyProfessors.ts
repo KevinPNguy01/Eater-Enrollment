@@ -30,11 +30,14 @@ export async function searchProfessor(shortened_name: string) {
             el.innerHTML = html;
             const scripts = el.getElementsByTagName("script");
             let text = ""
+            const urls = (Array.from(el.getElementsByClassName("TeacherCard__StyledTeacherCard-syjs0d-0")) as HTMLAnchorElement[]).map(({href}) => href.split("/"));
+            const ids = urls.map(url => url[url.length-1]);
             for (const script of scripts) {
                 text += script.innerHTML;
             }
             const teachers = text.split('"__typename":"Teacher",').slice(1);
-            for (const teacher of teachers) {
+            for (let i = 0; i < teachers.length; ++i) {
+                const teacher = teachers[i];
                 const data = new Map<string, string>();
                 teacher.replace(/"/g, '').split(",").forEach(pair => {
                     const [key, value] = pair.split(":");
@@ -50,7 +53,7 @@ export async function searchProfessor(shortened_name: string) {
                         numRatings: parseInt(data.get("numRatings") || ""),
                         wouldTakeAgainPercent: parseFloat(data.get("wouldTakeAgainPercent") || ""),
                         avgDifficulty: parseFloat(data.get("avgDifficulty") || ""),
-                        url: `https://www.ratemyprofessors.com/professor/${data.get("legacyId") || ""}`
+                        url: `https://www.ratemyprofessors.com/professor/${ids[i]}`
                     } as Review;
                     break;
                 }
