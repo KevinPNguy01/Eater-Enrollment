@@ -112,7 +112,6 @@ function SearchResultsNavBar(props: {
                     const offerings = await requestSchedule(prevQueries);
                     const courses = groupOfferings(offerings);
                     dispatch(setSearchFulfilled({ queries: prevQueries, courses, refresh: true }))
-
                     const grades = await requestGrades(courses.filter(({ department, number }) => !allGrades[`${department} ${number}`]));
                     Object.keys(grades).forEach(courseName => dispatch(addCourseGrades({ courseName, grades: grades[courseName] })));
 
