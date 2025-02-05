@@ -91,12 +91,10 @@ export type HourMinute = {
     minute: number
 }
 
-export type RawGrade = {
+export type AggregateGradeByOffering = {
     averageGPA: number
     courseNumber: string
-    coourseNumeric: number
     department: string
-    geCategories: string[]
     gradeACount: number
     gradeBCount: number
     gradeCCount: number
@@ -105,10 +103,7 @@ export type RawGrade = {
     gradeNPCount: number
     gradePCount: number
     gradeWCount: number
-    instructors: string[]
-    quarter: Term
-    sectionCode: string
-    year: string
+    instructor: string
 }
 
 export enum Term {
@@ -119,3 +114,49 @@ export enum Term {
     Summer2 = "Summer2",
     Winter = "Winter"
 }
+
+export type CoursePreview = {
+    courseNumber: string
+    department: string
+    id: string
+    title: string
+}
+
+export type InstructorPreview = {
+    department: string
+    email: string
+    name: string
+    shortenedNames: string[]
+    title: string
+    ucinetid: string
+}
+
+export type Course = {
+    concurrent: string
+    corequisites: string
+    courseLevel: string
+    courseNumber: string
+    courseNumeric: number
+    department: string
+    departmentName: string
+    dependencies: CoursePreview[]
+    description: string
+    geList: string[]
+    geText: string
+    gradingOption: string
+    id: string
+    instructors: InstructorPreview[]
+    maxUnits: number
+    minUnits: number
+    overlap: string
+    prerequisiteText: string
+    prerequisiteTree: any
+    prerequisites: CoursePreview[]
+    repeatability: string
+    restriction: string
+    sameAs: string
+    school: string
+    terms: string[]
+    title: string
+  };
+  

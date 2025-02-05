@@ -4,7 +4,7 @@ import { CourseOffering } from "types/CourseOffering";
 import { GradeDistribution } from "types/GradeDistribution";
 import { GradeDistributionCollection } from "types/GradeDistributionCollection";
 import { ScheduleQuery } from "types/ScheduleQuery";
-import { WebsocResponse } from "types/AnteaterAPI";
+import { AggregateGradeByOffering, WebsocResponse } from "types/AnteaterAPI";
 import { Instructor } from "types/Instructor";
 import { Meeting } from "types/Meeting";
 import { SectionInfo } from "types/SectionInfo";
@@ -96,46 +96,74 @@ export async function requestSchedule(queries: ScheduleQuery[]): Promise<CourseO
  * @returns
  */
 export async function requestGrades(courses: Course[]) {
-    // The fields to select on GradeDistributionCollection.
-    const gradesFragment = `
-    fragment gradeFields on GradeDistributionCollection {
-        grade_distributions{
-            average_gpa grade_a_count grade_b_count grade_c_count grade_d_count grade_f_count grade_p_count grade_np_count grade_w_count
-            course_offering {
-                course { department number }
-                section { type }
-                instructors {shortened_name }
-            }
-        }
-    }`;
-
     // Build a separate GraphQL query for each of the given queries.
     const buildSubQuery = (course: Course, index: number): string => {
         const { department, number } = course;
         return `
-        course${index}: grades(
+        course${index}: aggregateGradesByOffering(query: {
             ${department ? `department: "${department}"` : ""}
-            ${number ? `number: "${number}"` : ""}
-        ) {...gradeFields}`;
+            ${number ? `courseNumber: "${number}"` : ""}
+        }) {...gradeFields}`;
     };
 
-    // The actual GraphQL query.
-    const query = `
-        ${gradesFragment}
-        query {
-            ${courses.map(buildSubQuery)}
-        }
-    `.replace(/ +/g, ' ');
+    // The fields to select on GradeDistributionCollection.
+    const gradesFragment = `
+    fragment gradeFields on AggregateGradeByOffering {
+        averageGPA courseNumber department instructor
+        gradeACount gradeBCount gradeCCount gradeDCount gradeFCount
+        gradeNPCount gradePCount gradeWCount
+    }`;
 
-    // Combine all of the GradeDistributionCollections from all the subqueries.
-    const response = await makeRequest(query);
     const grades = { grade_distributions: [] as GradeDistribution[] } as GradeDistributionCollection;
-    courses.forEach((_, index) => {
-        const courseGrades = response.data[`course${index}`] as GradeDistributionCollection;
-        courseGrades.grade_distributions.forEach(grade => grades.grade_distributions.push(grade));
-    });
+
+    // Process 15 aliases at a time due to API limit
+    for (let i = 0; i < courses.length; i += 15) {
+        const courseSlice = courses.slice(i, i+15);
+        // The actual GraphQL query.
+        const query = `
+            ${gradesFragment}
+            query {
+                ${courseSlice.map(buildSubQuery)}
+            }
+        `.replace(/ +/g, ' ');
+
+        // Combine all of the GradeDistributions from all the subqueries.
+        const response = await makeRequest(query);
+        const rawGrades = response.data as Record<string, AggregateGradeByOffering[]>;
+        grades.grade_distributions.push(...anteaterGradesToPeterPortal(courseSlice, rawGrades));
+    }
 
     return aggregatedGrades(grades);
+}
+
+function anteaterGradesToPeterPortal(courses: Course[], rawGrades: Record<string, AggregateGradeByOffering[]>) : GradeDistribution[] {
+    const distributions = [] as GradeDistribution[];
+    courses.forEach((_, index) => {
+        rawGrades[`course${index}`].forEach(grades => {
+            const {gradeACount, gradeBCount, gradeCCount, gradeDCount, gradeFCount, gradePCount, gradeNPCount, gradeWCount, instructor, department, courseNumber, averageGPA} = grades;
+            distributions.push({
+                grade_a_count: gradeACount,
+                grade_b_count: gradeBCount,
+                grade_c_count: gradeCCount,
+                grade_d_count: gradeDCount,
+                grade_f_count: gradeFCount,
+                grade_np_count: gradeNPCount,
+                grade_p_count: gradePCount,
+                grade_w_count: gradeWCount,
+                average_gpa: averageGPA,
+                course_offering: {
+                    course: {
+                        department: department,
+                        number: courseNumber
+                    },
+                    instructors: [
+                        {shortened_name: instructor}
+                    ]
+                }
+            } as GradeDistribution)
+        });
+    });
+    return distributions;
 }
 
 function anteaterToPeterPortal(queryMap: Record<number, [string, string]>, data: Record<string, WebsocResponse>) : CourseOffering[] {
