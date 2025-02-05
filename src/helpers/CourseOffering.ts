@@ -25,6 +25,10 @@ export function groupOfferings(offerings: CourseOffering[]) {
     const courseOfferings = new Map<string, CourseOffering[]>();
     offerings.forEach((offering) => {
         const id = offering.course.id;
+        // Skip offerings that don't have a valid course
+        if (!courseMap.has(id)) {
+            return;
+        }
         if (!courseOfferings.has(id)) {
             courseOfferings.set(id, []);
         }
