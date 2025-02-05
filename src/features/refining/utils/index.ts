@@ -3,7 +3,7 @@ import { statusColors, typeColors } from "constants/TextColors";
 import { Course } from "types/Course";
 import { FilterOptions, SortBy, SortDirection, SortOptions } from "../types/options";
 import { filterDays, filterLevel, filterRestrictions, filterSectionTypes, filterStatus, filterTime } from "./FilterFunctions";
-import { sortCoursesByGPA, sortCoursesByName, sortCoursesByRMP, sortInstructorsByRMP, sortOfferingsByGPA, sortOfferingsByRMP } from "./SortFunctions";
+import { sortCoursesByGPA, sortCoursesByName, sortCoursesByRMP, sortInstructorsByRMP, sortOfferingsByGPA, sortOfferingsByName, sortOfferingsByRMP } from "./SortFunctions";
 import { GradeDistributionCollection } from "types/GradeDistributionCollection";
 import { Review } from "types/Review";
 
@@ -53,18 +53,23 @@ export function sortCourses(courses: Course[], sortOptions: SortOptions, grades:
             }
         })()
     );
+    
     if (direction === Descending) sortedCourses.reverse();
-    if (!sortWithin) return sortedCourses;
+    if (!sortWithin) {
+        // Fix incorrect sorting within courses
+        sortedCourses.forEach(course => course.offerings.sort(sortOfferingsByName));
+        return sortedCourses;
+    }
 
     // Sort offerings if necessary.
     sortedCourses.forEach(course => {
         // Sort course offerings with appropriate sorting function.
-        course.offerings = course.offerings.toSorted(
+        course.offerings.sort(
             (() => {
                 switch (sortBy) {
                     case GPA: return sortOfferingsByGPA(defaultGpa, grades);
                     case RMP: return sortOfferingsByRMP(defaultRmp, reviews);
-                    default: return () => 0;
+                    default: return sortOfferingsByName;
                 }
             })()
         );

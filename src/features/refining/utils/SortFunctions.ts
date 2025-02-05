@@ -28,6 +28,20 @@ export function sortCoursesByName(a: Course, b: Course) {
 }
 
 /**
+ * @returns A sorting function to sort two course offerings by section number.
+ */
+export function sortOfferingsByName(a: CourseOffering, b: CourseOffering) {
+    const aLetters = a.section.number.replace(/\d+/g, '');
+    const aNumbers = (a.section.number.match(/\d+/g) || []).join('');
+    const bLetters = b.section.number.replace(/\d+/g, '');
+    const bNumbers = (b.section.number.match(/\d+/g) || []).join('');
+    if (!aLetters && bLetters) return 1;
+    if (!bLetters && aLetters) return -1;
+    if (aLetters === bLetters) return aNumbers.localeCompare(bNumbers);
+    return aLetters.localeCompare(bLetters);
+}
+
+/**
  * @param defaultGpa The default GPA to give to course offerings with null grades.
  * @param grades A Record of course ids to Records of instructor names to GradeDistributionCollections.
  * @returns A sorting function to sort two course offerings by GPA.
