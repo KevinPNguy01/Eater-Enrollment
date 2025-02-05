@@ -25,7 +25,6 @@ export function parseFinal(final: string): Final | null {
     const day = days[dayString];
     const time = parseTime(timeString);
     if (!time) return null;
-    console.log({day, startTime: time[0], endTime: time[1]})
     return {
         day,
         startTime: time[0],

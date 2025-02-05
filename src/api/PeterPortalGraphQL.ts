@@ -155,7 +155,6 @@ function anteaterToPeterPortal(queryMap: Record<number, [string, string]>, data:
                         const {dayOfWeek, startTime, endTime} = websocSection.finalExam;
                         const finalTime = startTime && endTime ? `${startTime.hour % (startTime.hour >= 13 ? 12 : 24)}:${("0"+startTime.minute).slice(-2)}-${endTime.hour % (endTime.hour >= 13 ? 12 : 24)}:${("0"+endTime.minute).slice(-2)}${endTime.hour >= 12 ? "pm" : "am"}` : "";
                         const finalString = finalTime ? `${dayOfWeek} _ _ ${finalTime}` : ""
-                        console.log(websocSection.finalExam, finalString);
                         const offering = {
                             year: year,
                             quarter: quarter,
