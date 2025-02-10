@@ -7,7 +7,7 @@ import { selectReviews } from "stores/selectors/Reviews";
 import { selectSearchQuarter, selectSearchType, selectSearchYear } from "stores/selectors/Search";
 import { addCourseGrades } from "stores/slices/Grades";
 import { addInstructorReview } from "stores/slices/Reviews";
-import { addQuery, setSearchFulfilled, setSearchPending } from "stores/slices/Search";
+import { addQuery, setSearchFulfilled, setSearchPending, setSearchSuggestions } from "stores/slices/Search";
 import { ScheduleQuery } from "types/ScheduleQuery";
 import { searchProfessor } from "utils/RateMyProfessors";
 import { SearchSuggestion } from "../utils/FormHelpers";
@@ -40,6 +40,7 @@ export function SearchList(props: { suggestions: SearchSuggestion[] }) {
     const allReviews = useSelector(selectReviews);
 
     const clickHandler = (query: ScheduleQuery) => async () => {
+        dispatch(setSearchSuggestions([]));
         if (searchType === "single") {
             dispatch(setSearchPending());
             const queries = [{ ...query, year, quarter }];

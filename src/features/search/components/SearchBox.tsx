@@ -6,12 +6,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectGrades } from "stores/selectors/Grades";
 import { selectReviews } from "stores/selectors/Reviews";
-import { selectScheduleQueries, selectSearchInput, selectSearchQuarter, selectSearchType, selectSearchYear } from "stores/selectors/Search";
+import { selectScheduleQueries, selectSearchInput, selectSearchQuarter, selectSearchSuggestions, selectSearchType, selectSearchYear } from "stores/selectors/Search";
 import { addCourseGrades } from "stores/slices/Grades";
 import { addInstructorReview } from "stores/slices/Reviews";
-import { addQuery, clearQueries, removeQuery, setDisplayResults, setSearchFulfilled, setSearchInput, setSearchPending, toggleSearchType } from "stores/slices/Search";
+import { addQuery, clearQueries, removeQuery, setDisplayResults, setSearchFulfilled, setSearchInput, setSearchPending, setSearchSuggestions, toggleSearchType } from "stores/slices/Search";
 import { searchProfessor } from "utils/RateMyProfessors";
-import { getSuggestions, SearchSuggestion } from "../utils/FormHelpers";
+import { getSuggestions } from "../utils/FormHelpers";
 import { QueryBubble } from "./QueryBubble";
 import { SearchList } from "./SearchList";
 
@@ -55,8 +55,8 @@ export function SearchBox() {
 
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const [searchSuggestions, setSearchSuggestions] = useState([] as SearchSuggestion[])
-    useEffect(() => setSearchSuggestions(getSuggestions(input)), [input]);
+    const searchSuggestions = useSelector(selectSearchSuggestions);
+    useEffect(() => { dispatch(setSearchSuggestions(getSuggestions(input))) }, [dispatch, input]);
 
     const listRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
