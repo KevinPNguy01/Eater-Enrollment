@@ -1,4 +1,3 @@
-import { navLinks } from "constants/links";
 import { AddedTab } from "./AddedTab";
 import { MapTab } from "./MapTab";
 import { SearchForms } from "./SearchForms";
@@ -7,6 +6,7 @@ import { useSelector } from "react-redux";
 import { selectDisplayResults } from "stores/selectors/Search";
 import { useState } from "react";
 import { CalendarPane } from "./CalendarPane";
+import { navLinks } from "constants/Links";
 
 export function CoursesPane(props: { includeCalendar: boolean }) {
     const { includeCalendar } = props;

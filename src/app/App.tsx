@@ -9,29 +9,45 @@ import { ImportMenu } from "features/schedule-storage/components/ImportMenu";
 import { LoadMenu } from "features/schedule-storage/components/LoadMenu";
 import { SaveMenu } from "features/schedule-storage/components/SaveMenu";
 import { SnackbarProvider } from "notistack";
-import { useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import useWindowDimensions from "utils/WindowDimensions";
 import { anteater } from "../assets";
 import { CalendarPane } from "./pages/CalendarPane";
 import { CoursesPane } from "./pages/CoursesPane";
 import { themeOptions } from "./theme";
+import { getCalendarTerms } from "api/PeterPortalGraphQL";
+
+export const AvailableTermsContext = createContext({
+	availableTerms: {} as Record<string, [string, string][]>,
+	setAvailableTerms: (terms: Record<string, [string, string][]>) => { console.log(terms) }
+});
 
 // Navigation bar with calendar on the left, and everything else on the right.
 export function App() {
 	const { height, width } = useWindowDimensions();
 	const aspect = width / height;
 
+	const [availableTerms, setAvailableTerms] = useState({} as Record<string, [string, string][]>);
+
+	useEffect(() => {
+		(async () => {
+			setAvailableTerms(await getCalendarTerms());
+		})();
+	}, []);
+
 	return (
 		<LocalizationProvider dateAdapter={AdapterMoment}>
 			<ThemeProvider theme={themeOptions}>
-				<div className="relative h-[100dvh] flex text-white flex-col overflow-y-hidden overflow-x-hidden">
-					<NavBar />
-					<div id="main" className={`h-1 grow bg-secondary grid ${aspect >= 1 ? "grid-cols-2" : "grid-cols-1"}`}>
-						{aspect >= 1 ? <CalendarPane /> : null}
-						<CoursesPane includeCalendar={aspect < 1} />
+				<AvailableTermsContext.Provider value={{ availableTerms, setAvailableTerms }}>
+					<div className="relative h-[100dvh] flex text-white flex-col overflow-y-hidden overflow-x-hidden">
+						<NavBar />
+						<div id="main" className={`h-1 grow bg-secondary grid ${aspect >= 1 ? "grid-cols-2" : "grid-cols-1"}`}>
+							{aspect >= 1 ? <CalendarPane /> : null}
+							<CoursesPane includeCalendar={aspect < 1} />
+						</div>
+						<SnackbarProvider />
 					</div>
-					<SnackbarProvider />
-				</div>
+				</AvailableTermsContext.Provider>
 			</ThemeProvider>
 		</LocalizationProvider>
 	)

@@ -15,11 +15,11 @@ import { parseMeeting } from "utils/ParseMeeting";
  * @param query 
  * @returns The data fetched from the API.
  */
-async function makeRequest(query: string) {
+export async function makeRequest(query: string) {
     const response = await fetch("https://anteaterapi.com/v2/graphql",
         {
             method: 'POST',
-            headers: { 
+            headers: {
                 'content-type': 'application/json',
                 Authorization: "Bearer 13604MytBc54PSnIBf4KZ7zLYlgWBzFKg6Rc91tm00Q.sk.vpvujamvf419g0r43yioi5m4",
             },
@@ -69,7 +69,7 @@ export async function requestSchedule(queries: ScheduleQuery[]): Promise<CourseO
         return codeChunks.map((section_codes) => `
         schedule${numQueries++}: websoc(query: {
             quarter: ${quarter}
-            year: "${year}"
+            year: "${parseInt(year) + (quarter === 'Fall' ? 0 : 1)}"
             ${department ? `department: "${department}"` : ""}
             ${section_codes ? `sectionCodes: "${section_codes}"` : ""}
             ${number ? `courseNumber: "${number}"` : ""}
@@ -84,10 +84,10 @@ export async function requestSchedule(queries: ScheduleQuery[]): Promise<CourseO
         }
     `.replace(/ +/g, ' ');
 
-    const queryMap: Record<number, [string, string]> = Object.fromEntries(queries.map(({year, quarter}, index) => [index, [year, quarter]]));
+    const queryMap: Record<number, [string, string]> = Object.fromEntries(queries.map(({ year, quarter }, index) => [index, [year, quarter]]));
 
     const response = await makeRequest(query);
-    
+
     return anteaterToPeterPortal(queryMap, response.data);
 }
 
@@ -118,7 +118,7 @@ export async function requestGrades(courses: Course[]) {
 
     // Process 15 aliases at a time due to API limit
     for (let i = 0; i < courses.length; i += 15) {
-        const courseSlice = courses.slice(i, i+15);
+        const courseSlice = courses.slice(i, i + 15);
         // The actual GraphQL query.
         const query = `
             ${gradesFragment}
@@ -136,11 +136,11 @@ export async function requestGrades(courses: Course[]) {
     return aggregatedGrades(grades);
 }
 
-function anteaterGradesToPeterPortal(courses: Course[], rawGrades: Record<string, AggregateGradeByOffering[]>) : GradeDistribution[] {
+function anteaterGradesToPeterPortal(courses: Course[], rawGrades: Record<string, AggregateGradeByOffering[]>): GradeDistribution[] {
     const distributions = [] as GradeDistribution[];
     courses.forEach((_, index) => {
         rawGrades[`course${index}`].forEach(grades => {
-            const {gradeACount, gradeBCount, gradeCCount, gradeDCount, gradeFCount, gradePCount, gradeNPCount, gradeWCount, instructor, department, courseNumber, averageGPA} = grades;
+            const { gradeACount, gradeBCount, gradeCCount, gradeDCount, gradeFCount, gradePCount, gradeNPCount, gradeWCount, instructor, department, courseNumber, averageGPA } = grades;
             distributions.push({
                 grade_a_count: gradeACount,
                 grade_b_count: gradeBCount,
@@ -157,7 +157,7 @@ function anteaterGradesToPeterPortal(courses: Course[], rawGrades: Record<string
                         number: courseNumber
                     },
                     instructors: [
-                        {shortened_name: instructor}
+                        { shortened_name: instructor }
                     ]
                 }
             } as GradeDistribution)
@@ -166,11 +166,11 @@ function anteaterGradesToPeterPortal(courses: Course[], rawGrades: Record<string
     return distributions;
 }
 
-function anteaterToPeterPortal(queryMap: Record<number, [string, string]>, data: Record<string, WebsocResponse>) : CourseOffering[] {
+function anteaterToPeterPortal(queryMap: Record<number, [string, string]>, data: Record<string, WebsocResponse>): CourseOffering[] {
     const offerings = [] as CourseOffering[];
     for (const [index, pair] of Object.entries(queryMap)) {
         const [year, quarter] = pair;
-        const response = data["schedule"+index];
+        const response = data["schedule" + index];
         for (const websocSchool of response.schools) {
             for (const websocDepartment of websocSchool.departments) {
                 for (const websocCourse of websocDepartment.courses) {
@@ -180,24 +180,24 @@ function anteaterToPeterPortal(queryMap: Record<number, [string, string]>, data:
                         number: websocCourse.courseNumber
                     } as Course;
                     for (const websocSection of websocCourse.sections) {
-                        const {dayOfWeek, startTime, endTime} = websocSection.finalExam;
-                        const finalTime = startTime && endTime ? `${startTime.hour % (startTime.hour >= 13 ? 12 : 24)}:${("0"+startTime.minute).slice(-2)}-${endTime.hour % (endTime.hour >= 13 ? 12 : 24)}:${("0"+endTime.minute).slice(-2)}${endTime.hour >= 12 ? "pm" : "am"}` : "";
+                        const { dayOfWeek, startTime, endTime } = websocSection.finalExam;
+                        const finalTime = startTime && endTime ? `${startTime.hour % (startTime.hour >= 13 ? 12 : 24)}:${("0" + startTime.minute).slice(-2)}-${endTime.hour % (endTime.hour >= 13 ? 12 : 24)}:${("0" + endTime.minute).slice(-2)}${endTime.hour >= 12 ? "pm" : "am"}` : "";
                         const finalString = finalTime ? `${dayOfWeek} _ _ ${finalTime}` : ""
                         const offering = {
                             year: year,
                             quarter: quarter,
                             instructors: websocSection.instructors.map(
-                                instructor => ({shortened_name: instructor} as Instructor)
+                                instructor => ({ shortened_name: instructor } as Instructor)
                             ),
                             final_exam: finalString,
                             max_capacity: parseInt(websocSection.maxCapacity),
                             meetings: websocSection.meetings.map(
                                 meeting => {
-                                    const {bldg, days, startTime, endTime} = meeting;
+                                    const { bldg, days, startTime, endTime } = meeting;
                                     return {
                                         building: bldg ? bldg[0] : "TBA",
                                         days: days || "TBA",
-                                        time: startTime && endTime ? `${startTime.hour % (startTime.hour >= 13 ? 12 : 24)}:${("0"+startTime.minute).slice(-2)}-${endTime.hour % (endTime.hour >= 13 ? 12 : 24)}:${("0"+endTime.minute).slice(-2)} ${endTime.hour >= 12 ? "pm" : "am"}` : ""
+                                        time: startTime && endTime ? `${startTime.hour % (startTime.hour >= 13 ? 12 : 24)}:${("0" + startTime.minute).slice(-2)}-${endTime.hour % (endTime.hour >= 13 ? 12 : 24)}:${("0" + endTime.minute).slice(-2)} ${endTime.hour >= 12 ? "pm" : "am"}` : ""
                                     } as Meeting
                                 }
                             ),
@@ -229,4 +229,46 @@ function anteaterToPeterPortal(queryMap: Record<number, [string, string]>, data:
         }
     }
     return offerings;
+}
+
+const quarterOptions: Record<string, string> = {
+    Fall: "Fall",
+    Winter: "Winter",
+    Spring: "Spring",
+    Summer1: "Summer Session 1",
+    Summer10wk: "10-week Summer",
+    Summer2: "Summer Session 2",
+}
+
+export async function getCalendarTerms() {
+    const query = `
+        query MyQuery {
+            allCalendarTerms {
+                quarter
+                year
+                socAvailable
+            }
+        }
+    `;
+    const response = await makeRequest(query);
+    const terms = response.data.allCalendarTerms as { quarter: string, year: string, socAvailable: string }[];
+    const availableTerms: Record<string, [string, string][]> = {};
+    terms.map(
+        term => {
+            const quarter = term.quarter;
+            const year = parseInt(term.year) - (quarter == "Fall" ? 0 : 1);
+            const date = new Date(term.socAvailable);
+            return { quarter, year, date };
+        }
+    ).filter(
+        term => term.date.getTime() <= Date.now()
+    ).forEach(
+        ({ year, quarter }) => {
+            if (!availableTerms[year]) {
+                availableTerms[year] = [];
+            }
+            availableTerms[year].push([quarter, quarterOptions[quarter]]);
+        }
+    );
+    return availableTerms;
 }
