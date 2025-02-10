@@ -38,7 +38,7 @@ export async function saveUser(username: string, scheduleSet: Schedule[], curren
         // Convert offerings to a comma-separated string.
         const offeringsString = schedule.courses.map(
             ({ offerings }) => offerings.map(
-                ({ quarter, year, section, color }) => `${quarter} ${year} ${section.code} ${color}`
+                ({ quarter, year, section, color }) => `${quarter} ${parseInt(year) + (quarter === "Fall" ? 0 : 1)} ${section.code} ${color}`
             )
         ).join(",");
         // Convert custom events into a list string.
@@ -104,7 +104,7 @@ export async function loadUser(userId: string) {
         const [quarter, year] = key.split(" ");
         const query = {
             quarter,
-            year,
+            year: `${parseInt(year) - (quarter === "Fall" ? 0 : 1)}`,
             section_codes: strings!.map(s => s[2]).join(",")
         } as ScheduleQuery;
         return query;
@@ -128,7 +128,7 @@ export async function loadUser(userId: string) {
 
             // Find the offering in the array of offerings fetched previously.
             const [quarter, year, code, color] = offeringString.split(" ");
-            const offeringCompare = { quarter, year, section: { code } } as CourseOffering;
+            const offeringCompare = { quarter, year: `${parseInt(year) - (quarter === "Fall" ? 0 : 1)}`, section: { code } } as CourseOffering;
             const offering = offerings.find(offering => offeringEquals(offering, offeringCompare));
 
             // Set the offering color and return it.
@@ -171,7 +171,7 @@ export async function importUser(userId: string) {
         const [year, quarter] = term.split(" ");
         const query = {
             quarter,
-            year,
+            year: `${parseInt(year) - (quarter === "Fall" ? 0 : 1)}`,
             section_codes: offerings!.map(({ sectionCode }) => sectionCode).join(",")
         } as ScheduleQuery;
         return query;
