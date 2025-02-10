@@ -27,7 +27,7 @@ export function filterDays(dayTypes: Set<string>) {
     return (offering: CourseOffering) => {
         let days = offering.meetings[0].days;
         dayTypes.forEach(day => days = days.replace(day, ""));
-        return days === "";
+        return days === "" || days === "TBA"
     }
 }
 
