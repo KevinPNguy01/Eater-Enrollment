@@ -1,6 +1,5 @@
 import { ThemeProvider } from "@emotion/react";
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
-import DriveFileMoveIcon from '@mui/icons-material/DriveFileMove';
 import SaveIcon from '@mui/icons-material/Save';
 import Button from "@mui/material/Button";
 import { LocalizationProvider } from '@mui/x-date-pickers';
@@ -16,6 +15,8 @@ import { CalendarPane } from "./pages/CalendarPane";
 import { CoursesPane } from "./pages/CoursesPane";
 import { themeOptions } from "./theme";
 import { getCalendarTerms } from "api/PeterPortalGraphQL";
+import { setYear, setQuarter } from "stores/slices/Search";
+import { useDispatch } from "react-redux";
 
 export const AvailableTermsContext = createContext({
 	availableTerms: {} as Record<string, [string, string][]>,
@@ -28,12 +29,18 @@ export function App() {
 	const aspect = width / height;
 
 	const [availableTerms, setAvailableTerms] = useState({} as Record<string, [string, string][]>);
+	const dispatch = useDispatch();
 
 	useEffect(() => {
 		(async () => {
-			setAvailableTerms(await getCalendarTerms());
+			const terms = await getCalendarTerms();
+			setAvailableTerms(terms);
+			const year = Object.keys(terms)[Object.keys(terms).length - 1];
+			const quarter = terms[year][terms[year].length - 1][0];
+			dispatch(setYear(year));
+			dispatch(setQuarter(quarter));
 		})();
-	}, []);
+	}, [dispatch]);
 
 	return (
 		<LocalizationProvider dateAdapter={AdapterMoment}>
@@ -68,15 +75,12 @@ function NavBar() {
 					Eater Enrollment
 				</h1>}
 			</div>
-			<div className="flex gap-2 mr-8">
+			<div className="flex gap-2 mr-2">
 				<Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={() => saveMenuState[1](true)}>
 					Save
 				</Button>
 				<Button variant="contained" color="primary" startIcon={<CloudDownloadIcon />} onClick={() => loadMenuState[1](true)}>
 					Load
-				</Button>
-				<Button variant="contained" color="primary" startIcon={<DriveFileMoveIcon />} onClick={() => importMenuState[1](true)}>
-					Import
 				</Button>
 			</div>
 
