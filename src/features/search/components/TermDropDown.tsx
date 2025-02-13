@@ -1,5 +1,5 @@
 import { AvailableTermsContext } from "app/App";
-import { useContext, useState } from "react";
+import { useContext, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectSearchQuarter, selectSearchYear } from "stores/selectors/Search";
 import { setQuarter, setYear } from "stores/slices/Search";
@@ -21,7 +21,7 @@ export function TermDropDown() {
     const { availableTerms } = useContext(AvailableTermsContext);
 
     // React state hook for displaying the current term in the select box.
-    const [termLabel, setTermLabel] = useState(`${quarter} ${year}-${parseInt(year) % 100 + 1}`);
+    const termLabel = useMemo(() => `${quarterOptions[quarter]} ${year}-${parseInt(year) % 100 + 1}`, [quarter, year]);
 
     return (
         <div className="grid mx-1">
@@ -33,7 +33,6 @@ export function TermDropDown() {
                     const [quarter, year] = target.value.split(",");
                     dispatch(setQuarter(quarter))
                     dispatch(setYear(year));
-                    setTermLabel(`${quarterOptions[quarter]} ${year}-${parseInt(year) % 100 + 1}`)
                 }}
             >
                 {/** Hidden option used for displaying the current term. */}

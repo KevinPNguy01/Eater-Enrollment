@@ -25,6 +25,7 @@ export const schedulesSlice = createSlice({
         },
         addSchedule: (state, action: PayloadAction<Schedule>) => {
             scheduleSetAdd(state.scheduleSet, action.payload);
+            state.selectedIndex = state.scheduleSet.length - 1;
         },
         removeSchedule: (state, action: PayloadAction<number>) => {
             scheduleSetRemove(state.scheduleSet, action.payload);
