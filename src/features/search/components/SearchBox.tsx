@@ -1,4 +1,4 @@
-import { requestGrades, requestSchedule } from "api/PeterPortalGraphQL";
+import { requestGrades, requestSchedule } from "api/AnteaterAPI";
 import { AppDispatch } from "app/store";
 import { Tooltip } from "components/Tooltip";
 import { groupOfferings } from "helpers/CourseOffering";

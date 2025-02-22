@@ -92,7 +92,7 @@ export async function requestSchedule(queries: ScheduleQuery[]): Promise<CourseO
 }
 
 /**
- * Requests grades from the PeterPortal GraphQL API for the given courses.
+ * Requests grades from the Anteater GraphQL API for the given courses.
  * @returns
  */
 export async function requestGrades(courses: Course[]) {

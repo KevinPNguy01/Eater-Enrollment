@@ -1,5 +1,5 @@
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
-import { requestSchedule } from "api/PeterPortalGraphQL";
+import { requestSchedule } from "api/AnteaterAPI";
 import { groupOfferings, offeringEquals } from "helpers/CourseOffering";
 import { customEventFromString, customEventToString } from "helpers/CustomEvent";
 import { scheduleAddCustomEvent } from "helpers/Schedule";

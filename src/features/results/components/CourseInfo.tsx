@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "app/store";
 import { setSearchFulfilled, setSearchInput, setSearchPending, setSearchType } from "stores/slices/Search";
 import { groupOfferings } from "helpers/CourseOffering";
-import { requestGrades, requestSchedule } from "api/PeterPortalGraphQL";
+import { requestGrades, requestSchedule } from "api/AnteaterAPI";
 import { addCourseGrades } from "stores/slices/Grades";
 import { selectGrades } from "stores/selectors/Grades";
 import { addInstructorReview } from "stores/slices/Reviews";

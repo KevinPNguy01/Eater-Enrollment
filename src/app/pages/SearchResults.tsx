@@ -3,7 +3,7 @@ import WestIcon from '@mui/icons-material/West'
 import IconButton from "@mui/material/IconButton"
 import RefreshIcon from '@mui/icons-material/Refresh';
 import HomeIcon from '@mui/icons-material/Home';
-import { requestGrades, requestSchedule } from 'api/PeterPortalGraphQL'
+import { requestGrades, requestSchedule } from 'api/AnteaterAPI'
 import { AppDispatch } from "app/store"
 import { filterIcon, sortIcon } from 'assets/icons'
 import { FilterMenu } from "features/refining/components/FilteringMenu"
