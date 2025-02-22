@@ -14,7 +14,7 @@ import { anteater } from "../assets";
 import { CalendarPane } from "./pages/CalendarPane";
 import { CoursesPane } from "./pages/CoursesPane";
 import { themeOptions } from "./theme";
-import { getCalendarTerms } from "api/PeterPortalGraphQL";
+import { getCalendarTerms } from "api/AnteaterAPI";
 import { setYear, setQuarter } from "stores/slices/Search";
 import { useDispatch } from "react-redux";
 

@@ -1,6 +1,6 @@
 import Dialog from "@mui/material/Dialog";
 import TextField from "@mui/material/TextField";
-import { requestGrades } from "api/PeterPortalGraphQL";
+import { requestGrades } from "api/AnteaterAPI";
 import { BpCheckbox } from "components/BpCheckbox";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";

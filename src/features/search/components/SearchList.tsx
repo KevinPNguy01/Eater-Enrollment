@@ -1,4 +1,4 @@
-import { requestGrades, requestSchedule } from "api/PeterPortalGraphQL";
+import { requestGrades, requestSchedule } from "api/AnteaterAPI";
 import { AppDispatch } from "app/store";
 import { groupOfferings } from "helpers/CourseOffering";
 import { useDispatch, useSelector } from "react-redux";
