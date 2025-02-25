@@ -66,7 +66,7 @@ export async function requestSchedule(queries: ScheduleQuery[]): Promise<CourseO
 
         // Create a subquery for each chunk of 10 section codes.
         return codeChunks.map((section_codes) => `
-        schedule${numQueries++}: websoc(query: {
+        schedule${1+numQueries++}: websoc(query: {
             quarter: ${quarter}
             year: "${parseInt(year) + (quarter === 'Fall' ? 0 : 1)}"
             ${department ? `department: "${department}"` : ""}
@@ -84,7 +84,7 @@ export async function requestSchedule(queries: ScheduleQuery[]): Promise<CourseO
     `.replace(/ +/g, ' ');
 
     const queryMap: Record<number, [string, string]> = Object.fromEntries(
-        queries.map(({ year, quarter }, index) => [index, [year, quarter]])
+        queries.map(({ year, quarter }, index) => [index+1, [year, quarter]])
     );
 
     const response = await makeRequest(query);
