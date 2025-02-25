@@ -16,16 +16,14 @@ import { parseMeeting } from "utils/ParseMeeting";
  * @returns The data fetched from the API.
  */
 export async function makeRequest(query: string) {
-    const response = await fetch("https://anteaterapi.com/v2/graphql",
-        {
-            method: 'POST',
-            headers: {
-                'content-type': 'application/json',
-                Authorization: "Bearer 13604MytBc54PSnIBf4KZ7zLYlgWBzFKg6Rc91tm00Q.sk.vpvujamvf419g0r43yioi5m4",
-            },
-            body: JSON.stringify({ 'query': query })
-        }
-    );
+    const response = await fetch("https://anteaterapi.com/v2/graphql", {
+        method: 'POST',
+        headers: {
+            'content-type': 'application/json',
+            Authorization: "Bearer 13604MytBc54PSnIBf4KZ7zLYlgWBzFKg6Rc91tm00Q.sk.vpvujamvf419g0r43yioi5m4",
+        },
+        body: JSON.stringify({ 'query': query })
+    });
     return (await response.json());
 }
 
@@ -43,7 +41,8 @@ export async function requestSchedule(queries: ScheduleQuery[]): Promise<CourseO
                 courses {
                     courseTitle deptCode courseNumber
                     sections {
-                        maxCapacity numOnWaitlist numNewOnlyReserved status restrictions units sectionCode sectionType sectionNum
+                        maxCapacity numOnWaitlist numNewOnlyReserved status 
+                        restrictions units sectionCode sectionType sectionNum
                         meetings { bldg days startTime { hour minute } endTime { hour minute } }
                         instructors
                         numCurrentlyEnrolled { sectionEnrolled totalEnrolled }
@@ -84,7 +83,9 @@ export async function requestSchedule(queries: ScheduleQuery[]): Promise<CourseO
         }
     `.replace(/ +/g, ' ');
 
-    const queryMap: Record<number, [string, string]> = Object.fromEntries(queries.map(({ year, quarter }, index) => [index, [year, quarter]]));
+    const queryMap: Record<number, [string, string]> = Object.fromEntries(
+        queries.map(({ year, quarter }, index) => [index, [year, quarter]])
+    );
 
     const response = await makeRequest(query);
 
@@ -93,7 +94,8 @@ export async function requestSchedule(queries: ScheduleQuery[]): Promise<CourseO
 
 /**
  * Requests grades from the Anteater GraphQL API for the given courses.
- * @returns
+ * @returns A record of course IDs mapped to a GradeDistribution record.
+ *          A GradeDistribution record maps professor names to GradeDistribution objects.
  */
 export async function requestGrades(courses: Course[]) {
     // Build a separate GraphQL query for each of the given queries.
@@ -136,11 +138,17 @@ export async function requestGrades(courses: Course[]) {
     return aggregatedGrades(grades);
 }
 
-function anteaterGradesToPeterPortal(courses: Course[], rawGrades: Record<string, AggregateGradeByOffering[]>): GradeDistribution[] {
+function anteaterGradesToPeterPortal(
+    courses: Course[], rawGrades: Record<string, AggregateGradeByOffering[]>
+): GradeDistribution[] {
     const distributions = [] as GradeDistribution[];
     courses.forEach((_, index) => {
         rawGrades[`course${index}`].forEach(grades => {
-            const { gradeACount, gradeBCount, gradeCCount, gradeDCount, gradeFCount, gradePCount, gradeNPCount, gradeWCount, instructor, department, courseNumber, averageGPA } = grades;
+            const { 
+                gradeACount, gradeBCount, gradeCCount, gradeDCount, gradeFCount, 
+                gradePCount, gradeNPCount, gradeWCount, 
+                instructor, department, courseNumber, averageGPA 
+            } = grades;
             distributions.push({
                 grade_a_count: gradeACount,
                 grade_b_count: gradeBCount,
@@ -181,7 +189,18 @@ function anteaterToPeterPortal(queryMap: Record<number, [string, string]>, data:
                     } as Course;
                     for (const websocSection of websocCourse.sections) {
                         const { dayOfWeek, startTime, endTime } = websocSection.finalExam;
-                        const finalTime = startTime && endTime ? `${startTime.hour % (startTime.hour >= 13 ? 12 : 24)}:${("0" + startTime.minute).slice(-2)}-${endTime.hour % (endTime.hour >= 13 ? 12 : 24)}:${("0" + endTime.minute).slice(-2)}${endTime.hour >= 12 ? "pm" : "am"}` : "";
+                        const finalTime = startTime && endTime ? 
+                            `${
+                                startTime.hour % (startTime.hour >= 13 ? 12 : 24)
+                            }:${
+                                ("0" + startTime.minute).slice(-2)
+                            }-${
+                                endTime.hour % (endTime.hour >= 13 ? 12 : 24)
+                            }:${
+                                ("0" + endTime.minute).slice(-2)
+                            }${
+                                endTime.hour >= 12 ? "pm" : "am"
+                            }` : "";
                         const finalString = finalTime ? `${dayOfWeek} _ _ ${finalTime}` : ""
                         const offering = {
                             year: year,
@@ -197,7 +216,18 @@ function anteaterToPeterPortal(queryMap: Record<number, [string, string]>, data:
                                     return {
                                         building: bldg ? bldg[0] : "TBA",
                                         days: days || "TBA",
-                                        time: startTime && endTime ? `${startTime.hour % (startTime.hour >= 13 ? 12 : 24)}:${("0" + startTime.minute).slice(-2)}-${endTime.hour % (endTime.hour >= 13 ? 12 : 24)}:${("0" + endTime.minute).slice(-2)} ${endTime.hour >= 12 ? "pm" : "am"}` : ""
+                                        time: startTime && endTime ? 
+                                            `${
+                                                startTime.hour % (startTime.hour >= 13 ? 12 : 24)
+                                            }:${
+                                                ("0" + startTime.minute).slice(-2)
+                                            }-${
+                                                endTime.hour % (endTime.hour >= 13 ? 12 : 24)
+                                            }:${
+                                                ("0" + endTime.minute).slice(-2)
+                                            } ${
+                                                endTime.hour >= 12 ? "pm" : "am"
+                                            }` : ""
                                     } as Meeting
                                 }
                             ),
