@@ -2,6 +2,7 @@ import { restrictionCodes } from "constants/RestrictionCodes";
 import moment from "moment";
 import { Course } from "types/Course";
 import { CourseOffering } from "types/CourseOffering";
+import { sortNumbers } from "./SortFunctions";
 
 /**
  * @param sectionTypes A set of strings representing the valid sectionTypes types.
@@ -52,7 +53,17 @@ export function filterTime(timeRange: [number, number]) {
 export function filterLevel(levelTypes: Set<string>) {
     return (course: Course) => {
         for (const level of levelTypes) {
-            if (course.course_level.includes(level)) return true;
+            switch (level) {
+                case "Lower Division":
+                    if (sortNumbers(course.number, "100") < 0) return true;
+                    break;
+                case "Upper Division":
+                    if (sortNumbers(course.number, "100") >= 0 && sortNumbers(course.number, "200") < 0) return true;
+                    break;
+                case "Graduate":
+                    if (sortNumbers(course.number, "200") >= 0) return true;
+                    break;
+            }
         }
         return false;
     }

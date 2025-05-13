@@ -28,6 +28,22 @@ export function sortCoursesByName(a: Course, b: Course) {
 }
 
 /**
+ * Sorts two strings by their letters and numbers.
+ * @param a The first string to compare.
+ * @param b The second string to compare.
+ * @returns A negative number if a < b, a positive number if a > b, and 0 if they are equal.
+ */
+export function sortNumbers(a: string, b: string) {
+    const aLetters = a.replace(/\d+/g, '');
+    const aNumbers = (a.match(/\d+/g) || []).join('');
+    const bLetters = b.replace(/\d+/g, '');
+    const bNumbers = (b.match(/\d+/g) || []).join('');
+    if (aNumbers !== bNumbers) return parseInt(aNumbers) - parseInt(bNumbers);
+    if (aLetters !== bLetters) return aLetters.localeCompare(bLetters);
+    return 0;
+}
+
+/**
  * @returns A sorting function to sort two course offerings by section number.
  */
 export function sortOfferingsByName(a: CourseOffering, b: CourseOffering) {
