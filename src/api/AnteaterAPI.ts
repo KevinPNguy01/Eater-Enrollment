@@ -183,7 +183,8 @@ function anteaterToPeterPortal(queryMap: Record<number, [string, string]>, data:
                     const course = {
                         id: websocCourse.deptCode.replace(" ", "") + websocCourse.courseNumber,
                         department: websocCourse.deptCode,
-                        number: websocCourse.courseNumber
+                        number: websocCourse.courseNumber,
+                        title: websocCourse.courseTitle
                     } as Course;
                     for (const websocSection of websocCourse.sections) {
                         const { dayOfWeek, startTime, endTime } = websocSection.finalExam;
