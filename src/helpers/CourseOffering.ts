@@ -27,7 +27,10 @@ export function groupOfferings(offerings: CourseOffering[]) {
         const id = offering.course.id;
         // Skip offerings that don't have a valid course
         if (!courseMap.has(id)) {
-            return;
+            courseMap.set(id, Object.assign({
+                prerequisite_list: [],
+                prerequisite_for: [],
+            }, offering.course));
         }
         if (!courseOfferings.has(id)) {
             courseOfferings.set(id, []);
