@@ -77,11 +77,9 @@ export async function requestSchedule(queries: ScheduleQuery[]): Promise<CourseO
     };
 
     // The actual GraphQL query.
-    const query = `
-        query {
-            ${queries.map(buildSubQuery)}
-        }
-    `.replace(/ +/g, ' ');
+    const query = `{
+        ${queries.map(buildSubQuery)}
+    }`.replace(/ +/g, ' ');
 
     const queryMap: Record<number, [string, string]> = Object.fromEntries(
         queries.map(({ year, quarter }, index) => [index+1, [year, quarter]])
