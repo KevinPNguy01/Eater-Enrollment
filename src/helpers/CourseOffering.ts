@@ -25,13 +25,15 @@ export function groupOfferings(offerings: CourseOffering[]) {
     const courseOfferings = new Map<string, CourseOffering[]>();
     offerings.forEach((offering) => {
         const id = offering.course.id;
-        // Skip offerings that don't have a valid course
+
+        // Update courses not in the map.
         if (!courseMap.has(id)) {
             courseMap.set(id, Object.assign({
                 prerequisite_list: [],
                 prerequisite_for: [],
             }, offering.course));
         }
+
         if (!courseOfferings.has(id)) {
             courseOfferings.set(id, []);
         }
@@ -51,6 +53,7 @@ export function groupOfferings(offerings: CourseOffering[]) {
                 course = { ...offering.course };
                 course.offerings = [...offerings];
             }
+            Object.assign(course, offering.course);                                                // Merge course and offering.
             offering.course = { ...course };                                                        // Assign course as copy to prevent circular reference.
             offering.course.offerings = [];                                                         // Prevent circular reference.
             offering.parsed_meetings = offering.meetings.map(meeting => parseMeeting(meeting));     // Parse each meeting.

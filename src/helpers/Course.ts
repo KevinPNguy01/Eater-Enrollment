@@ -6,7 +6,7 @@ import coursesJson from "../../src/assets/allCourses.json";
 import { GradeDistributionCollection } from "types/GradeDistributionCollection";
 
 // Load all courses from JSON file.
-export const courseMap = new Map<string, Course>((coursesJson as { data: { allCourses: Course[] } }).data.allCourses.map(course => [course.id, course]));
+export const courseMap = new Map<string, Course>((coursesJson as unknown as { data: { allCourses: Course[] } }).data.allCourses.map(course => [course.id, course]));
 
 /**
  * @param course 
