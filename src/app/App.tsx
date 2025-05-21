@@ -70,16 +70,16 @@ function NavBar() {
 	return (
 		<nav className="bg-primary flex justify-between items-center">
 			<div className="flex items-center">
-				<img src={anteater} alt="Anteater Logo" className="w-[96px] h-[48px" />
+				<img src={anteater} alt="Anteater Logo" className="w-[72px] h-[36px] md:w-[96px] md:h-[48px]" />
 				{width >= height && <h1 className="text-nowrap">
 					Eater Enrollment
 				</h1>}
 			</div>
 			<div className="flex gap-2 mr-2">
-				<Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={() => saveMenuState[1](true)}>
+				<Button size={width >= height ? "medium" : "small"} variant="contained" color="primary" startIcon={<SaveIcon />} onClick={() => saveMenuState[1](true)}>
 					Save
 				</Button>
-				<Button variant="contained" color="primary" startIcon={<CloudDownloadIcon />} onClick={() => loadMenuState[1](true)}>
+				<Button size={width >= height ? "medium" : "small"} variant="contained" color="primary" startIcon={<CloudDownloadIcon />} onClick={() => loadMenuState[1](true)}>
 					Load
 				</Button>
 			</div>

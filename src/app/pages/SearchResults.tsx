@@ -23,6 +23,7 @@ import { addInstructorReview } from 'stores/slices/Reviews';
 import { searchProfessor } from 'utils/RateMyProfessors';
 import { selectReviews } from 'stores/selectors/Reviews';
 import useWindowDimensions from 'utils/WindowDimensions';
+import SvgIcon from '@mui/material/SvgIcon';
 
 export function SearchResults() {
     const searchResults = useSelector(selectSearchResults);
@@ -89,7 +90,7 @@ function SearchResultsNavBar(props: {
                 disabled={!pastSearch || pending}
                 onClick={() => dispatch({ type: "search/undo" })}
             >
-                <WestIcon />
+                <WestIcon fontSize="inherit" />
             </IconButton>
             {/** Redo button. */}
             <IconButton
@@ -99,7 +100,7 @@ function SearchResultsNavBar(props: {
                 disabled={!futureSearch || pending}
                 onClick={() => dispatch({ type: "search/redo" })}
             >
-                <EastIcon />
+                <EastIcon fontSize="inherit"/>
             </IconButton>
             {/** Refresh button. */}
             <IconButton
@@ -127,7 +128,7 @@ function SearchResultsNavBar(props: {
                     }
                 }}
             >
-                <RefreshIcon />
+                <RefreshIcon fontSize="inherit" />
             </IconButton>
             {/** Home button. */}
             <IconButton
@@ -142,11 +143,11 @@ function SearchResultsNavBar(props: {
                     dispatch({ type: "search/clearHistory" });
                 }}
             >
-                <HomeIcon />
+                <HomeIcon fontSize="inherit" />
             </IconButton>
             {/** Search box will expand. */}
             <form
-                className={`relative w-0 flex-grow ${isMobile ? "text-sm" : "text-base"}`}
+                className={`relative w-0 flex-grow ${isMobile ? "text-sm" : "text-base"} h-fit`}
                 onSubmit={e => e.preventDefault()}
                 onFocus={() => setSearching(true)}
                 onBlur={() => setSearching(false)}
@@ -160,7 +161,11 @@ function SearchResultsNavBar(props: {
                 color="white"
                 onClick={() => sortMenuState[1](true)}
             >
-                {sortIcon}
+                <SvgIcon
+                    fontSize="inherit"
+                >
+                    {sortIcon}
+                </SvgIcon>
             </IconButton>
             <SortingMenu
                 optionsState={sortOptionsState}
@@ -173,7 +178,11 @@ function SearchResultsNavBar(props: {
                 color="white"
                 onClick={() => filterMenuState[1](true)}
             >
-                {filterIcon}
+                <SvgIcon
+                    fontSize="inherit"
+                >
+                    {filterIcon}
+                </SvgIcon>
             </IconButton>
             <FilterMenu
                 optionsState={filterOptionsState}

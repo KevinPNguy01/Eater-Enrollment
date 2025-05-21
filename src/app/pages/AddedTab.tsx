@@ -8,7 +8,7 @@ export function AddedTab() {
     const units = (currentSchedule.courses.map(({ offerings }) => offerings.map((offering) => parseFloat(offering.units))).flat().concat(0)).reduce((a, b) => a + b);
     return (
         <div className="h-full flex flex-col gap-[1px]">
-            <Card className="bg-tertiary border border-quaternary m-[1px] py-2 px-4 font-semibold text-xl drop-shadow">
+            <Card className="bg-tertiary border border-quaternary m-[1px] py-2 px-4 font-semibold md:text-xl drop-shadow">
                 {`${currentSchedule.name} (${units} Units)`}
             </Card>
             <ScheduleResults courses={currentSchedule.courses} />
