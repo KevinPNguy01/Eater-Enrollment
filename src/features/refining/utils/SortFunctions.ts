@@ -53,8 +53,11 @@ export function sortOfferingsByName(a: CourseOffering, b: CourseOffering) {
     const bNumbers = (b.section.number.match(/\d+/g) || []).join('');
     if (!aLetters && bLetters) return 1;
     if (!bLetters && aLetters) return -1;
-    if (aLetters === bLetters) return aNumbers.localeCompare(bNumbers);
-    return aLetters.localeCompare(bLetters);
+    if (aLetters !== bLetters) return aLetters.localeCompare(bLetters);
+    if (!aNumbers && bNumbers) return -1;
+    if (!bNumbers && aNumbers) return 1;
+    if (aNumbers !== bNumbers) return parseInt(aNumbers) - parseInt(bNumbers);
+    return parseInt(b.units) - parseInt(a.units);
 }
 
 /**
