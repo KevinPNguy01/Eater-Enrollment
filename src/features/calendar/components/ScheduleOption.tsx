@@ -17,6 +17,7 @@ export function ScheduleOption(props: { name: string, index: number, setMenu: (m
     const [renaming, setRenaming] = useState(false);    // Whether the schedule is being renamed.
     const [menuOpen, setMenuOpen] = useState(false);    // Whether the action menu is open.
     const ref = useRef<HTMLButtonElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     return (
         <>
@@ -57,6 +58,9 @@ export function ScheduleOption(props: { name: string, index: number, setMenu: (m
                         startIcon={<i className="bi bi-pencil-square"></i>}
                         onClick={() => {
                             setRenaming(true);
+                            setTimeout(() => {
+                                inputRef.current?.focus();
+                            }, 0);
                         }}
                     >
                         Rename
@@ -89,8 +93,14 @@ export function ScheduleOption(props: { name: string, index: number, setMenu: (m
                         className="min-w-0 flex-grow"
                         autoFocus
                         defaultValue={scheduleSet[index].name}
+                        ref={inputRef}
                         onBlur={() => {
-                            setTimeout(() => setRenaming(false), 100);
+                            setTimeout(() => {
+                                // if not in focus set renaming to false
+                                if (document.activeElement !== inputRef.current) {
+                                    setRenaming(false);
+                                }
+                            }, 10);
                         }}
                         onChange={e => {
                             dispatch(renameSchedule({ index, name: e.currentTarget.value }))
