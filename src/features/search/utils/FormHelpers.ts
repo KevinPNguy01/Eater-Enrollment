@@ -8,7 +8,7 @@ export type SearchSuggestion = {
 }
 
 type CoursesJson = { data: { allCourses: Course[] } };
-const courses = (coursesJson as CoursesJson).data.allCourses as Course[];
+const courses = (coursesJson as unknown as CoursesJson).data.allCourses as Course[];
 
 const departmentSuggestions = [
     ...new Map(courses.map(
