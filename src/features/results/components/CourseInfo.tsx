@@ -13,6 +13,7 @@ import { addInstructorReview } from "stores/slices/Reviews";
 import { searchProfessor } from "utils/RateMyProfessors";
 import { selectReviews } from "stores/selectors/Reviews";
 import useWindowDimensions from "utils/WindowDimensions";
+import { courseMap } from "helpers/Course";
 
 const downArrowIcon = <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
     <path fill="#bbb" stroke="#bbb" strokeWidth="0.5" transform="translate(0,-1.5)" d="M8 9.8l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 10.293L8 9.8z" />
@@ -37,6 +38,7 @@ export function CourseInfo(props: { course: Course }) {
             </AccordionSummary>
             <AccordionDetails className="text-left text-base">
                 <div className={`flex flex-col gap-4 ${isMobile ? "!text-xs" : "text-base"}`}>
+                    <span className="font-bold">{courseMap.get(course.id)?.title || course.title}</span>
                     {course.description ? <CourseDescription course={course} /> : "No description available."}
                     {course.ge_list?.length ? <GeInfo course={course} /> : null}
                     {course.prerequisite_text ? <PrerequisiteInfo course={course} /> : null}
