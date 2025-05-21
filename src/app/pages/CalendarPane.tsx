@@ -145,15 +145,23 @@ function CalendarNavBar(props: { showingFinals: boolean, setShowingFinals: (_: b
 	const currentScheduleIndex = useSelector(selectCurrentScheduleIndex);
 	const currentSchedule = useSelector(selectCurrentSchedule);
 	const dispatch = useDispatch();
+	const screenSize = useWindowDimensions();
+	const { height, width } = screenSize;
+
+	const isMobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) || (width > height && 1.33 * width / 2 < height);
 
 	return (
-		<nav className="w-full bg-tertiary flex flex-wrap my-1 items-center justify-between px-0.5">
+		<nav className="w-full bg-tertiary flex flex-wrap items-center justify-between p-1 gap-1 my-1">
 			{/** Container for components that change schedule view. */}
-			<div className="flex w-fit items-center gap-4 h-fit p-2">
+			<div className="flex w-fit items-center gap-4 h-fit">
 				<ScheduleSelect />
+			</div>
+			{/** Container for buttons that mutate schedules. */}
+			<div className="flex flex-nowrap items-center">
 				{/** Toggle finals button. */}
 				<Button
-					className="w-fit h-fit !px-4 !py-0.5"
+					size={isMobile ? "small" : "medium"}
+					className={`w-fit h-fit !mr-2 !border-white/20 !p-0 md:!p-1 md:!px-4`}
 					sx={showingFinals ? { "&:hover": { backgroundColor: "#008000", border: "#bbb 1px solid" } } : null}
 					variant={showingFinals ? "contained" : "outlined"}
 					color={showingFinals ? "primary" : "white"}
@@ -161,12 +169,10 @@ function CalendarNavBar(props: { showingFinals: boolean, setShowingFinals: (_: b
 				>
 					Finals
 				</Button>
-			</div>
-			{/** Container for buttons that mutate schedules. */}
-			<div className="px-4 flex flex-nowrap">
 				{/** Download schedule image button. */}
 				<IconButton
 					color="white"
+					size={isMobile ? "small" : "medium"}
 					onClick={async () => {
 						const calendar = document.getElementById("calendar")!;
 						setContentHeight("auto");
@@ -220,40 +226,44 @@ function CalendarNavBar(props: { showingFinals: boolean, setShowingFinals: (_: b
 							});
 					}}
 				>
-					<ImageIcon />
+					<ImageIcon fontSize="inherit"/>
 				</IconButton>
 				{/** Undo button. */}
 				<IconButton
+					size={isMobile ? "small" : "medium"}
 					color="white"
 					disabled={!prevState}
 					onClick={() => dispatch({ type: "schedules/undo" })}
 				>
-					<UndoIcon />
+					<UndoIcon fontSize="inherit"/>
 				</IconButton>
 				{/** Redo button. */}
 				<IconButton
+					size={isMobile ? "small" : "medium"}
 					color="white"
 					disabled={!nextState}
 					onClick={() => dispatch({ type: "schedules/redo" })}
 				>
-					<RedoIcon />
+					<RedoIcon fontSize="inherit" />
 				</IconButton>
 				{/** Clear schedule button. */}
 				<IconButton
+					size={isMobile ? "small" : "medium"}
 					color="white"
 					onClick={() => dispatch(clearSchedule(currentScheduleIndex))}
 				>
-					<DeleteIcon />
+					<DeleteIcon fontSize="inherit" />
 				</IconButton>
 				{/** Open custom event menu button. */}
 				<IconButton
+					size={isMobile ? "small" : "medium"}
 					color="white"
 					onClick={e => {
 						e.stopPropagation();
 						setMenuState(!menuState);
 					}}
 				>
-					<AddIcon />
+					<AddIcon fontSize="inherit"/>
 				</IconButton>
 			</div>
 		</nav>

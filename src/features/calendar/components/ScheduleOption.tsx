@@ -95,7 +95,9 @@ export function ScheduleOption(props: { name: string, index: number, setMenu: (m
                         }
                     }}
                 />
-            ) : <p className="flex-grow text-nowrap whitespace-pre">{name}</p>
+            ) : <p className="flex-grow text-nowrap whitespace-pre">
+                {name.length > 20 ? name.slice(0, 20) + "..." : name}
+            </p>
             }
             {/** Button to open menu for editing actions. */}
             <IconButton

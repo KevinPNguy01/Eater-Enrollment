@@ -271,3 +271,15 @@ fieldset {
 .MuiInputBase-root::before {
   border-bottom-color: gray !important;
 }
+
+@media only screen and (max-width: 768px) 
+{
+  .fc-col-header-cell .fc-scrollgrid-sync-inner {
+    padding: 0px;
+    height: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.6rem;
+  }
+}

@@ -98,19 +98,21 @@ export function ScheduleSelect() {
     // Invisible placeholder component so the absolute positioned dropdown appears to fit.
     const dropDownPlaceHolder = (
         <Accordion className="invisible !border !border-quaternary !rounded w-full" disableGutters={true}>
-            <AccordionSummary className='*:!m-0 !min-h-0 !p-1 !pl-2' expandIcon={<ExpandMoreIcon style={{ color: "white" }} />}>
+            <AccordionSummary className='*:!m-0 !min-h-0 !p-1 !pl-2' expandIcon={<ExpandMoreIcon fontSize="small" style={{ color: "white" }} />}>
                 <span className={`text-nowrap ${width < height ? "text-sm" : "text-base"}`}>{`${currentSchedule.name}`}</span>
             </AccordionSummary>
             <AccordionDetails className="text-left text-base !p-2 !pt-0">
-                {scheduleSet.map(({ name }, index) => (
-                    <ScheduleOption
-                        className={width < height ? "text-sm" : "text-base"}
-                        key={`schedule-option-${index}`}
-                        name={name}
-                        index={index}
-                        setMenu={setActionMenu}
-                    />
-                ))}
+                <div className="max-h-[50dvh] overflow-y-auto overflow-x-hidden">
+                    {scheduleSet.map(({ name }, index) => (
+                        <ScheduleOption
+                            className={width < height ? "text-sm" : "text-base"}
+                            key={`schedule-option-${index}`}
+                            name={name}
+                            index={index}
+                            setMenu={setActionMenu}
+                        />
+                    ))}
+                </div>
             </AccordionDetails>
         </Accordion>
     );
@@ -123,13 +125,13 @@ export function ScheduleSelect() {
                 <Accordion className="!bg-secondary !border !border-quaternary !rounded w-full left-0 top-0 !absolute z-10" disableGutters={true} expanded={expanded}>
                     <AccordionSummary
                         className='*:!m-0 !min-h-0 !p-1 !pl-2'
-                        expandIcon={<ExpandMoreIcon style={{ color: "white" }} />}
+                        expandIcon={<ExpandMoreIcon fontSize="small" style={{ color: "white" }} />}
                     >
                         <span className={`font-semibold text-nowrap ${width < height ? "text-sm" : "text-base"}`}>{`${currentSchedule.name}`}</span>
                     </AccordionSummary>
                     <AccordionDetails className="text-left text-base !p-2 !pt-0">
                         {dragged !== null && <DropZone index={-1} dropZone={dropZone} />}
-                        <div onClick={e => e.stopPropagation()}>
+                        <div onClick={e => e.stopPropagation()} className="max-h-[50dvh] overflow-y-auto overflow-x-hidden">
                             {scheduleSet.map(({ name }, index) => (
                                 <React.Fragment key={index}>
                                     <ScheduleOption
