@@ -9,7 +9,6 @@ import { Instructor } from "types/Instructor";
 import { Meeting } from "types/Meeting";
 import { SectionInfo } from "types/SectionInfo";
 import { parseMeeting } from "utils/ParseMeeting";
-import { data } from "jquery";
 
 /**
  * Makes a request to the PeterPortal GraphQL API.
