@@ -9,6 +9,7 @@ import { Instructor } from "types/Instructor";
 import { Meeting } from "types/Meeting";
 import { SectionInfo } from "types/SectionInfo";
 import { parseMeeting } from "utils/ParseMeeting";
+import { data } from "jquery";
 
 /**
  * Makes a request to the PeterPortal GraphQL API.
@@ -76,16 +77,31 @@ export async function requestSchedule(queries: ScheduleQuery[]): Promise<CourseO
         }) {${offeringFragment}}`.replace(/\n+/g, ' ')).join("\n");
     };
 
-    // The actual GraphQL query.
-    const query = `{
-        ${queries.map(buildSubQuery)}
-    }`.replace(/ +/g, ' ');
+    // Chunk queries into groups of 5 due to API limit
+    const chunkedQueries: string[][] = [];
+    for (let i = 0; i < queries.length; i += 5) {
+        const querySlice = queries.slice(i, i + 5);
+        chunkedQueries.push(querySlice.map(buildSubQuery));
+    }
+
+    // The actual GraphQL queries.
+    const graphQLQueries = chunkedQueries.map((queryGroup => `
+        query {
+            ${queryGroup}
+        }
+    `.replace(/ +/g, ' ')));
+
+    // Process all queries in parallel and combine results
+    const responses = await Promise.all(
+        graphQLQueries.map(query => makeRequest(query))
+    );
+    const response = responses.reduce((acc, curr) => {
+        return { data: { ...acc.data, ...curr.data } };
+    }, {data: {}} as { data: Record<string, WebsocResponse> });
 
     const queryMap: Record<number, [string, string]> = Object.fromEntries(
         queries.map(({ year, quarter }, index) => [index+1, [year, quarter]])
     );
-
-    const response = await makeRequest(query);
 
     return anteaterToPeterPortal(queryMap, response.data);
 }
