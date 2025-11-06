@@ -1,6 +1,7 @@
 import { Course } from "types/Course";
 import { ScheduleQuery } from "types/ScheduleQuery";
 import coursesJson from "../../../assets/allCourses.json";
+import { sortCoursesByName } from "features/refining/utils/SortFunctions";
 
 export type SearchSuggestion = {
     text: string;
@@ -44,8 +45,12 @@ const searchSuggestions = [...geSuggestions, ...departmentSuggestions, ...course
 export function getSuggestions(searchStr: string) {
     if (searchStr.length < 2) return [];
     const regExp = buildRegExp(searchStr);
-    return searchSuggestions.filter(
+    const results = searchSuggestions.filter(
         ({ text }) => (regExp.test(` ${text.toLowerCase()}`)))
+        .toSorted(compareFn);
+
+    console.log(results)
+    return results;
 }
 
 function buildRegExp(searchStr: string) {
@@ -58,4 +63,18 @@ function buildRegExp(searchStr: string) {
         }
     }
     return new RegExp(regExpStr);
+}
+
+function compareFn(a: SearchSuggestion, b: SearchSuggestion) {
+    const aValue = a.value;
+    const bValue = b.value;
+    if (aValue.ge && !bValue.ge) return -1;
+    if (!aValue.ge && bValue.ge) return 1;
+    if (!aValue.number && bValue.number) return -1;
+    if (aValue.number && !bValue.number) return 1;
+
+    return sortCoursesByName(
+        { department: aValue.department!, number: aValue.number || "" } as Course,
+        { department: bValue.department!, number: bValue.number || "" } as Course
+    );
 }
