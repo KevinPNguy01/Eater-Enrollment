@@ -4,10 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-html {
-  overflow: hidden;
-}
-
 body {
   /* prevent overscroll bounce*/
   -webkit-overflow-scrolling: touch;
@@ -20,6 +16,11 @@ body {
   --color-tertiary: rgb(64, 64, 64);
   --color-quaternary: rgb(80, 80, 80);
   --color-dim-white: rgb(208, 208, 208);
+}
+
+html {
+  overflow: hidden;
+  background-color: var(--color-secondary);
 }
 
 * {
