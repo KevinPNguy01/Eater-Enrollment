@@ -49,7 +49,6 @@ export function getSuggestions(searchStr: string) {
         ({ text }) => (regExp.test(` ${text.toLowerCase()}`)))
         .toSorted(compareFn);
 
-    console.log(results)
     return results;
 }
 
