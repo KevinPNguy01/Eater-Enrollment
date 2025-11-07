@@ -11,6 +11,7 @@ import { addQuery, setSearchFulfilled, setSearchPending } from "stores/slices/Se
 import { ScheduleQuery } from "types/ScheduleQuery";
 import { searchProfessor } from "utils/RateMyProfessors";
 import { SearchSuggestion } from "../utils/FormHelpers";
+import { useState } from "react";
 
 const departmentIcon = <svg fill="#bbb" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
     <path d="M4 2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zM7.5 5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm2.5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zM4.5 8a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm2.5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5z" />
@@ -66,6 +67,8 @@ export function SearchList(props: { suggestions: SearchSuggestion[] }) {
         }
     }
 
+    const [touchStartPos, setTouchStartPos] = useState<{ x: number; y: number }>({ x: -1, y: -1 });
+
     return (
         <div className="absolute z-10 bg-secondary border-quaternary border border-t-0 -left-[1px] -right-[1px] top-full grid max-h-[50vh] overflow-y-scroll hide-scroll rounded-b-[1.25rem]">
             {suggestions.map(({ text, value }) => {
@@ -76,7 +79,17 @@ export function SearchList(props: { suggestions: SearchSuggestion[] }) {
                         key={text}
                         className={buttonStyle + "search-suggestion"}
                         onMouseDown={clickHandler(query)}
-                        onTouchStart={clickHandler(query)}
+                        onTouchStart={e => {
+                            setTouchStartPos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+                        }}
+                        onTouchEnd={e => {
+                            const touch = e.changedTouches[0];
+                            const { x, y } = touchStartPos;
+                            const { clientX: x2, clientY: y2 } = touch;
+                            const delta = 5;
+                            if (Math.abs(x - x2) > delta || Math.abs(y - y2) > delta) return;
+                            clickHandler(query)();
+                        }}
                     >
                         <div className="ml-0.5 mr-2.5">
                             {(function getIcon() {
