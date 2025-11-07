@@ -62,20 +62,6 @@ export function SearchBox() {
     const searchSuggestions = useSelector(selectSearchSuggestions);
     useEffect(() => { dispatch(setSearchSuggestions(getSuggestions(input))) }, [dispatch, input]);
 
-    const listRef = useRef<HTMLDivElement>(null);
-    useEffect(() => {
-        const handler = (e: TouchEvent) => {
-            e.preventDefault();
-        }
-        const list = listRef.current;
-        if (list) {
-            list.addEventListener("touchstart", handler)
-            return () => {
-                list!.removeEventListener("touchstart", handler)
-            }
-        }
-    }, [listRef, searchSuggestions])
-
     const searchToggleRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         const handler = (e: TouchEvent | MouseEvent) => {
@@ -91,7 +77,7 @@ export function SearchBox() {
                 searchToggle.removeEventListener("mousedown", handler)
             }
         }
-    }, [listRef, searchSuggestions, toggleSearchTypeHandler])
+    }, [searchSuggestions, toggleSearchTypeHandler])
 
     const keyHandler = async (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key !== "Enter") return;
@@ -228,7 +214,7 @@ export function SearchBox() {
                 </div>
             ) : null}
             {focus && searchSuggestions.length > 0 && (
-                <div ref={listRef}>
+                <div>
                     <SearchList suggestions={searchSuggestions} />
                 </div>
             )}
