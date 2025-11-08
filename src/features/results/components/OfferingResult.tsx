@@ -10,7 +10,28 @@ import { RateMyProfessorsLink } from "./RateMyProfessorsLink";
 import { ZotisticsLink } from "./ZotisticsLink";
 import useWindowDimensions from "utils/WindowDimensions";
 import { enqueueSnackbar } from "notistack";
+import { Tooltip } from "@mui/material";
 
+const restrictionCodes: Record<string, string> = {
+  "A": "Prerequisite required",
+  "B": "Authorization code required",
+  "C": "Fee required",
+  "D": "Pass/Not Pass option only",
+  "E": "Freshmen only",
+  "F": "Sophomores only",
+  "G": "Lower-division only",
+  "H": "Juniors only",
+  "I": "Seniors only",
+  "J": "Upper-division only",
+  "K": "Graduate only",
+  "L": "Major only",
+  "M": "Non-major only",
+  "N": "School major only",
+  "O": "Non-school major only",
+  "R": "Biomedical Pass/Fail course (School of Medicine only)",
+  "S": "Satisfactory/Unsatisfactory only",
+  "X": "Separate authorization codes required to add, drop, or change enrollment"
+}
 
 /**
  * Component for displaying a course result as a tr, to be used in CourseResult.
@@ -19,6 +40,13 @@ export function OfferingResult(props: { offering: CourseOffering }) {
     const { offering } = props;
     const { height, width } = useWindowDimensions();
     const isMobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) || (width > height && 1.33 * width / 2 < height);
+
+    const toolTipText = offering.restrictions.split(" and ").map(code => (
+        <>
+            {code}: {restrictionCodes[code]}
+            <br />
+        </>
+    ))
 
     return (
         <tr className={`course-result odd:bg-quaternary even:bg-tertiary ${isMobile ? "text-2xs" : "text-xs"}`} key={offering.section.code}>
@@ -63,7 +91,13 @@ export function OfferingResult(props: { offering: CourseOffering }) {
                 <ColoredText text={offering.status} colorRules={statusColors} />
             </td>
             <td>
-                {offering.restrictions}
+                {offering.restrictions && (
+                    <Tooltip title={toolTipText} placement="top" arrow>
+                        <span className="cursor-pointer hover:bg-[#666] rounded-full py-1 px-2 mx-auto w-fit flex justify-center">
+                            {offering.restrictions}
+                        </span>
+                    </Tooltip>
+                )}
             </td>
         </tr>)
 }
