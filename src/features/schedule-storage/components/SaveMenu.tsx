@@ -22,6 +22,7 @@ export function SaveMenu(props: { openState: [boolean, (val: boolean) => void], 
 		e.preventDefault();
 		setTimeout(() => (document.activeElement as HTMLElement)?.blur(), 0)
 		if (input) {
+			localStorage.setItem("lastLoadedState", JSON.stringify({ scheduleSet, selectedIndex: currentScheduleIndex }));
 			saveUser(input, scheduleSet, currentScheduleIndex);
 			if (rememberMe) {
 				localStorage.setItem("userID", input);
