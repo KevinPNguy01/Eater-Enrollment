@@ -10,7 +10,7 @@ import { navLinks } from "constants/Links";
 
 export function CoursesPane(props: { includeCalendar: boolean }) {
     const { includeCalendar } = props;
-    const [activeTab, setActiveTab] = useState("search");
+    const [activeTab, setActiveTab] = useState(includeCalendar ? "calendar" : "search");
     const displaySearchResults = useSelector(selectDisplayResults);
 
     // When switching to split screen, calendar tab won't exist in CoursesPane.
