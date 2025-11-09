@@ -27,6 +27,7 @@ export function LoadMenu(props: { openState: [boolean, (val: boolean) => void], 
 
     const loadUser = async (userId: string) => {
         const state = await loadUser2(userId);
+        localStorage.setItem("lastLoadedState", JSON.stringify(state));
         if (state) {
             dispatch(setState(state));
             dispatch({ type: "schedules/clearHistory" })
@@ -50,8 +51,16 @@ export function LoadMenu(props: { openState: [boolean, (val: boolean) => void], 
     };
 
     useEffect(() => {
+        const lastLoadedState = localStorage.getItem("lastLoadedState");
+        if (lastLoadedState) {
+            dispatch(setState(JSON.parse(lastLoadedState)));
+            dispatch({ type: "schedules/clearHistory" });
+        }
+
         const userID = localStorage.getItem("userID");
-        if (userID) loadUser(userID);
+        if (userID) {
+            loadUser(userID);
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
