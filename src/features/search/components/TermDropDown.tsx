@@ -18,7 +18,6 @@ export function TermDropDown() {
   const dispatch = useDispatch();
   const year = useSelector(selectSearchYear);
   const quarter = useSelector(selectSearchQuarter);
-  console.log(quarter, year);
   const { availableTerms } = useContext(AvailableTermsContext);
 
   // React state hook for displaying the current term in the select box.
